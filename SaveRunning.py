@@ -30,6 +30,12 @@ def GetHostname(tab):
         return prompt[:-1]
 
 def CaptureOutput(command, prompt, tab):
+    '''
+    This function captures the raw output of the command supplied and returns it.
+    The prompt variable is used to signal the end of the command output, and 
+    the "tab" variable is object that specifies which tab the commands are 
+    written to. 
+    '''
     #Send term length command and wait for prompt to return
     tab.Send('term length 0\n')
     tab.WaitForString(prompt)
@@ -50,6 +56,9 @@ def CaptureOutput(command, prompt, tab):
     return result
 
 def GetDate():
+    '''
+    This function returns a tuple of the year, month and day.
+    '''
     #Get Date
     now = datetime.datetime.now()
     day = str(now.day)
@@ -66,12 +75,22 @@ def GetDate():
 
 
 def WriteFile(raw, filename):
+    '''
+    This function simply write the contents of the "raw" variable to a 
+    file with the name passed to the function.  The file suffix is .txt by
+    default unless a different suffix is passed in.
+    '''
     newfile = open(filename, 'wb')
     newfile.write(raw)
     newfile.close()
 
 
 def Main():
+    '''
+    This purpose of this program is to capture the output of the "show run" command and
+    save it to a file.  This method is much faster than manually setting a log file, or 
+    trying to extract the information from a log file.
+    '''
     SendCmd = "show run\n"
     savepath = 'Dropbox/SecureCRT/Backups/'
 

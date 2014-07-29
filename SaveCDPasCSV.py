@@ -10,9 +10,10 @@ import re
 
 def GetHostname(tab):
     '''
-    This function will capture the prompt of the device.  The script will capture the
-    text that is sent back from the remote device, which includes what we typed being
-    echoed back to us, so we have to account for that while we parse data.
+    This function will capture the prompt of the device, by capturing the text
+    returned after sending a couple line feeds.  Because the script will keep
+    running commands before the commands we send are echo'd back to us, we
+    have to add some "WaitForString"s so we capture only what we want.
     '''
     #Send two line feeds
     tab.Send("\n\n")
@@ -55,10 +56,18 @@ def short_int(str):
 
 
 def short_name(name):
+    ''' This function will remove any domain suffixes (.cisco.com) or serial numbers
+    that show up in parenthesis after the hostname'''
     return name.split('.')[0].split('(')[0]
 
 
 def CaptureOutput(command, prompt, tab):
+    '''
+    This function captures the raw output of the command supplied and returns it.
+    The prompt variable is used to signal the end of the command output, and 
+    the "tab" variable is object that specifies which tab the commands are 
+    written to. 
+    '''
     #Send term length command and wait for prompt to return
     tab.Send('term length 0\n')
     tab.WaitForString(prompt)
@@ -79,6 +88,9 @@ def CaptureOutput(command, prompt, tab):
     return result
 
 def GetDate():
+    '''
+    This function returns a tuple of the year, month and day.
+    '''
     #Get Date
     now = datetime.datetime.now()
     day = str(now.day)
@@ -95,12 +107,22 @@ def GetDate():
 
 
 def WriteFile(raw, filename, suffix = ".txt"):
+    '''
+    This function simply write the contents of the "raw" variable to a 
+    file with the name passed to the function.  The file suffix is .txt by
+    default unless a different suffix is passed in.
+    '''
     newfile = open(filename + suffix, 'wb')
     newfile.write(raw)
     newfile.close()
 
 
 def ParseCDP(rawdata):
+    '''
+    This function parses the raw "show cdp neighbors detail" output into
+    a data structure (a list of dictionaries) of only the important information,
+    which can be more easily used by other functions in the program.
+    '''
     def GetSeperator(raw):
         list = raw.split('\n')
         for line in list:
@@ -129,6 +151,11 @@ def ParseCDP(rawdata):
 
 
 def CDPtoCSV(data, filename, suffix=".csv"):
+    '''
+    This function takes the parsed CDP data and puts it into a CSV file with
+    the supplied filename.  The default suffix is .csv unless a different one 
+    is passed in.
+    '''
     header = ['Local Intf', 'Remote ID', 'Remote Intf', 'IP Address', 'Platform']
     newfile = open(filename + suffix, 'wb')
     csvOut = csv.writer(newfile)
@@ -140,6 +167,10 @@ def CDPtoCSV(data, filename, suffix=".csv"):
 
 
 def Main():
+    '''
+    The purpose of this program is to capture the CDP information from the connected
+    switch and ouptut it into a CSV file.
+    '''
     SendCmd = "show cdp neighbors detail"
     savepath = 'Dropbox/SecureCRT/Backups/'
 
