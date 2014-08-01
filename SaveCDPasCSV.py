@@ -131,22 +131,24 @@ def ParseCDP(rawdata):
         else:
             return None
     regex = {
-    "Device" : re.compile(r"Device ID:.*"),
-    "IP" : re.compile(r"IP address:.*"),
-    "Platform" : re.compile(r"Platform:.*,"),
-    "LocalInt" : re.compile(r"Interface:.*,"),
-    "RemoteInt" : re.compile(r"Port ID.*:.*")
+    "Device" : re.compile(r"Device ID:.*", re.I),
+    "IP" : re.compile(r"IP\w* address:.*", re.I),
+    "Platform" : re.compile(r"Platform:.*,", re.I),
+    "LocalInt" : re.compile(r"Interface:.*,", re.I),
+    "RemoteInt" : re.compile(r"Port ID.*:.*", re.I)
     }
     devData = []
+    empty = re.compile(r"")
     sep = GetSeperator(rawdata)
     data_list = rawdata.split(sep)
-    data_list.remove(u'\r\n')
     for chunk in data_list:
         devInfo = {}
-        for name, search in regex.iteritems():
-            temp = search.findall(chunk)[0].split(":")
-            devInfo[name] = temp[1].strip().strip(',')
-        devData.append(devInfo)
+        chunk = chunk.strip()
+        if len(chunk) > 0:
+            for name, search in regex.iteritems():
+                temp = search.findall(chunk)[0].split(":")
+                devInfo[name] = temp[1].strip().strip(',')
+            devData.append(devInfo)
     return devData
 
 
@@ -181,14 +183,11 @@ def Main():
 
     #Get the prompt of the device
     hostname = GetHostname(tab)
+    prompt = hostname + "#"
 
     if hostname == None:
         crt.Dialog.MessageBox("Either not in enable mode, or the prompt could not be detected")
-        tab.WaitForString(prompt.strip())
     else:
-        prompt = hostname + "#"
-        #crt.Dialog.MessageBox("'" + hostname + "'")
-       
         year, month, day = GetDate()
         
         #Create Filename
@@ -199,10 +198,8 @@ def Main():
         fullFileName = os.path.join(os.environ['HOME'], savepath + filename)
 
         raw = CaptureOutput(SendCmd, prompt, tab)
-        #WriteFile(raw, fullFileName)
 
         cdpInfo = ParseCDP(raw)
-        #WriteFile (str(cdpInfo),fullFileName)
         CDPtoCSV(cdpInfo, fullFileName)
 
     tab.Synchronous = False

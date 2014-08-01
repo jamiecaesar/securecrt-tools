@@ -101,14 +101,13 @@ def Main():
 
     #Get the prompt of the device
     hostname = GetHostname(tab)
+    
 
     if hostname == None:
-        crt.Dialog.MessageBox("Either not in enable mode, or the prompt could not be detected")
-        tab.WaitForString(prompt.strip())
+        crt.Dialog.MessageBox("You must be in enable mode to run this script.")
     else:
         prompt = hostname + "#"
-        #crt.Dialog.MessageBox("'" + hostname + "'")
-       
+
         year, month, day = GetDate()
         
         #Create Filename
