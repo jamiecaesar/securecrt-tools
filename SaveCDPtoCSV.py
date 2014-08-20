@@ -1,7 +1,18 @@
 # $language = "python"
 # $interface = "1.0"
 
-# This script is designed to capture information from Cisco routers and switches.
+# Author: Jamie Caesar
+# Twitter: @j_cae
+# 
+# This script will grab the detailed CDP information from a Cisco IOS or NX-OS 
+# device and export it to a CSV file containing the important information, such
+# as Remote Device hostname, model and IP information, in addition to the local
+# and remote interfaces that connect the devices.
+# 
+# The path where the file is saved is specified in the "savepath" variable in
+# the Main() function.
+# 
+# This script is tested on SecureCRT version 7.2 on OSX Mavericks
 
 import os
 import datetime
@@ -58,6 +69,9 @@ def short_int(str):
 def short_name(name):
     ''' This function will remove any domain suffixes (.cisco.com) or serial numbers
     that show up in parenthesis after the hostname'''
+    #TODO: Some devices give IP address instead of name.  Need to ignore IP format.
+    #TODO: Some CatOS devices put hostname in (), instead of serial number.  Find a way
+    #       to catch this when it happens.
     return name.split('.')[0].split('(')[0]
 
 
@@ -97,7 +111,7 @@ def GetDate():
     month = str(now.month)
     year = str(now.year)
     
-    #Prepend '0' to day and month if only a single digit (better for alpha sorting)
+    #Prepend '0' to single-digit day and month (better for alpha sorting of filenames)
     if len(day) == 1:
         day = '0' + day
     if len(month) == 1:
@@ -174,6 +188,8 @@ def Main():
     switch and ouptut it into a CSV file.
     '''
     SendCmd = "show cdp neighbors detail"
+    # 'savepath' can be either a relative path from HOME, or an absolute path.  Both
+    # will work.
     savepath = 'Dropbox/SecureCRT/Backups/'
 
     #Create a "Tab" object, so that all the output goes into the correct Tab.

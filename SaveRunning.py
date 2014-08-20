@@ -1,6 +1,17 @@
 ﻿# $language = "python"
 # $interface = "1.0"
 
+# Author: Jamie Caesar
+# Twitter: @j_cae
+# 
+# This script will grab the running configuration of a Cisco IOS or NX-OS device
+# and dump it into a file.  The path where the file is saved is specified in the
+# "savepath" variable in the Main() function.
+#
+# This script is tested on SecureCRT version 7.2 on OSX Mavericks
+#
+
+
 import os
 import datetime
 
@@ -92,6 +103,8 @@ def Main():
     trying to extract the information from a log file.
     '''
     SendCmd = "show run\n"
+    # 'savepath' can be either a relative path from HOME, or an absolute path.  Both
+    # will work.
     savepath = 'Dropbox/SecureCRT/Backups/'
 
     #Create a "Tab" object, so that all the output goes into the correct Tab.
