@@ -160,7 +160,11 @@ def ParseCDP(rawdata):
         chunk = chunk.strip()
         if len(chunk) > 0:
             for name, search in regex.iteritems():
-                temp = search.findall(chunk)[0].split(":")
+                tempsearch = search.findall(chunk)
+                if len(tempsearch) > 0:
+                    temp = tempsearch[0].split(":")
+                else:
+                    temp = ['','']                    
                 devInfo[name] = temp[1].strip().strip(',')
             devData.append(devInfo)
     return devData
