@@ -225,9 +225,8 @@ def NextHopSummary(routelist):
 
 def ListToCSV(data, filename, suffix=".csv"):
     '''
-    This function takes the parsed CDP data and puts it into a CSV file with
-    the supplied filename.  The default suffix is .csv unless a different one 
-    is passed in.
+    This function takes a list and puts it into a CSV file with the supplied 
+    filename.  The default suffix is .csv unless a different one is passed in.
     '''
     newfile = open(filename + suffix, 'wb')
     csvOut = csv.writer(newfile)
