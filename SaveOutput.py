@@ -4,9 +4,9 @@
 # Author: Jamie Caesar
 # Twitter: @j_cae
 # 
-# This script will grab the running configuration of a Cisco IOS or NX-OS device
-# and dump it into a file.  The path where the file is saved is specified in the
-# "savepath" variable in the Main() function.
+# This SecureCRT script will prompt the user for a command to a Cisco IOS or NX-OS 
+# device and dump the output to a file.  The path where the file is saved is
+# specified in the "savepath" variable in the Main() function.
 #
 # This script is tested on SecureCRT version 7.2 on OSX Mavericks
 #
@@ -98,11 +98,19 @@ def WriteFile(raw, filename):
 
 def Main():
     '''
-    This purpose of this program is to capture the output of the "show run" command and
-    save it to a file.  This method is much faster than manually setting a log file, or 
-    trying to extract the information from a log file.
+    This purpose of this program is to capture the output of the command entered by the
+    user and save it to a file.  This method is much faster than manually setting a log
+    file, or trying to extract only the information needed from the saved log file.
     '''
-    SendCmd = "show vlan\n"
+    SendCmd = crt.Dialog.Prompt("Enter the command to capture")
+    if SendCmd == "":
+        return
+    else:
+        # Save command without spaces to use in output filename.
+        CmdName = SendCmd.replace(" ", "_")
+        # Add a newline to command before sending it to the remote device.
+        SendCmd = SendCmd + "\r\n"
+
     # 'savepath' can be either a relative path from HOME, or an absolute path.  Both
     # will work.
     savepath = 'Dropbox/SecureCRT/Backups/'
@@ -124,7 +132,7 @@ def Main():
         year, month, day = GetDate()
         
         #Create Filename
-        filebits = [hostname, "vlans", year, month, day + ".txt"]
+        filebits = [hostname, CmdName, year, month, day + ".txt"]
         filename = '-'.join(filebits)
         
         #Create path to save configuration file and open file

@@ -183,6 +183,7 @@ def CDPtoCSV(data, filename, suffix=".csv"):
     for device in data:
         csvOut.writerow([short_int(device["LocalInt"]), short_name(device["Device"]), 
             short_int(device["RemoteInt"]), device["IP"], device["Platform"]])
+    newfile.flush()
     newfile.close()
 
 
