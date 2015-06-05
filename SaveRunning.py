@@ -5,15 +5,26 @@
 # Twitter: @j_cae
 # 
 # This script will grab the running configuration of a Cisco IOS or NX-OS device
-# and dump it into a file.  The path where the file is saved is specified in the
-# "savepath" variable in the Main() function.
+# and dump it into a file.
 #
-# This script is tested on SecureCRT version 7.2 on OSX Mavericks
+# The path where the file is saved is specified in the "savepath" variable.
+#
+# Formate of the Date/Time stamp is specified in the "mydatestr" variable.
+#
+# This script is tested on SecureCRT version 7.3.3 on OSX Yosemite and Windows 8.1
 #
 
 
 import os
 import datetime
+
+
+savepath = 'Dropbox/SecureCRT/Backups/'
+
+# Short date (YYYY-MM-DD)
+#mydatestr = '%Y-%m-%d'
+# Or Long date and time (YYYY-MM-DD-HH-MM-SS)
+mydatestr = '%Y-%m-%d-%H-%M-%S'
 
 def GetHostname(tab):
     '''
@@ -66,25 +77,6 @@ def CaptureOutput(command, prompt, tab):
 
     return result
 
-def GetDate():
-    '''
-    This function returns a tuple of the year, month and day.
-    '''
-    #Get Date
-    now = datetime.datetime.now()
-    day = str(now.day)
-    month = str(now.month)
-    year = str(now.year)
-    
-    #Prepend '0' to day and month if only a single digit (better for alpha sorting)
-    if len(day) == 1:
-        day = '0' + day
-    if len(month) == 1:
-        month = '0' + month
-
-    return year, month, day
-
-
 def WriteFile(raw, filename):
     '''
     This function simply write the contents of the "raw" variable to a 
@@ -103,14 +95,12 @@ def Main():
     trying to extract the information from a log file.
     '''
     SendCmd = "show run\n"
-    # 'savepath' can be either a relative path from HOME, or an absolute path.  Both
-    # will work.
-    savepath = 'Dropbox/SecureCRT/Backups/'
 
     #Create a "Tab" object, so that all the output goes into the correct Tab.
     objTab = crt.GetScriptTab()
-    objTab.Screen.Synchronous = True
     tab = objTab.Screen  #Allows us to type "tab.xxx" instead of "objTab.Screen.xxx"
+    tab.Synchronous = True
+    tab.IgnoreEscape = True
 
     #Get the prompt of the device
     hostname = GetHostname(tab)
@@ -121,19 +111,19 @@ def Main():
     else:
         prompt = hostname + "#"
 
-        year, month, day = GetDate()
+        now = datetime.datetime.now()
+        mydate = now.strftime(mydatestr)
         
         #Create Filename
-        filebits = [hostname, "config", year, month, day + ".txt"]
+        filebits = [hostname, "config", mydate + ".txt"]
         filename = '-'.join(filebits)
         
         #Create path to save configuration file and open file
-        fullFileName = os.path.join(os.environ['HOME'], savepath + filename)
+        fullFileName = os.path.join(os.path.expanduser('~'), savepath + filename)
 
         WriteFile(CaptureOutput(SendCmd, prompt, tab), fullFileName)
 
     tab.Synchronous = False
-
-
+    tab.IgnoreEscape = False
 
 Main()
