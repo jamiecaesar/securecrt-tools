@@ -19,6 +19,9 @@ import re
 import pickle
 import sys
 
+savepath = 'Dropbox/SecureCRT/Backups/'
+mydatestr = '%Y-%m-%d-%H-%M-%S'
+
 def GetHostname(tab):
     '''
     This function will capture the prompt of the device, by capturing the text
@@ -91,25 +94,6 @@ def CaptureOutput(command, prompt, tab):
     tab.WaitForString(prompt)
 
     return result
-
-
-def GetDate():
-    '''
-    This function returns a tuple of the year, month and day.
-    '''
-    #Get Date
-    now = datetime.datetime.now()
-    day = str(now.day)
-    month = str(now.month)
-    year = str(now.year)
-    
-    #Prepend '0' to single-digit day and month (better for alpha sorting of filenames)
-    if len(day) == 1:
-        day = '0' + day
-    if len(month) == 1:
-        month = '0' + month
-
-    return year, month, day
 
 
 def ParseRawRoutes(routelist):
@@ -241,14 +225,12 @@ def Main():
     switch and ouptut it into a CSV file.
     '''
     SendCmd = "show ip route"
-    # 'savepath' can be either a relative path from HOME, or an absolute path.  Both
-    # will work.
-    savepath = 'Dropbox/SecureCRT/Backups/'
 
     #Create a "Tab" object, so that all the output goes into the correct Tab.
     objTab = crt.GetScriptTab()
-    objTab.Screen.Synchronous = True
     tab = objTab.Screen  #Allows us to type "tab.xxx" instead of "objTab.Screen.xxx"
+    tab.Synchronous = True
+    tab.IgnoreEscape = True
 
     #Get the prompt of the device
     hostname = GetHostname(tab)
@@ -257,14 +239,15 @@ def Main():
     if hostname == None:
         crt.Dialog.MessageBox("Either not in enable mode, or the prompt could not be detected")
     else:
-        year, month, day = GetDate()
+        now = datetime.datetime.now()
+        mydate = now.strftime(mydatestr)
         
         #Create Filename
-        filebits = [hostname, "nexthops", year, month, day]
+        filebits = [hostname, "nexthops", mydate]
         filename = '-'.join(filebits)
         
         #Create path to save configuration file and open file
-        fullFileName = os.path.join(os.environ['HOME'], savepath + filename)
+        fullFileName = os.path.join(os.path.expanduser('~'), savepath + filename)
 
         raw = CaptureOutput(SendCmd, prompt, tab)
 
@@ -275,6 +258,7 @@ def Main():
         
 
     tab.Synchronous = False
+    tab.IgnoreEscape = False
 
 
 Main()

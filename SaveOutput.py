@@ -1,4 +1,4 @@
-﻿# $language = "python"
+# $language = "python"
 # $interface = "1.0"
 
 # Author: Jamie Caesar
@@ -14,6 +14,9 @@
 
 import os
 import datetime
+
+savepath = 'Dropbox/SecureCRT/Backups/'
+mydatestr = '%Y-%m-%d-%H-%M-%S'
 
 def GetHostname(tab):
     '''
@@ -66,25 +69,6 @@ def CaptureOutput(command, prompt, tab):
 
     return result
 
-def GetDate():
-    '''
-    This function returns a tuple of the year, month and day.
-    '''
-    #Get Date
-    now = datetime.datetime.now()
-    day = str(now.day)
-    month = str(now.month)
-    year = str(now.year)
-    
-    #Prepend '0' to day and month if only a single digit (better for alpha sorting)
-    if len(day) == 1:
-        day = '0' + day
-    if len(month) == 1:
-        month = '0' + month
-
-    return year, month, day
-
-
 def WriteFile(raw, filename):
     '''
     This function simply write the contents of the "raw" variable to a 
@@ -111,37 +95,33 @@ def Main():
         # Add a newline to command before sending it to the remote device.
         SendCmd = SendCmd + "\r\n"
 
-    # 'savepath' can be either a relative path from HOME, or an absolute path.  Both
-    # will work.
-    savepath = 'Dropbox/SecureCRT/Backups/'
-
     #Create a "Tab" object, so that all the output goes into the correct Tab.
     objTab = crt.GetScriptTab()
-    objTab.Screen.Synchronous = True
     tab = objTab.Screen  #Allows us to type "tab.xxx" instead of "objTab.Screen.xxx"
+    tab.Synchronous = True
+    tab.IgnoreEscape = True
 
     #Get the prompt of the device
     hostname = GetHostname(tab)
     
-
     if hostname == None:
         crt.Dialog.MessageBox("You must be in enable mode to run this script.")
     else:
         prompt = hostname + "#"
 
-        year, month, day = GetDate()
+        now = datetime.datetime.now()
+        mydate = now.strftime(mydatestr)
         
         #Create Filename
-        filebits = [hostname, CmdName, year, month, day + ".txt"]
+        filebits = [hostname, CmdName, mydate + ".txt"]
         filename = '-'.join(filebits)
         
         #Create path to save configuration file and open file
-        fullFileName = os.path.join(os.environ['HOME'], savepath + filename)
+        fullFileName = os.path.join(os.path.expanduser('~'), savepath + filename)
 
         WriteFile(CaptureOutput(SendCmd, prompt, tab), fullFileName)
 
     tab.Synchronous = False
-
-
+    tab.IgnoreEscape = False
 
 Main()
