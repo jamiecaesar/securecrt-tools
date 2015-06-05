@@ -1,6 +1,8 @@
 #$language = "python"
 #$interface = "1.0"
 
+# Script to commit the configuration of an IOS device, and log the output
+# of some common commands for later reference
 
 import os
 import subprocess
