@@ -69,10 +69,8 @@ def main():
 		log file is defined.\n\n\
 		Specify a Log file name in Session Options, ""Terminal\
 		Log File"", and run this script again.")
-	elif sys.platform == "win32":
-		logFileName = logdir + "\\" + Today + "-" + TAB_NAME + "-Backup.txt"
 	else:
-		logFileName = logdir + "/" + Today + "-" + TAB_NAME + "-Backup.txt"
+		logFileName = logdir + os.sep + Today + "-" + TAB_NAME + "-Backup.txt"
 	
 
 
@@ -100,7 +98,7 @@ def main():
 	# Set log file and open it 
 	filep = open(logFileName, 'wb+')
 
-	# Loop through commands
+	# Loop through commands, printing as we go
 	for (i, command) in enumerate(COMMANDS):
 		command = command.strip()
 		prev_command = i - 1
@@ -114,6 +112,8 @@ def main():
 
 		result = SCRIPT_TAB.Screen.ReadString(prompt)
 		result = result.strip()
+		
+		# Log only commands supported by the device
 		if "% Invalid input" not in result:
 			filep.write(os.linesep)
 			filep.write("#################### " + COMMANDS[prev_command] + " ####################" + os.linesep)
