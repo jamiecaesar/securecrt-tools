@@ -90,9 +90,9 @@ def main():
 	if "config" in prompt == 1:
 		SCRIPT_TAB.Screen.Send("end" + '\r')
 	
-	# Set terminal legth to 0
+	# Set terminal legth & width to 0
 	SCRIPT_TAB.Screen.Send("terminal length 0" + '\r')
-	
+	SCRIPT_TAB.Screen.Send("terminal width 0" + '\r')
 
 
 	# Set log file and open it 
