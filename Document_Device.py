@@ -24,7 +24,7 @@ mydatestr = '%Y-%m-%d-%H-%M-%S'
 COMMANDS = [
 	"show access-list",
 	"show call active voice brief",
-	"show cann history voice brief",
+	"show call history voice brief",
 	"show cdp neighbors detail",
 	"show cdp neighbors",
 	"show clock",
