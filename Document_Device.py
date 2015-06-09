@@ -1,134 +1,184 @@
 #$language = "python"
 #$interface = "1.0"
 
-# Script to commit the configuration of an IOS device, and log the output
-# of some common commands for later reference
+# Document_Device.py
+# 
+# Description:
+#   Sends a series of Cisco Show commands one by one as listed in the
+#   COMMANDS array.  The results of each command are captured into a
+#   variable, and then written to an individual log file (one log file
+#   for each command).
+# 
+#   Filename format is:
+#   ~/$savepath/<Host Name>-<Command Name>-<Date Format>.txt
 
 import os
 import subprocess
 import datetime
 import sys
 
-SCRIPT_TAB = crt.GetScriptTab()
-
-TAB_NAME = SCRIPT_TAB.Caption
+# Adjust these to your environment
+savepath = 'Configs/'
+mydatestr = '%Y-%m-%d-%H-%M-%S'
 
 COMMANDS = [
-	"show ip interface brief",
-	"show ipv6 interface brief",
-	"show cdp neighbors",
-	"show cdp neighbors detail",
-	"show running",
-	"show inventory",
-	"show version",
-	"show ip route",
-	"show ip protocols",
-	"show ipv6 protocols",
-	"show ip ospf neighbor",
-	"show ip eigrp neighbor",
-	"show ipv6 route",
-	"show ipv6 protocols",
-	"show controllers E1",
-	"show dial-peer voice summary",
+	"show access-list",
 	"show call active voice brief",
 	"show cann history voice brief",
-	"show spanning-tree",
-	"show vtp status",
-	"show etherchannel sum",
-	"show crypto isakmp sa",
-	"show crypto ipsec sa",
-	"show crypto map",
-	"show access-list",
-	"show policy-map",
-	"show policy-map interface"
-	"show route-map",
 	"show cdp neighbors detail",
-	"show log",
+	"show cdp neighbors",
+	"show clock",
+	"show controllers E1",
+	"show controllers T1",
+	"show crypto ipsec sa",
+	"show crypto isakmp sa",
+	"show crypto map",
 	"show debug",
+	"show dial-peer voice summary",
+	"show environment power"
+	"show etherchannel summary",
+	"show interface counters error",
+	"show interface description",
+	"show interface stats",
+	"show interface status",
+	"show interface summary",
+	"show interface transceiver detail",
+	"show interface transceiver",
+	"show interfaces",
+	"show inventory",
+	"show ip arp",
+	"show ip eigrp neighbor",
+	"show ip interface brief",
+	"show ip ospf neighbor",
+	"show ip protocols",
+	"show ip route 0.0.0.0",
+	"show ip route",
+	"show ipv6 interface brief",
+	"show ipv6 protocols",
+	"show ipv6 protocols",
+	"show ipv6 route",
+	"show log",
+	"show mac address-table dynamic",
+	"show mac address-table",
+	"show module",
+	"show policy-map interface"
+	"show policy-map",
+	"show port-channel summary",
+	"show power",
+	"show route-map",
+	"show running",
+	"show spanning-tree",
+	"show version",
+	"show vtp status",
 	"write"
 	]
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-def main():
-	SCRIPT_TAB.Screen.IgnoreEscape = True
-	SCRIPT_TAB.Screen.Synchronous = True
-	
-	# Make sure we are connected
-	if not SCRIPT_TAB.Session.Connected:
-		crt.Dialog.MessageBox(
-			"Not Connected.  Please connect before running this script.")
-		return
-	
-	# Find logging directory & setup file path parts
-	logfile = SCRIPT_TAB.Session.LogFileName
-	logdir = os.path.dirname(logfile)
-	Today = str(datetime.date.today().isoformat()) 
-
-	# Complain if logging isnt currently enabled, Else Setup the file path
-	if logfile == "" :
-		crt.Dialog.MessageBox("Error.\n\n\
-		This script requires a session configuration in which a\
-		log file is defined.\n\n\
-		Specify a Log file name in Session Options, ""Terminal\
-		Log File"", and run this script again.")
+def GetHostname(tab):
+	'''
+	This function will capture the prompt of the device.  The script will capture the
+	text that is sent back from the remote device, which includes what we typed being
+	echoed back to us, so we have to account for that while we parse data.
+	'''
+	#Send two line feeds
+	tab.Send("\n\n")
+	tab.WaitForString("\n") # Waits for first linefeed to be echoed back to us
+	prompt = tab.ReadString("\n") #Read the text up to the next linefeed.
+	prompt = prompt.strip() #Remove any trailing control characters
+	# Check for non-enable mode (prompt ends with ">" instead of "#")
+	if prompt[-1] == ">": 
+		return None
+	# Get out of config mode if that is the active mode when the script was launched
+	elif "(conf" in prompt:
+		tab.Send("end\n")
+		hostname = prompt.split("(")[0]
+		tab.WaitForString(hostname + "#")
+		# Return the hostname (everything before the first "(")
+		return hostname
+	# Else, Return the hostname (all of the prompt except the last character)        
 	else:
-		logFileName = logdir + os.sep + Today + "-" + TAB_NAME + "-Backup.txt"
-	
+		return prompt[:-1]
 
+def CaptureOutput(command, prompt, tab):
+	'''
+	This function captures the raw output of the command supplied and returns it.
+	The prompt variable is used to signal the end of the command output, and 
+	the "tab" variable is object that specifies which tab the commands are 
+	written to. 
+	'''
+	#Send command
+	tab.Send(command)
 
-	# Hold off until cursor has been still for 1 second
-	while True:
-		if not SCRIPT_TAB.Screen.WaitForCursor(1):
-			break
-	rowIndex = SCRIPT_TAB.Screen.CurrentRow
-	colIndex = SCRIPT_TAB.Screen.CurrentColumn - 1
-
-	# Grab prompt
-	prompt = SCRIPT_TAB.Screen.Get(rowIndex, 0, rowIndex, colIndex)
-	prompt = prompt.strip()
-
-
-	# If we are in config mode, drop to exec	
-	if "config" in prompt == 1:
-		SCRIPT_TAB.Screen.Send("end" + '\r')
-	
-	# Set terminal legth & width to 0
-	SCRIPT_TAB.Screen.Send("terminal length 0" + '\r')
-	SCRIPT_TAB.Screen.Send("terminal width 0" + '\r')
-
-
-	# Set log file and open it 
-	filep = open(logFileName, 'wb+')
-
-	# Loop through commands, printing as we go
-	for (i, command) in enumerate(COMMANDS):
-		command = command.strip()
-		prev_command = i - 1
+	#Ignore the echo of the command we typed
+	tab.WaitForString(command.strip())
 		
-		# Send the command text to the remote
-		SCRIPT_TAB.Screen.Send(COMMANDS[i] + '\r')
+	#Capture the output until we get our prompt back and write it to the file
+	result = tab.ReadString(prompt)
 
-		# Wait for the command to be echo'd back to us.
-		SCRIPT_TAB.Screen.WaitForString('\r', 1)
-		SCRIPT_TAB.Screen.WaitForString('\n', 1)
+	return result
 
-		result = SCRIPT_TAB.Screen.ReadString(prompt)
-		result = result.strip()
+def WriteFile(raw, filename):
+	'''
+	This function simply write the contents of the "raw" variable to a 
+	file with the name passed to the function.  The file suffix is .txt by
+	default unless a different suffix is passed in.
+	'''
+	newfile = open(filename, 'wb')
+	newfile.write(raw)
+	newfile.close()
+
+
+def main():
+
+	#Create a "Tab" object, so that all the output goes into the correct Tab.
+	objTab = crt.GetScriptTab()
+	tab = objTab.Screen  #Allows us to type "tab.xxx" instead of "objTab.Screen.xxx"
+	tab.IgnoreEscape = True
+	tab.Synchronous = True
 		
-		# Log only commands supported by the device
-		if "% Invalid input" not in result:
-			filep.write(os.linesep)
-			filep.write("#################### " + COMMANDS[prev_command] + " ####################" + os.linesep)
-			filep.write(os.linesep)
-				
+	#Get the prompt of the device
+	hostname = GetHostname(tab)
 		
-			# Write out the results of the command to our log file
-			filep.write(result + os.linesep)
+	if hostname == None:
+		crt.Dialog.MessageBox("You must be in enable mode to run this script.")
+	else:
+		prompt = hostname + "#"
+		
+		now = datetime.datetime.now()
+		mydate = now.strftime(mydatestr)
 
-	
-	# Close the log file
-	filep.close()
+		#Send term length command and wait for prompt to return
+		tab.Send('term length 0\n')
+		tab.Send('term width 0\n')
+		tab.WaitForString(prompt)
+		
+		for (index, SendCmd) in enumerate(COMMANDS):
+			SendCmd = SendCmd.strip()
+			# Save command without spaces to use in output filename.
+			CmdName = SendCmd.replace(" ", "_")
+			# Add a newline to command before sending it to the remote device.
+			SendCmd = SendCmd + "\n"
+		
+			#Create Filename
+			filebits = [hostname, CmdName, mydate + ".txt"]
+			filename = '-'.join(filebits)
+			
+			#Create path to save configuration file and open file
+			fullFileName = os.path.join(os.path.expanduser('~'), savepath + filename)
+			
+			CmdResult = CaptureOutput(SendCmd, prompt, tab)
+			if "% Invalid input" not in CmdResult:
+				WriteFile(CmdResult, fullFileName)
+			
+			CmdResult = ''
+			
+		#Send term length back to default
+		tab.Send('term length 24\n')
+		tab.Send('term width 80\n')
+		tab.WaitForString(prompt)
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		tab.Synchronous = False
+		tab.IgnoreEscape = False
+		
+	crt.Dialog.MessageBox("Device Documentation Script Complete", "Script Complete", 0)
 
 main()
