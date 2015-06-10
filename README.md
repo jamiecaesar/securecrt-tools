@@ -4,7 +4,7 @@ SecureCRT Python scripts for doing various tasks on Cisco equipment.
 
 These have been testing using SecureCRT 7.x on OSX (10.9 and 10.10), as well as Windows 8.1.
 
-You will need to modify the scripts to have a valid output directory for your particular machine.
+**Before using, you will need to modify the `savepath` variable to reference a valid output directory for your particular machine.**
 
 Scripts:
 ========
