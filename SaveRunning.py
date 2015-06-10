@@ -34,12 +34,20 @@ def GetHostname(tab):
     '''
     #Send two line feeds
     tab.Send("\n\n")
-    tab.WaitForString("\n") # Waits for first linefeed to be echoed back to us
-    prompt = tab.ReadString("\n") #Read the text up to the next linefeed.
-    prompt = prompt.strip() #Remove any trailing control characters
+    
+    # Waits for first linefeed to be echoed back to us
+    tab.WaitForString("\n") 
+    
+    # Read the text up to the next linefeed.
+    prompt = tab.ReadString("\n") 
+
+    #Remove any trailing control characters
+    prompt = prompt.strip()
+
     # Check for non-enable mode (prompt ends with ">" instead of "#")
     if prompt[-1] == ">": 
         return None
+
     # Get out of config mode if that is the active mode when the script was launched
     elif "(conf" in prompt:
         tab.Send("end\n")
@@ -47,17 +55,23 @@ def GetHostname(tab):
         tab.WaitForString(hostname + "#")
         # Return the hostname (everything before the first "(")
         return hostname
+        
     # Else, Return the hostname (all of the prompt except the last character)        
     else:
         return prompt[:-1]
 
-def CaptureOutput(command, prompt, tab):
+
+
+def WriteOutput(command, filename, prompt, tab):
     '''
     This function captures the raw output of the command supplied and returns it.
     The prompt variable is used to signal the end of the command output, and 
     the "tab" variable is object that specifies which tab the commands are 
     written to. 
     '''
+    endings=["\r\n", prompt]
+    newfile = open(filename, 'wb')
+
     #Send term length command and wait for prompt to return
     tab.Send('term length 0\n')
     tab.WaitForString(prompt)
@@ -65,27 +79,24 @@ def CaptureOutput(command, prompt, tab):
     #Send command
     tab.Send(command)
 
-    #Ignore the echo of the command we typed
+    #Ignore the echo of the command we typed (including linefeed)
     tab.WaitForString(command.strip() + "\r\n")
-    
-    #Capture the output until we get our prompt back and write it to the file
-    result = tab.ReadString(prompt)
 
+    while True:
+        nextline = tab.ReadString(endings)
+        # If the match was the 1st index in the endings list -> \r\n
+        if tab.MatchIndex == 1:
+            # Write the line of text to the file
+            newfile.write(nextline + "\r\n")
+        else:
+            # We got our prompt, so break the loop
+            break
+    
+    newfile.close()
+    
     #Send term length back to default
     tab.Send('term length 24\n')
     tab.WaitForString(prompt)
-
-    return result
-
-def WriteFile(raw, filename):
-    '''
-    This function simply write the contents of the "raw" variable to a 
-    file with the name passed to the function.  The file suffix is .txt by
-    default unless a different suffix is passed in.
-    '''
-    newfile = open(filename, 'wb')
-    newfile.write(raw)
-    newfile.close()
 
 
 def Main():
@@ -121,7 +132,7 @@ def Main():
         #Create path to save configuration file and open file
         fullFileName = os.path.join(os.path.expanduser('~'), savepath + filename)
 
-        WriteFile(CaptureOutput(SendCmd, prompt, tab), fullFileName)
+        WriteOutput(SendCmd, fullFileName, prompt, tab)
 
     tab.Synchronous = False
     tab.IgnoreEscape = False
