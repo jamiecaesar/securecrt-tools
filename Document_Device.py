@@ -18,7 +18,7 @@ import datetime
 import sys
 
 # Adjust these to your environment
-savepath = 'Configs/'
+savepath = 'Dropbox/SecureCRT/Backups/'
 mydatestr = '%Y-%m-%d-%H-%M-%S'
 
 COMMANDS = [
@@ -109,7 +109,7 @@ def CaptureOutput(command, prompt, tab):
 	tab.Send(command)
 
 	#Ignore the echo of the command we typed
-	tab.WaitForString(command.strip())
+	tab.WaitForString(command.strip() + "\r\n")
 		
 	#Capture the output until we get our prompt back and write it to the file
 	result = tab.ReadString(prompt)

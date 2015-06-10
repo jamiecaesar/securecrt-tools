@@ -93,7 +93,7 @@ def CaptureOutput(command, prompt, tab):
     tab.Send(command + "\n")
 
     #Ignore the echo of the command we typed
-    tab.WaitForString(command)
+    tab.WaitForString(command.strip() + "\r\n")
     
     #Capture the output until we get our prompt back and write it to the file
     result = tab.ReadString(prompt)
