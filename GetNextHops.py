@@ -24,19 +24,26 @@ mydatestr = '%Y-%m-%d-%H-%M-%S'
 
 def GetHostname(tab):
     '''
-    This function will capture the prompt of the device, by capturing the text
-    returned after sending a couple line feeds.  Because the script will keep
-    running commands before the commands we send are echo'd back to us, we
-    have to add some "WaitForString"s so we capture only what we want.
+    This function will capture the prompt of the device.  The script will capture the
+    text that is sent back from the remote device, which includes what we typed being
+    echoed back to us, so we have to account for that while we parse data.
     '''
     #Send two line feeds
     tab.Send("\n\n")
-    tab.WaitForString("\n") # Waits for first linefeed to be echoed back to us
-    prompt = tab.ReadString("\n") #Read the text up to the next linefeed.
-    prompt = prompt.strip() #Remove any trailing control characters
+    
+    # Waits for first linefeed to be echoed back to us
+    tab.WaitForString("\n") 
+    
+    # Read the text up to the next linefeed.
+    prompt = tab.ReadString("\n") 
+
+    #Remove any trailing control characters
+    prompt = prompt.strip()
+
     # Check for non-enable mode (prompt ends with ">" instead of "#")
     if prompt[-1] == ">": 
         return None
+
     # Get out of config mode if that is the active mode when the script was launched
     elif "(conf" in prompt:
         tab.Send("end\n")
@@ -44,6 +51,7 @@ def GetHostname(tab):
         tab.WaitForString(hostname + "#")
         # Return the hostname (everything before the first "(")
         return hostname
+        
     # Else, Return the hostname (all of the prompt except the last character)        
     else:
         return prompt[:-1]
