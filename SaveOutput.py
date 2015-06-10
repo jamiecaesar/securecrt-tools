@@ -26,12 +26,20 @@ def GetHostname(tab):
     '''
     #Send two line feeds
     tab.Send("\n\n")
-    tab.WaitForString("\n") # Waits for first linefeed to be echoed back to us
-    prompt = tab.ReadString("\n") #Read the text up to the next linefeed.
-    prompt = prompt.strip() #Remove any trailing control characters
+    
+    # Waits for first linefeed to be echoed back to us
+    tab.WaitForString("\n") 
+    
+    # Read the text up to the next linefeed.
+    prompt = tab.ReadString("\n") 
+
+    #Remove any trailing control characters
+    prompt = prompt.strip()
+
     # Check for non-enable mode (prompt ends with ">" instead of "#")
     if prompt[-1] == ">": 
         return None
+
     # Get out of config mode if that is the active mode when the script was launched
     elif "(conf" in prompt:
         tab.Send("end\n")
@@ -39,6 +47,7 @@ def GetHostname(tab):
         tab.WaitForString(hostname + "#")
         # Return the hostname (everything before the first "(")
         return hostname
+        
     # Else, Return the hostname (all of the prompt except the last character)        
     else:
         return prompt[:-1]
@@ -54,16 +63,20 @@ def WriteOutput(command, filename, prompt, tab):
     endings=["\r\n", prompt]
     newfile = open(filename, 'wb')
 
-    #Send term length command and wait for prompt to return
+    # Send term length command and wait for prompt to return
     tab.Send('term length 0\n')
     tab.WaitForString(prompt)
     
-    #Send command
+    # Send command
     tab.Send(command)
 
-    #Ignore the echo of the command we typed (including linefeed)
+    # Ignore the echo of the command we typed (including linefeed)
     tab.WaitForString(command.strip() + "\r\n")
 
+    # Loop to capture every line of the command.  If we get CRLF (first entry
+    # in our "endings" list), then write that line to the file.  If we get
+    # our prompt back (which won't have CRLF), break the loop b/c we found the
+    # end of the output.
     while True:
         nextline = tab.ReadString(endings)
         # If the match was the 1st index in the endings list -> \r\n
@@ -76,7 +89,7 @@ def WriteOutput(command, filename, prompt, tab):
     
     newfile.close()
     
-    #Send term length back to default
+    # Send term length back to default
     tab.Send('term length 24\n')
     tab.WaitForString(prompt)
 
@@ -96,13 +109,13 @@ def Main():
         # Add a newline to command before sending it to the remote device.
         SendCmd = SendCmd + "\r\n"
 
-    #Create a "Tab" object, so that all the output goes into the correct Tab.
+    # Create a "Tab" object, so that all the output goes into the correct Tab.
     objTab = crt.GetScriptTab()
     tab = objTab.Screen  #Allows us to type "tab.xxx" instead of "objTab.Screen.xxx"
     tab.Synchronous = True
     tab.IgnoreEscape = True
 
-    #Get the prompt of the device
+    # Get the prompt of the device
     hostname = GetHostname(tab)
     
     if hostname == None:
@@ -113,14 +126,14 @@ def Main():
         now = datetime.datetime.now()
         mydate = now.strftime(mydatestr)
         
-        #Create Filename
+        # Create Filename
         filebits = [hostname, CmdName, mydate + ".txt"]
         filename = '-'.join(filebits)
         
-        #Create path to save configuration file and open file
+        # Create path to save configuration file and open file
         fullFileName = os.path.join(os.path.expanduser('~'), savepath + filename)
 
-        # WriteFile(CaptureOutput(SendCmd, prompt, tab), fullFileName)
+        # Write output of command to file
         WriteOutput(SendCmd, fullFileName, prompt, tab)
 
     tab.Synchronous = False
