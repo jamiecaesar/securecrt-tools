@@ -70,8 +70,7 @@ COMMANDS = [
 	"show spanning-tree",
 	"show switch detail",
 	"show version",
-	"show vtp status",
-	"write"
+	"show vtp status"
 	]
 
 def GetHostname(tab):
