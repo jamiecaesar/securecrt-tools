@@ -68,84 +68,96 @@ COMMANDS = [
 	"show route-map",
 	"show running",
 	"show spanning-tree",
+	"show switch detail",
 	"show version",
 	"show vtp status",
 	"write"
 	]
 
-	def GetHostname(tab):
-	    '''
-	    This function will capture the prompt of the device.  The script will capture the
-	    text that is sent back from the remote device, which includes what we typed being
-	    echoed back to us, so we have to account for that while we parse data.
-	    '''
-	    #Send two line feeds
-	    tab.Send("\n\n")
-	    
-	    # Waits for first linefeed to be echoed back to us
-	    tab.WaitForString("\n") 
-	    
-	    # Read the text up to the next linefeed.
-	    prompt = tab.ReadString("\n") 
+def GetHostname(tab):
+	'''
+	This function will capture the prompt of the device.  The script will capture the
+	text that is sent back from the remote device, which includes what we typed being
+	echoed back to us, so we have to account for that while we parse data.
+	'''
+	#Send two line feeds
+	tab.Send("\n\n")
+	
+	# Waits for first linefeed to be echoed back to us
+	tab.WaitForString("\n") 
+	
+	# Read the text up to the next linefeed.
+	prompt = tab.ReadString("\n") 
+	#Remove any trailing control characters
+	prompt = prompt.strip()
+	# Check for non-enable mode (prompt ends with ">" instead of "#")
+	if prompt[-1] == ">": 
+		return None
 
-	    #Remove any trailing control characters
-	    prompt = prompt.strip()
-
-	    # Check for non-enable mode (prompt ends with ">" instead of "#")
-	    if prompt[-1] == ">": 
-	        return None
-
-	    # Get out of config mode if that is the active mode when the script was launched
-	    elif "(conf" in prompt:
-	        tab.Send("end\n")
-	        hostname = prompt.split("(")[0]
-	        tab.WaitForString(hostname + "#")
-	        # Return the hostname (everything before the first "(")
-	        return hostname
-	        
-	    # Else, Return the hostname (all of the prompt except the last character)        
-	    else:
-	        return prompt[:-1]
+	# Get out of config mode if that is the active mode when the script was launched
+	elif "(conf" in prompt:
+		tab.Send("end\n")
+		hostname = prompt.split("(")[0]
+		tab.WaitForString(hostname + "#")
+		# Return the hostname (everything before the first "(")
+		return hostname
+		
+	# Else, Return the hostname (all of the prompt except the last character)		
+	else:
+		return prompt[:-1]
 
 
-def CaptureOutput(command, prompt, tab):
+def WriteOutput(command, filename, prompt, tab):
 	'''
 	This function captures the raw output of the command supplied and returns it.
 	The prompt variable is used to signal the end of the command output, and 
 	the "tab" variable is object that specifies which tab the commands are 
 	written to. 
 	'''
-	#Send command
+	endings=["\r\n", prompt]
+	newfile = open(filename, 'wb')
+
+	# Send term length command and wait for prompt to return
+	tab.Send('term length 0\n')
+	tab.WaitForString(prompt)
+	
+	# Send command
 	tab.Send(command)
 
-	#Ignore the echo of the command we typed
+	# Ignore the echo of the command we typed (including linefeed)
 	tab.WaitForString(command.strip() + "\r\n")
-		
-	#Capture the output until we get our prompt back and write it to the file
-	result = tab.ReadString(prompt)
 
-	return result
-
-def WriteFile(raw, filename):
-	'''
-	This function simply write the contents of the "raw" variable to a 
-	file with the name passed to the function.  The file suffix is .txt by
-	default unless a different suffix is passed in.
-	'''
-	newfile = open(filename, 'wb')
-	newfile.write(raw)
+	# Loop to capture every line of the command.  If we get CRLF (first entry
+	# in our "endings" list), then write that line to the file.  If we get
+	# our prompt back (which won't have CRLF), break the loop b/c we found the
+	# end of the output.
+	while True:
+		nextline = tab.ReadString(endings)
+		# If the match was the 1st index in the endings list -> \r\n
+		if tab.MatchIndex == 1:
+			# Write the line of text to the file
+			newfile.write(nextline + "\r\n")
+		else:
+			# We got our prompt, so break the loop
+			break
+	
 	newfile.close()
+	
+	# Send term length back to default
+	tab.Send('term length 24\n')
+	tab.WaitForString(prompt)
 
 
-def main():
+def Main():
 
-	#Create a "Tab" object, so that all the output goes into the correct Tab.
+	# Create a "Tab" object, so that all the output goes into the correct Tab.
 	objTab = crt.GetScriptTab()
-	tab = objTab.Screen  #Allows us to type "tab.xxx" instead of "objTab.Screen.xxx"
+	# Allows us to type "tab.xxx" instead of "objTab.Screen.xxx"
+	tab = objTab.Screen  
 	tab.IgnoreEscape = True
 	tab.Synchronous = True
 		
-	#Get the prompt of the device
+	# Get the prompt of the device
 	hostname = GetHostname(tab)
 		
 	if hostname == None:
@@ -156,11 +168,6 @@ def main():
 		now = datetime.datetime.now()
 		mydate = now.strftime(mydatestr)
 
-		#Send term length command and wait for prompt to return
-		tab.Send('term length 0\n')
-		tab.Send('term width 0\n')
-		tab.WaitForString(prompt)
-		
 		for (index, SendCmd) in enumerate(COMMANDS):
 			SendCmd = SendCmd.strip()
 			# Save command without spaces to use in output filename.
@@ -168,27 +175,38 @@ def main():
 			# Add a newline to command before sending it to the remote device.
 			SendCmd = SendCmd + "\n"
 		
-			#Create Filename
+			# Create Filename
 			filebits = [hostname, CmdName, mydate + ".txt"]
 			filename = '-'.join(filebits)
 			
-			#Create path to save configuration file and open file
+			# Create path to save configuration file and open file
 			fullFileName = os.path.join(os.path.expanduser('~'), savepath + filename)
 			
-			CmdResult = CaptureOutput(SendCmd, prompt, tab)
-			if "% Invalid input" not in CmdResult:
-				WriteFile(CmdResult, fullFileName)
+			# Write the output of the command to a file.
+			WriteOutput(SendCmd, fullFileName, prompt, tab)
 			
-			CmdResult = ''
-			
-		#Send term length back to default
-		tab.Send('term length 24\n')
-		tab.Send('term width 80\n')
-		tab.WaitForString(prompt)
+			# If file isn't empty (greater than 3 bytes)
+			# Some of these file only save one CRLF, and so we can't match on 0 bytes
+			if os.path.getsize(fullFileName) > 3: 
+				# Open the file we just created.
+				newfile = open(fullFileName, "r")
 
-		tab.Synchronous = False
-		tab.IgnoreEscape = False
+				# If the file only contains invalid command error, delete it.
+				for line in newfile:
+					if "% Invalid" in line:
+						newfile.close()
+						os.remove(fullFileName)
+						break 
+				else:
+					newfile.close()
+			# If the file is empty, delete it
+			else:
+				os.remove(fullFileName)
+			
+	tab.Synchronous = False
+	tab.IgnoreEscape = False
 		
 	crt.Dialog.MessageBox("Device Documentation Script Complete", "Script Complete", 0)
 
-main()
+
+Main()
