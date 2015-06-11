@@ -101,16 +101,16 @@ def CaptureOutput(command, prompt, tab):
     tab.Send(command + "\n")
 
     #Ignore the echo of the command we typed
-    tab.WaitForString(command.strip() + "\r\n")
+    tab.WaitForString(command.strip())
     
     #Capture the output until we get our prompt back and write it to the file
     result = tab.ReadString(prompt)
-
+    
     #Send term length back to default
     tab.Send('term length 24\n')
     tab.WaitForString(prompt)
 
-    return result
+    return result.strip("\r")
 
 def WriteFile(raw, filename, suffix = ".txt"):
     '''

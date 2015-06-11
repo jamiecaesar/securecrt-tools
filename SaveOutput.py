@@ -71,7 +71,7 @@ def WriteOutput(command, filename, prompt, tab):
     tab.Send(command)
 
     # Ignore the echo of the command we typed (including linefeed)
-    tab.WaitForString(command.strip() + "\r\n")
+    tab.WaitForString(command.strip())
 
     # Loop to capture every line of the command.  If we get CRLF (first entry
     # in our "endings" list), then write that line to the file.  If we get
@@ -81,10 +81,14 @@ def WriteOutput(command, filename, prompt, tab):
         nextline = tab.ReadString(endings)
         # If the match was the 1st index in the endings list -> \r\n
         if tab.MatchIndex == 1:
-            # Write the line of text to the file
-            newfile.write(nextline + "\r\n")
+            # For Nexus will have extra "\r"s in it, leading to extra lines at the
+            # start of the file.  Don't write those.
+            if nextline != "\r":
+                # Write the line of text to the file
+                # crt.Dialog.MessageBox("Original:" + repr(nextline) + "\nStripped:" + repr(nextline.strip('\r')))
+                newfile.write(nextline.strip("\r") + "\r\n")
         else:
-            # We got our prompt, so break the loop
+            # We got our prompt (MatchIndex is 2), so break the loop
             break
     
     newfile.close()
