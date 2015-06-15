@@ -105,6 +105,12 @@ def CaptureOutput(command, prompt, tab):
 
 
 def ParseRawRoutes(routelist):
+    '''
+    This function parses the raw route table into a datastucture that can be used to more easily
+    extract information.  The data structure that is returned in a list of dictionaries.
+    Each dictionary entry represents an entry in the route table and contains the following keys:
+    {"protocol", "network", "AD", "metric", "nexthop", "lifetime", "interface"}
+    '''
     DEBUG = False
     routetable = []
     # Various RegEx expressions to match varying parts of a route table line
@@ -202,16 +208,59 @@ def ParseRawRoutes(routelist):
 
 
 def NextHopSummary(routelist):
+    '''
+    This function will take the routelist datastructure (created by ParseRawRoutes) and process it into
+    a datastructure containing the summary data, that is then converted to a list so it can be easily written
+    into a CSV file (by ListToCSV).
+    '''
+    def GetProtocol(raw_protocol):
+        if raw_protocol[0] == 'S':
+            return 'Static'
+        elif raw_protocol[0] == 'D':
+            return 'EIGRP'
+        elif raw_protocol[0] == 'O':
+            return 'OSPF'
+        elif raw_protocol[0] == 'B':
+            return 'BGP'
+        elif raw_protocl[0] == 'i':
+            return 'ISIS'
+        elif raw_protocol[0] == 'R':
+            return 'RIP'
+        else:
+            return 'Other' 
+
     summaryDict = {}
+    connectedDict = {}
     for entry in routelist:
+        # Verify this entry has a next-hop parameter
         if entry['nexthop']:
-            if entry['nexthop'] in summaryDict:
-                summaryDict[entry['nexthop']] += 1
+            nh = entry['nexthop']
+            proto = GetProtocol(entry['protocol'])
+            if nh in summaryDict:
+                summaryDict[nh]['Total'] += 1
+                summaryDict[nh][proto] += 1
             else:
-                summaryDict[entry['nexthop']] = 1
-    nexthops = [['Next-hop', '# of routes']]
+                summaryDict[entry['nexthop']] = { 'Total': 0, 
+                                                  'Static': 0, 
+                                                  'EIGRP': 0, 
+                                                  'OSPF' : 0, 
+                                                  'BGP':0, 
+                                                  'ISIS': 0, 
+                                                  'RIP' : 0, 
+                                                  'Other' : 0 
+                                                  }
+                summaryDict[nh]['Total'] += 1
+                summaryDict[nh][proto] += 1
+        elif entry['interface']:
+            if entry['interface'] in connectedDict:
+                connectedDict[entry['interface']].append(entry['network'])
+            else:
+                connectedDict[entry['interface']] = [ entry['network'] ]
+
+    nexthops = [['Next-hop', 'Total routes', 'Static', 'EIGRP', 'OSPF', 'BGP', 'ISIS', 'RIP', 'Other']]
     for key, value in summaryDict.iteritems():
-        nexthops.append([key, value])
+        nexthops.append([key, value['Total'], value['Static'], value['EIGRP'], 
+                         value['OSPF'], value['BGP'], value['ISIS'], value['RIP'], value['Other']])
     return nexthops
 
 
