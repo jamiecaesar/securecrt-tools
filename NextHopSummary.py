@@ -16,7 +16,6 @@ import os
 import datetime
 import csv
 import re
-import pickle
 import sys
 
 savepath = 'Dropbox/SecureCRT/Backups/'
@@ -77,6 +76,51 @@ def short_int(str):
     return str
 
 
+def WriteOutput(command, filename, prompt, tab):
+    '''
+    This function captures the raw output of the command supplied and returns it.
+    The prompt variable is used to signal the end of the command output, and 
+    the "tab" variable is object that specifies which tab the commands are 
+    written to. 
+    '''
+    endings=["\r\n", prompt]
+    newfile = open(filename, 'wb')
+
+    # Send term length command and wait for prompt to return
+    tab.Send('term length 0\n')
+    tab.WaitForString(prompt)
+    
+    # Send command
+    tab.Send(command + "\n")
+
+    # Ignore the echo of the command we typed (including linefeed)
+    tab.WaitForString(command.strip())
+
+    # Loop to capture every line of the command.  If we get CRLF (first entry
+    # in our "endings" list), then write that line to the file.  If we get
+    # our prompt back (which won't have CRLF), break the loop b/c we found the
+    # end of the output.
+    while True:
+        nextline = tab.ReadString(endings)
+        # If the match was the 1st index in the endings list -> \r\n
+        if tab.MatchIndex == 1:
+            # For Nexus will have extra "\r"s in it, leading to extra lines at the
+            # start of the file.  Don't write those.
+            if nextline != "\r":
+                # Write the line of text to the file
+                # crt.Dialog.MessageBox("Original:" + repr(nextline) + "\nStripped:" + repr(nextline.strip('\r')))
+                newfile.write(nextline.strip("\r") + "\r\n")
+        else:
+            # We got our prompt (MatchIndex is 2), so break the loop
+            break
+    
+    newfile.close()
+    
+    # Send term length back to default
+    tab.Send('term length 24\n')
+    tab.WaitForString(prompt)
+
+
 def CaptureOutput(command, prompt, tab):
     '''
     This function captures the raw output of the command supplied and returns it.
@@ -111,7 +155,6 @@ def ParseRawRoutes(routelist):
     Each dictionary entry represents an entry in the route table and contains the following keys:
     {"protocol", "network", "AD", "metric", "nexthop", "lifetime", "interface"}
     '''
-    DEBUG = False
     routetable = []
     # Various RegEx expressions to match varying parts of a route table line
     # I did it this way to break up the regex into more manageable parts, 
@@ -129,7 +172,7 @@ def ParseRawRoutes(routelist):
     # Matches the lifetime of the route, usually in a format like 2m3d. Optional
     re_lifetime = r'(?P<lifetime>\w+)?(, )?'
     # Matches outgoing interface. Not all protocols track this, so it is optional
-    re_interface = r'(?P<interface>\w+(/\d)*)?'
+    re_interface = r'(?P<interface>\w+(/\d*)*)?'
 
     # Combining expressions above to build possible lines found in the route table
     #
@@ -199,9 +242,6 @@ def ParseRawRoutes(routelist):
                                         "lifetime" : regex.group('lifetime'),
                                         "interface" : regex.group('interface')
                                         }
-                    else:
-                        if DEBUG:
-                            print "Skipping: " + entry
         if routeentry != {}:
             routetable.append(routeentry)
     return routetable
@@ -236,11 +276,13 @@ def NextHopSummary(routelist):
         if entry['nexthop']:
             nh = entry['nexthop']
             proto = GetProtocol(entry['protocol'])
+            intf = entry['interface']
             if nh in summaryDict:
                 summaryDict[nh]['Total'] += 1
                 summaryDict[nh][proto] += 1
             else:
-                summaryDict[entry['nexthop']] = { 'Total': 0, 
+                summaryDict[entry['nexthop']] = { 'int' : entry['interface'],
+                                                  'Total': 0, 
                                                   'Static': 0, 
                                                   'EIGRP': 0, 
                                                   'OSPF' : 0, 
@@ -257,11 +299,25 @@ def NextHopSummary(routelist):
             else:
                 connectedDict[entry['interface']] = [ entry['network'] ]
 
-    nexthops = [['Next-hop', 'Total routes', 'Static', 'EIGRP', 'OSPF', 'BGP', 'ISIS', 'RIP', 'Other']]
+    nexthops = [['Next-hop', 'Interface', 'Total routes', 'Static', 'EIGRP', 'OSPF', 'BGP', 'ISIS', 'RIP', 'Other']]
+    # Put next-hop stats into list for writing into a CSV file
+    nexthops_data = []
     for key, value in summaryDict.iteritems():
-        nexthops.append([key, value['Total'], value['Static'], value['EIGRP'], 
+        nexthops_data.append([key, value['int'], value['Total'], value['Static'], value['EIGRP'], 
                          value['OSPF'], value['BGP'], value['ISIS'], value['RIP'], value['Other']])
-    return nexthops
+    # Append sorted nexthops stats after header line
+    nexthops.extend(sorted(nexthops_data))
+
+    connected = [ ['',''],
+                  ['Connected', ''],
+                  ['Interface', 'Network(s)']]
+    conn_data = []
+    for key, value in connectedDict.iteritems():
+        this_row = [ key ]
+        this_row.extend(value)
+        conn_data.append(this_row)
+    connected.extend(sorted(conn_data))
+    return nexthops, connected
 
 
 def ListToCSV(data, filename, suffix=".csv"):
@@ -305,13 +361,19 @@ def Main():
         
         #Create path to save configuration file and open file
         fullFileName = os.path.join(os.path.expanduser('~'), savepath + filename)
+        rawRouteFile = fullFileName + ".txt"
 
-        raw = CaptureOutput(SendCmd, prompt, tab)
+        # Save raw "show ip route" output to a file.  Dumping directly to a var has problems when the
+        # route table is very large (1000+ lines)
+        WriteOutput(SendCmd, rawRouteFile, prompt, tab)
 
-        routes = raw.split('\r\n')
+        # Create a list that contains all the route entries (minus their line endings)
+        routes = [line.rstrip('\n') for line in open(rawRouteFile)]
+        
         routelist = ParseRawRoutes(routes)
-        summary = NextHopSummary(routelist)
-        ListToCSV(summary, fullFileName)
+        nexthops, connected = NextHopSummary(routelist)
+        nexthops.extend(connected)
+        ListToCSV(nexthops, fullFileName)
         
 
     tab.Synchronous = False
