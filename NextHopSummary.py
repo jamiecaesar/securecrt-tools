@@ -9,8 +9,6 @@
 # 
 # The path where the file is saved is specified in the "savepath" variable in
 # the Main() function.
-# 
-# This script is tested on SecureCRT version 7.2 on OSX Mavericks
 
 import os
 import datetime
@@ -119,33 +117,6 @@ def WriteOutput(command, filename, prompt, tab):
     # Send term length back to default
     tab.Send('term length 24\n')
     tab.WaitForString(prompt)
-
-
-def CaptureOutput(command, prompt, tab):
-    '''
-    This function captures the raw output of the command supplied and returns it.
-    The prompt variable is used to signal the end of the command output, and 
-    the "tab" variable is object that specifies which tab the commands are 
-    written to. 
-    '''
-    #Send term length command and wait for prompt to return
-    tab.Send('term length 0\n')
-    tab.WaitForString(prompt)
-    
-    #Send command
-    tab.Send(command + "\n")
-
-    #Ignore the echo of the command we typed
-    tab.WaitForString(command.strip())
-    
-    #Capture the output until we get our prompt back and write it to the file
-    result = tab.ReadString(prompt)
-
-    #Send term length back to default
-    tab.Send('term length 24\n')
-    tab.WaitForString(prompt)
-
-    return result.strip("\r")
 
 
 def ParseRawRoutes(routelist):
