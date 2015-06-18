@@ -218,6 +218,13 @@ def ParseRawRoutes(routelist):
     return routetable
 
 
+def alphanum_key(s):
+    '''
+    From http://nedbatchelder.com/blog/200712/human_sorting.html
+    '''
+    return [int(c) if c.isdigit() else c for c in re.split('([0-9]+)', s)] 
+
+
 def NextHopSummary(routelist):
     '''
     This function will take the routelist datastructure (created by ParseRawRoutes) and process it into
@@ -277,7 +284,7 @@ def NextHopSummary(routelist):
         nexthops_data.append([key, value['int'], value['Total'], value['Static'], value['EIGRP'], 
                          value['OSPF'], value['BGP'], value['ISIS'], value['RIP'], value['Other']])
     # Append sorted nexthops stats after header line
-    nexthops.extend(sorted(nexthops_data))
+    nexthops.extend(sorted(nexthops_data, key=lambda x: alphanum_key(x[0])))
 
     connected = [ ['',''],
                   ['Connected', ''],
@@ -287,7 +294,7 @@ def NextHopSummary(routelist):
         this_row = [ key ]
         this_row.extend(value)
         conn_data.append(this_row)
-    connected.extend(sorted(conn_data))
+    connected.extend(sorted(conn_data, key=lambda x: alphanum_key(x[0])))
     return nexthops, connected
 
 
