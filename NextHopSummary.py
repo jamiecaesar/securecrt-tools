@@ -143,7 +143,7 @@ def ParseRawRoutes(routelist):
     # Matches the lifetime of the route, usually in a format like 2m3d. Optional
     re_lifetime = r'(?P<lifetime>\w+)?(, )?'
     # Matches outgoing interface. Not all protocols track this, so it is optional
-    re_interface = r'(?P<interface>\w+(/\d*)*)?'
+    re_interface = r'(?P<interface>[\w-]+(/\d*)*)?'
 
     # Combining expressions above to build possible lines found in the route table
     #
