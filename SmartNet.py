@@ -29,15 +29,13 @@ my_session_dir = "~/VanDyke/Config/Sessions/"
 #my_site_dir = "Site1/"
 my_site_dir = ""
 
-'''
+
 COMMANDS = [
   "show inventory",
   "show hardware",
   "show hardware inventory",
   "show version",
   ]
-'''
-COMMANDS = [ "pwd" ]
 
 def GetHostname(tab):
   '''
