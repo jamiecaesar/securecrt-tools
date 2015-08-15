@@ -141,7 +141,7 @@ def ParseRawRoutes(routelist):
     # Matches the next hop in the route statement - "via y.y.y.y"
     re_nexthop = r'via (?P<nexthop>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}),?[ ]*'
     # Matches the lifetime of the route, usually in a format like 2m3d. Optional
-    re_lifetime = r'(?P<lifetime>\w+)?(, )?'
+    re_lifetime = r'(?P<lifetime>[\w:]+)?(, )?'
     # Matches outgoing interface. Not all protocols track this, so it is optional
     re_interface = r'(?P<interface>[\w-]+[\/\.\d]*)?'
 
@@ -155,7 +155,7 @@ def ParseRawRoutes(routelist):
     # the first line -- just the protocol and network.
     re_multiline = re_prot + re_net
     # This is the format seen for either a second ECMP path, or when the route has
-    # been broken up across lines becuase of the length.
+    # been broken up across lines because of the length.
     re_ecmp = r'[ ]*' + re_metric + re_nexthop + re_lifetime + re_interface
 
     #Compile RegEx expressions
