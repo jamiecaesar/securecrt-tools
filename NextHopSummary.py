@@ -54,26 +54,6 @@ def GetHostname(tab):
         return prompt[:-1]
 
 
-def short_int(str):
-  ''' 
-  This function shortens the interface name for easier reading 
-  '''
-  replace_pairs = [
-  ('tengigabitethernet', 'T'),
-  ('gigabitethernet', 'G'),
-  ('fastethernet', 'F'),
-  ('ethernet', 'e'),
-  ('eth', 'e'),
-  ('port-channel' , 'Po')
-  ]
-  lower_str = str.lower()
-  for pair in replace_pairs:
-    if pair[0] in lower_str:
-        return lower_str.replace(pair[0], pair[1])
-  else:
-    return str
-
-
 def WriteOutput(command, filename, prompt, tab):
     '''
     This function captures the raw output of the command supplied and returns it.
@@ -311,10 +291,7 @@ def ListToCSV(data, filename, suffix=".csv"):
 
 
 def Main():
-    '''
-    The purpose of this program is to capture the CDP information from the connected
-    switch and ouptut it into a CSV file.
-    '''
+
     SendCmd = "show ip route"
 
     #Create a "Tab" object, so that all the output goes into the correct Tab.
