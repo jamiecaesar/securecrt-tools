@@ -18,6 +18,7 @@ import os
 import datetime
 import csv
 import re
+import time
 
 savepath = 'Dropbox/SecureCRT/Backups/'
 mydatestr = '%Y-%m-%d-%H-%M-%S'
@@ -97,6 +98,10 @@ def CaptureOutput(command, prompt, tab):
     tab.Send('term length 0\n')
     tab.WaitForString(prompt)
     
+    # Added due to Nexus echoing twice if system hangs and hasn't printed the prompt yet.
+    # Seems like maybe the previous WaitFor prompt isn't working correctly always.  Something to look into.
+    time.sleep(0.1) 
+    
     #Send command
     tab.Send(command + "\n")
 
@@ -105,7 +110,7 @@ def CaptureOutput(command, prompt, tab):
     
     #Capture the output until we get our prompt back and write it to the file
     result = tab.ReadString(prompt)
-    
+
     #Send term length back to default
     tab.Send('term length 24\n')
     tab.WaitForString(prompt)

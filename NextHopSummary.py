@@ -54,26 +54,6 @@ def GetHostname(tab):
         return prompt[:-1]
 
 
-def short_int(str):
-  ''' 
-  This function shortens the interface name for easier reading 
-  '''
-  replace_pairs = [
-  ('tengigabitethernet', 'T'),
-  ('gigabitethernet', 'G'),
-  ('fastethernet', 'F'),
-  ('ethernet', 'e'),
-  ('eth', 'e'),
-  ('port-channel' , 'Po')
-  ]
-  lower_str = str.lower()
-  for pair in replace_pairs:
-    if pair[0] in lower_str:
-        return lower_str.replace(pair[0], pair[1])
-  else:
-    return str
-
-
 def WriteOutput(command, filename, prompt, tab):
     '''
     This function captures the raw output of the command supplied and returns it.
@@ -141,9 +121,9 @@ def ParseRawRoutes(routelist):
     # Matches the next hop in the route statement - "via y.y.y.y"
     re_nexthop = r'via (?P<nexthop>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}),?[ ]*'
     # Matches the lifetime of the route, usually in a format like 2m3d. Optional
-    re_lifetime = r'(?P<lifetime>\w+)?(, )?'
+    re_lifetime = r'(?P<lifetime>[\w:]+)?(, )?'
     # Matches outgoing interface. Not all protocols track this, so it is optional
-    re_interface = r'(?P<interface>[\w-]+(/\d*)*)?'
+    re_interface = r'(?P<interface>[\w-]+[\/\.\d]*)?'
 
     # Combining expressions above to build possible lines found in the route table
     #
@@ -155,7 +135,7 @@ def ParseRawRoutes(routelist):
     # the first line -- just the protocol and network.
     re_multiline = re_prot + re_net
     # This is the format seen for either a second ECMP path, or when the route has
-    # been broken up across lines becuase of the length.
+    # been broken up across lines because of the length.
     re_ecmp = r'[ ]*' + re_metric + re_nexthop + re_lifetime + re_interface
 
     #Compile RegEx expressions
@@ -311,10 +291,7 @@ def ListToCSV(data, filename, suffix=".csv"):
 
 
 def Main():
-    '''
-    The purpose of this program is to capture the CDP information from the connected
-    switch and ouptut it into a CSV file.
-    '''
+
     SendCmd = "show ip route"
 
     #Create a "Tab" object, so that all the output goes into the correct Tab.
