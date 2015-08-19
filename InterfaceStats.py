@@ -213,7 +213,7 @@ def DictListToCSV(data, filename, suffix=".csv"):
                           "InputPackets", "InputErr", "OutputPackets", "OutputErr"
                         ]
         writer = csv.DictWriter(csvfile, fieldnames=field_names)
-        writer.writeheader()
+        writer.writerow(dict(zip(writer.fieldnames, writer.fieldnames)))
         for entry in data:
             writer.writerow(entry)
 
