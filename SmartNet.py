@@ -14,11 +14,8 @@
 #   ~/$savepath/<Host Name>-<Command Name>-<Date Format>.txt
 
 import os
-import subprocess
 import datetime
 import sys
-import re
-import platform
 
 
 # Adjust these to your environment
@@ -87,7 +84,7 @@ def GetSessions(Session_Dir,Site_Dir):
             session_name = Site_Dir + (os.path.splitext(file)[0])
           SessionList.append(session_name)
               
-  return unique_SessionList
+  return SessionList
 
 
 def CaptureOutput(command, prompt, tab):
@@ -97,6 +94,10 @@ def CaptureOutput(command, prompt, tab):
   the "tab" variable is object that specifies which tab the commands are 
   written to. 
   '''
+  #Send two line feeds
+  #Helps with timing on Nexus platforms for comman separation
+  tab.Send("\n\n")
+  tab.WaitForString(prompt)
   #Send command
   tab.Send(command)
 
@@ -138,7 +139,7 @@ def main():
     # the list.
     if crt.Session.Connected:
 
-      crt.Sleep(5000)
+      crt.Sleep(1000)
       #Create a "Tab" object, so that all the output goes into the correct Tab.
       objTab = crt.GetScriptTab()
       tab = objTab.Screen  #Allows us to type "tab.xxx" instead of "objTab.Screen.xxx"
@@ -180,16 +181,11 @@ def main():
           fullFileName = os.path.join(os.path.expanduser('~'), savepath + filename)
           
           CmdResult = CaptureOutput(SendCmd, prompt, tab)
-          if "% Invalid input" not in CmdResult:
+          if "% Invalid " not in CmdResult:
             WriteFile(CmdResult, fullFileName)
           
-          CmdResult = ''
-          
-        #Send term length back to default
-        tab.Send('term length 24\n')
-        tab.Send('term width 80\n')
-        tab.WaitForString(prompt)
-    
+        tab.Send('exit\n')
+
         tab.Synchronous = False
         tab.IgnoreEscape = False
         
