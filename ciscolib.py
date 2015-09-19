@@ -411,7 +411,7 @@ def FixedColumnsToList(filepath, field_lens, ext='.txt'):
     list_of_lines = ReadFileToList(filepath, ext=ext)
     max_line = max([len(line) for line in list_of_lines])
     min_line_len = sum(list(field_lens)[:-1])
-    fmtstring = ' '.join('{}{}'.format(fw if fw > 0 else str(max_line - min_line_len), 's') for fw in field_lens)
+    fmtstring = ' '.join('{0}{1}'.format(fw if fw > 0 else str(max_line - min_line_len), 's') for fw in field_lens)
     fieldstruct = struct.Struct(fmtstring)
     parse = fieldstruct.unpack_from
     for line in list_of_lines:
