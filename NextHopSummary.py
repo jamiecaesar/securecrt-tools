@@ -1,213 +1,69 @@
 # $language = "python"
 # $interface = "1.0"
 
+################################  SCRIPT INFO  ################################
 # Author: Jamie Caesar
 # Twitter: @j_cae
 # 
 # This script will grab the route table information from a Cisco IOS device 
 # and export some statistics to a CSV file.
 # 
-# The path where the file is saved is specified in the "savepath" variable in
-# the Main() function.
+# The path where the file is saved is specified in the "save_path" variable in
+# the settings section below.
 
+settings = {}
+###############################  SCRIPT SETTING  ###############################
+#### WHERE TO SAVE FILES:
+# Enter the path to the directory where the script output should be stored.
+# This can either be a relative path (which will start in the user's home
+#   directory) or an absolute path (i.e. C:\Output or /Users/Jamie/Output).
+settings['savepath'] = 'Dropbox/SecureCRT/Output/'
+# The script will use the correct variable based on which OS is running.
+#
+#
+#### FILENAME FORMAT
+# Choose the format of the date string added to filenames created by this script.
+# Example = '%Y-%m-%d-%H-%M-%S'
+# See the bottom of https://docs.python.org/2/library/datetime.html for all 
+# available directives that can be used.
+settings['date_format'] = '%Y-%m-%d-%H-%M-%S'
+#
+#### DELETE TEMP FILES
+# This script saves the output into a file so that the output can be worked
+# with easier (large outputs going directly into variables can bog down and 
+# crash).  If you want to keep the file, set this to False.
+settings['delete_temp'] = True
+###############################  END OF SETTINGS ###############################
+
+
+# Import OS and Sys module to be able to perform required operations for adding
+# the script directory to the python path (for loading modules), and manipulating
+# paths for saving files.
 import os
-import datetime
-import csv
-import re
 import sys
+import re
 
-savepath = 'Dropbox/SecureCRT/Backups/'
-mydatestr = '%Y-%m-%d-%H-%M-%S'
+# Add the script directory to the python path (if not there) so we can import 
+# modules.
+script_dir = os.path.dirname(crt.ScriptFullName)
+if script_dir not in sys.path:
+    sys.path.insert(0, script_dir)
 
-def GetHostname(tab):
-    '''
-    This function will capture the prompt of the device.  The script will capture the
-    text that is sent back from the remote device, which includes what we typed being
-    echoed back to us, so we have to account for that while we parse data.
-    '''
-    #Send two line feeds
-    tab.Send("\n\n")
-    
-    # Waits for first linefeed to be echoed back to us
-    tab.WaitForString("\n") 
-    
-    # Read the text up to the next linefeed.
-    prompt = tab.ReadString("\n") 
-
-    #Remove any trailing control characters
-    prompt = prompt.strip()
-
-    # Check for non-enable mode (prompt ends with ">" instead of "#")
-    if prompt[-1] == ">": 
-        return None
-
-    # Get out of config mode if that is the active mode when the script was launched
-    elif "(conf" in prompt:
-        tab.Send("end\n")
-        hostname = prompt.split("(")[0]
-        tab.WaitForString(hostname + "#")
-        # Return the hostname (everything before the first "(")
-        return hostname
-        
-    # Else, Return the hostname (all of the prompt except the last character)        
-    else:
-        return prompt[:-1]
-
-
-def WriteOutput(command, filename, prompt, tab):
-    '''
-    This function captures the raw output of the command supplied and returns it.
-    The prompt variable is used to signal the end of the command output, and 
-    the "tab" variable is object that specifies which tab the commands are 
-    written to. 
-    '''
-    endings=["\r\n", prompt]
-    newfile = open(filename, 'wb')
-
-    # Send term length command and wait for prompt to return
-    tab.Send('term length 0\n')
-    tab.WaitForString(prompt)
-    
-    # Send command
-    tab.Send(command + "\n")
-
-    # Ignore the echo of the command we typed (including linefeed)
-    tab.WaitForString(command.strip())
-
-    # Loop to capture every line of the command.  If we get CRLF (first entry
-    # in our "endings" list), then write that line to the file.  If we get
-    # our prompt back (which won't have CRLF), break the loop b/c we found the
-    # end of the output.
-    while True:
-        nextline = tab.ReadString(endings)
-        # If the match was the 1st index in the endings list -> \r\n
-        if tab.MatchIndex == 1:
-            # For Nexus will have extra "\r"s in it, leading to extra lines at the
-            # start of the file.  Don't write those.
-            if nextline != "\r":
-                # Write the line of text to the file
-                # crt.Dialog.MessageBox("Original:" + repr(nextline) + "\nStripped:" + repr(nextline.strip('\r')))
-                newfile.write(nextline.strip("\r") + "\r\n")
-        else:
-            # We got our prompt (MatchIndex is 2), so break the loop
-            break
-    
-    newfile.close()
-    
-    # Send term length back to default
-    tab.Send('term length 24\n')
-    tab.WaitForString(prompt)
-
-
-def ParseRawRoutes(routelist):
-    '''
-    This function parses the raw route table into a datastucture that can be used to more easily
-    extract information.  The data structure that is returned in a list of dictionaries.
-    Each dictionary entry represents an entry in the route table and contains the following keys:
-    {"protocol", "network", "AD", "metric", "nexthop", "lifetime", "interface"}
-    '''
-    routetable = []
-    # Various RegEx expressions to match varying parts of a route table line
-    # I did it this way to break up the regex into more manageable parts, 
-    # Plus some of these parts can be found in mutliple line types
-    # I'm also using named groups to more easily extract the needed data.
-    #
-    # Protocol (letter code identifying route entry)
-    re_prot= r'(?P<protocol>\w[\* ][\w]{0,2})[ ]+'
-    # Matches network address of route:  x.x.x.x/yy
-    re_net = r'(?P<network>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(/\d+)?)[ ]+'
-    # Matches the Metric and AD: i.e. [110/203213]
-    re_metric = r'\[(?P<ad>\d+)/(?P<metric>\d+)\][ ]+'
-    # Matches the next hop in the route statement - "via y.y.y.y"
-    re_nexthop = r'via (?P<nexthop>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}),?[ ]*'
-    # Matches the lifetime of the route, usually in a format like 2m3d. Optional
-    re_lifetime = r'(?P<lifetime>[\w:]+)?(, )?'
-    # Matches outgoing interface. Not all protocols track this, so it is optional
-    re_interface = r'(?P<interface>[\w-]+[\/\.\d]*)?'
-
-    # Combining expressions above to build possible lines found in the route table
-    #
-    # Single line route entry
-    re_single = re_prot + re_net + re_metric + re_nexthop + re_lifetime + re_interface
-    # Directly connected route
-    re_connected = re_prot + re_net + 'is directly connected, ' + re_interface
-    # When the route length exceeds 80 chars, it is split across lines.  This is
-    # the first line -- just the protocol and network.
-    re_multiline = re_prot + re_net
-    # This is the format seen for either a second ECMP path, or when the route has
-    # been broken up across lines because of the length.
-    re_ecmp = r'[ ]*' + re_metric + re_nexthop + re_lifetime + re_interface
-
-    #Compile RegEx expressions
-    reSingle = re.compile(re_single)
-    reConnected = re.compile(re_connected)
-    reMultiline = re.compile(re_multiline)
-    reECMP = re.compile(re_ecmp)
-
-    # Start parsing raw route table into a data structure.  Each route entry goes
-    # into a dict, and all the entries are collected into a list.
-    for entry in routelist:
-        routeentry = {}
-        regex = reSingle.match(entry)
-        if regex:
-            # Need to track protocol and network in case the next line is a 2nd
-            # equal cost path (which doesn't show that info)
-            prev_prot = regex.group('protocol') 
-            prev_net = regex.group('network')
-            routeentry = {  "protocol" : prev_prot,
-                            "network" : prev_net,
-                            "AD" : regex.group('ad'),
-                            "metric" : regex.group('metric'),
-                            "nexthop" : regex.group('nexthop'),
-                            "lifetime" : regex.group('lifetime'),
-                            "interface" : regex.group('interface')
-                            }
-        else:
-            regex = reConnected.match(entry)
-            if regex:
-                routeentry = {  "protocol" : regex.group('protocol'),
-                                "network" : regex.group('network'),
-                                "AD" : 0,
-                                "metric" : 0,
-                                "nexthop" : None,
-                                "interface" : regex.group('interface')
-                                }
-            else:
-                regex = reMultiline.match(entry)
-                if regex:
-                    # Since this is the first line in an entry that was broken
-                    # up due to length, only record protocol and network.
-                    # The next line has the rest of the data needed.
-                    prev_prot = regex.group('protocol') 
-                    prev_net = regex.group('network')
-                else:
-                    regex = reECMP.match(entry)
-                    if regex:
-                        # Since this is a second equal cost entry, use
-                        # protocol and network info from previous entry
-                        routeentry = {  "protocol" : prev_prot,
-                                        "network" : prev_net,
-                                        "AD" : regex.group('ad'),
-                                        "metric" : regex.group('metric'),
-                                        "nexthop" : regex.group('nexthop'),
-                                        "lifetime" : regex.group('lifetime'),
-                                        "interface" : regex.group('interface')
-                                        }
-        if routeentry != {}:
-            routetable.append(routeentry)
-    return routetable
-
-
-def alphanum_key(s):
-    '''
-    From http://nedbatchelder.com/blog/200712/human_sorting.html
-    '''
-    return [int(c) if c.isdigit() else c for c in re.split('([0-9]+)', s)] 
+# Imports from common SecureCRT library
+from ciscolib import StartSession
+from ciscolib import EndSession
+from ciscolib import DetectNetworkOS
+from ciscolib import GetFilename
+from ciscolib import WriteOutput
+from ciscolib import ReadFileToList
+from ciscolib import ParseIOSRoutes
+from ciscolib import alphanum_key
+from ciscolib import ListToCSV
 
 
 def NextHopSummary(routelist):
     '''
-    This function will take the routelist datastructure (created by ParseRawRoutes) and process it into
+    This function will take the routelist datastructure (created by ParseIOSRoutes) and process it into
     a datastructure containing the summary data, that is then converted to a list so it can be easily written
     into a CSV file (by ListToCSV).
     '''
@@ -278,61 +134,47 @@ def NextHopSummary(routelist):
     return nexthops, connected
 
 
-def ListToCSV(data, filename, suffix=".csv"):
-    '''
-    This function takes a list and puts it into a CSV file with the supplied 
-    filename.  The default suffix is .csv unless a different one is passed in.
-    '''
-    newfile = open(filename + suffix, 'wb')
-    csvOut = csv.writer(newfile)
-    for line in data:
-        csvOut.writerow(line)
-    newfile.close()
-
-
 def Main():
-
+    SupportedOS = ["IOS", "IOS XE"]
     SendCmd = "show ip route"
+    
+    # Run session start commands and save session information into a dictionary
+    session = StartSession(crt)
 
-    #Create a "Tab" object, so that all the output goes into the correct Tab.
-    objTab = crt.GetScriptTab()
-    tab = objTab.Screen  #Allows us to type "tab.xxx" instead of "objTab.Screen.xxx"
-    tab.Synchronous = True
-    tab.IgnoreEscape = True
+    # Generate filename used for output files.
+    fullFileName = GetFilename(session, settings, "NextHopSummary")
 
-    #Get the prompt of the device
-    hostname = GetHostname(tab)
-    prompt = hostname + "#"
+    # Detect and store the OS of the attached device
+    DetectNetworkOS(session)
 
-    if hostname == None:
-        crt.Dialog.MessageBox("Either not in enable mode, or the prompt could not be detected")
-    else:
-        now = datetime.datetime.now()
-        mydate = now.strftime(mydatestr)
-        
-        #Create Filename
-        filebits = [hostname, "nexthops", mydate]
-        filename = '-'.join(filebits)
-        
-        #Create path to save configuration file and open file
-        fullFileName = os.path.join(os.path.expanduser('~'), savepath + filename)
-        rawRouteFile = fullFileName + ".txt"
+    if session['OS'] in SupportedOS:
+        # Save raw "show ip route" output to a file.  Dumping directly to a huge 
+        # string has problems when the route table is large (1000+ lines)
+        WriteOutput(session, SendCmd, fullFileName)
 
-        # Save raw "show ip route" output to a file.  Dumping directly to a var has problems when the
-        # route table is very large (1000+ lines)
-        WriteOutput(SendCmd, rawRouteFile, prompt, tab)
+        routes = ReadFileToList(fullFileName)
+        routelist = ParseIOSRoutes(routes)
 
-        # Create a list that contains all the route entries (minus their line endings)
-        routes = [line.rstrip('\n') for line in open(rawRouteFile)]
-        
-        routelist = ParseRawRoutes(routes)
+        # If the settings allow it, delete the temporary file that holds show cmd output
+        if settings['delete_temp']:    
+            os.remove(fullFileName + ".txt")
+            
+        # Get a list of all nexthop stats as well as connected networks (2 lists).
         nexthops, connected = NextHopSummary(routelist)
-        nexthops.extend(connected)
-        ListToCSV(nexthops, fullFileName)
         
+        # Merge the nexthops and connected interfaces into a single list before writing.
+        nexthops.extend(connected)
+        
+        # Write data into a CSV file.
+        ListToCSV(nexthops, fullFileName)
+    else:
+        error_str = "This script does not support {}.\n" \
+                    "It will currently only run on IOS Devices.".format(session['OS'])
+        crt.Dialog.MessageBox(error_str, "Unsupported Network OS", 16)
 
-    tab.Synchronous = False
-    tab.IgnoreEscape = False
+    # Clean up before exiting
+    EndSession(session)
 
 
-Main()
+if __name__ == "__builtin__":
+    Main()
