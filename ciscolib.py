@@ -184,7 +184,7 @@ def EndSession(session):
         prompt = session['prompt']
     
         len_str = 'term length {0}\n'.format(session['termlength'])
-        width_str = 'term length {0}\n'.format(session['termwidth'])
+        width_str = 'term width {0}\n'.format(session['termwidth'])
     
         #Set term length back to saved values
         tab.Send(len_str)
