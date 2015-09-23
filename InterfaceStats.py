@@ -277,9 +277,6 @@ def Main():
     # Generate filename used for output files.
     fullFileName = GetFilename(session, settings, "int_summary")
 
-    # Detect and store the OS of the attached device
-    DetectNetworkOS(session)
-
     if session['OS'] in SupportedOS:
         if session['OS'] == "NX-OS":
             SendCmd = "show interface"
