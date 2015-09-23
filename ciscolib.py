@@ -100,6 +100,7 @@ def GetTermInfo(session):
     '''
     A function that returns the current terminatl length and width
     '''
+
     re_num = r'\d+'
     reNum = re.compile(re_num)
 
@@ -154,12 +155,18 @@ def StartSession(crt):
 
         session['termlength'], session['termwidth'] = GetTermInfo(session)
 
+        # Detect and store the OS of the attached device
+        DetectNetworkOS(session)
+
         # Send term length command and wait for prompt to return
         tab.Send('term length 0\n')
         tab.WaitForString(prompt)
 
         # Send term width command and wait for prompt to return
-        tab.Send('term width 0\n')
+        if session['OS'] == "NX-OS":
+            tab.Send('term width 511\n')
+        else:
+            tab.Send('term width 0\n')
         tab.WaitForString(prompt)
         
         # Added due to Nexus echoing twice if system hangs and hasn't printed the prompt yet.
@@ -424,6 +431,50 @@ def FixedColumnsToList(filepath, field_lens, ext='.txt'):
     return table
 
 
+def ListToCSV(data, filename, suffix=".csv"):
+    '''
+    This function takes a list of lists, such as:
+    
+    [ ["IP", "Desc"], ["1.1.1.1", "Vlan 1"], ["2.2.2.2", "Vlan 2"] ]
+
+    and writes it into a CSV file with the filename supplied.   Each sub-list
+    in the outer list will be written as a row.  If you want a header row, it 
+    must be the first sub-list in the outer list.
+    
+    The default extension is .csv unless a different one is passed in.
+    '''
+
+    newfile = open(filename + suffix, 'wb')
+    csvOut = csv.writer(newfile)
+    for line in data:
+        csvOut.writerow(line)
+    newfile.close()
+
+
+def DictListToCSV(fields, data, filename, ext=".csv"):
+    '''
+    This function takes a list of dicts (passed in as data), such as:
+    
+    [ {"key1": value, "key2": value}, {"key1": value, "key2": value} ]
+    
+    and puts it into a CSV file with the supplied filename.  The function requires 
+    a list of the keys found in the dictionaries (passed in as fields), such as:
+    
+    [ "key1", "key2" ]
+    
+    This will write a CSV file with all of the keys as the header row, and add a
+    row for every dict in the list, with the correct data in each column.
+
+    The default extension is .csv unless a different one is passed in.
+    '''
+
+    with open(filename + ext, 'wb') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fields)
+        writer.writerow(dict(zip(writer.fieldnames, writer.fieldnames)))
+        for entry in data:
+            writer.writerow(entry)
+
+
 def ParseIOSRoutes(routelist):
     '''
     This function parses the raw IOS route table into a datastucture that can 
@@ -527,52 +578,97 @@ def ParseIOSRoutes(routelist):
     return routetable
 
 
-def ListToCSV(data, filename, suffix=".csv"):
+def ParseNXOSRoutes(routelist):
     '''
-    This function takes a list of lists, such as:
+    This function parses the raw IOS route table into a datastucture that can 
+    be used to more easily extract information.  The data structure that is 
+    returned in a list of dictionaries.  Each dictionary entry represents an 
+    entry in the route table and contains the following keys:
     
-    [ ["IP", "Desc"], ["1.1.1.1", "Vlan 1"], ["2.2.2.2", "Vlan 2"] ]
-
-    and writes it into a CSV file with the filename supplied.   Each sub-list
-    in the outer list will be written as a row.  If you want a header row, it 
-    must be the first sub-list in the outer list.
+    {"protocol", "network", "AD", "metric", "nexthop", "lifetime", "interface"}
     
-    The default extension is .csv unless a different one is passed in.
     '''
 
-    newfile = open(filename + suffix, 'wb')
-    csvOut = csv.writer(newfile)
-    for line in data:
-        csvOut.writerow(line)
-    newfile.close()
-
-
-def DictListToCSV(fields, data, filename, ext=".csv"):
-    '''
-    This function takes a list of dicts (passed in as data), such as:
+    routetable = []
+    ignore_protocols = ["local", "hsrp"]
+    # Various RegEx expressions to match varying parts of a route table line
+    # I did it this way to break up the regex into more manageable parts, 
+    # Plus some of these parts can be found in mutliple line types
+    # I'm also using named groups to more easily extract the needed data.
+    #
+    re_via = r'^[ ]+\*?via '
+    # Matches network address of route:  x.x.x.x/yy
+    re_net = r'(?P<network>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d+),\W+ubest\/mbest:'
+    # Matches the next hop in the route statement - "via y.y.y.y"
+    re_nexthop = r'(?P<nexthop>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}),'
+    # Matches outgoing interface. Not all protocols track this, so it is optional
+    re_interface = r'[ ]+(?P<interface>\w+\d+(\/\d+)?),'
+    # Matches the Metric and AD: i.e. [110/203213]
+    re_metric = r'[ ]+\[(?P<ad>\d+)\/(?P<metric>\d+)\],'
+    # Matches the lifetime of the route, usually in a format like 2m3d. Optional
+    re_lifetime = r'[ ]+(?P<lifetime>\w+),'
+    # Protocol (letter code identifying route entry)    
+    re_prot= r'[ ]+(?P<protocol>\w+(-\w+)?)[,]?'
     
-    [ {"key1": value, "key2": value}, {"key1": value, "key2": value} ]
-    
-    and puts it into a CSV file with the supplied filename.  The function requires 
-    a list of the keys found in the dictionaries (passed in as fields), such as:
-    
-    [ "key1", "key2" ]
-    
-    This will write a CSV file with all of the keys as the header row, and add a
-    row for every dict in the list, with the correct data in each column.
+    # Combining expressions above to build possible lines found in the route table
+    # Standard via line from routing protocol
+    re_nh_line = re_via + re_nexthop + re_interface + re_metric + re_lifetime + re_prot
+    # Static routes don't have an outgoing interface.
+    re_static = re_via + re_nexthop + re_metric + re_lifetime + re_prot
 
-    The default extension is .csv unless a different one is passed in.
-    '''
+    #Compile RegEx expressions
+    reNet = re.compile(re_net)
+    reVia = re.compile(re_nh_line)
+    reStatic = re.compile(re_static)
 
-    with open(filename + ext, 'wb') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=fields)
-        writer.writerow(dict(zip(writer.fieldnames, writer.fieldnames)))
-        for entry in data:
-            writer.writerow(entry)
+    # Start parsing raw route table into a data structure.  Each route entry goes
+    # into a dict, and all the entries are collected into a list.
+    for entry in routelist:
+        routeentry = {}
+        regex = reNet.match(entry)
+        if regex:
+            # Need to remember the network so the following next-hop lines
+            # can be associated with the correct net in the dict.
+            prev_net = regex.group('network')
+        else:
+            regex = reVia.match(entry)
+            if regex:
+                proto = regex.group('protocol')
+                if proto in ignore_protocols:
+                    pass
+                elif proto == "direct":
+                    routeentry = {  "network" : prev_net,
+                                    "nexthop" : None,
+                                    "interface" : regex.group('interface'),
+                                    "AD" : regex.group('ad'),
+                                    "metric" : regex.group('metric'),
+                                    "lifetime" : regex.group('lifetime'),
+                                    "protocol" : proto
+                                    }
+                else:
+                    routeentry = {  "network" : prev_net,
+                                    "nexthop" : regex.group('nexthop'),
+                                    "interface" : regex.group('interface'),
+                                    "AD" : regex.group('ad'),
+                                    "metric" : regex.group('metric'),
+                                    "lifetime" : regex.group('lifetime'),
+                                    "protocol" : proto
+                                    }
+            else:
+                regex = reStatic.match(entry)
+                if regex:
+                    routeentry = {  "network" : prev_net,
+                                    "nexthop" : regex.group('nexthop'),
+                                    "interface" : None,
+                                    "AD" : regex.group('ad'),
+                                    "metric" : regex.group('metric'),
+                                    "lifetime" : regex.group('lifetime'),
+                                    "protocol" : regex.group('protocol')
+                                    }
 
-
-
-
+        if routeentry != {}:
+            routetable.append(routeentry)
+    return routetable
 
 
 #############################  UTILITY  FUNCTIONS  #############################

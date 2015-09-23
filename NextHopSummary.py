@@ -57,6 +57,7 @@ from ciscolib import GetFilename
 from ciscolib import WriteOutput
 from ciscolib import ReadFileToList
 from ciscolib import ParseIOSRoutes
+from ciscolib import ParseNXOSRoutes
 from ciscolib import alphanum_key
 from ciscolib import ListToCSV
 
@@ -68,17 +69,17 @@ def NextHopSummary(routelist):
     into a CSV file (by ListToCSV).
     '''
     def GetProtocol(raw_protocol):
-        if raw_protocol[0] == 'S':
+        if raw_protocol[0] == 'S' or "static" in raw_protocol:
             return 'Static'
-        elif raw_protocol[0] == 'D':
+        elif raw_protocol[0] == 'D' or "eigrp" in raw_protocol:
             return 'EIGRP'
-        elif raw_protocol[0] == 'O':
+        elif raw_protocol[0] == 'O' or "ospf" in raw_protocol:
             return 'OSPF'
-        elif raw_protocol[0] == 'B':
+        elif raw_protocol[0] == 'B' or "bgp" in raw_protocol:
             return 'BGP'
-        elif raw_protocl[0] == 'i':
+        elif raw_protocol[0] == 'i' or "isis" in raw_protocol:
             return 'ISIS'
-        elif raw_protocol[0] == 'R':
+        elif raw_protocol[0] == 'R' or "rip" in raw_protocol:
             return 'RIP'
         else:
             return 'Other' 
@@ -135,7 +136,7 @@ def NextHopSummary(routelist):
 
 
 def Main():
-    SupportedOS = ["IOS", "IOS XE"]
+    SupportedOS = ["IOS", "IOS XE", "NX-OS"]
     SendCmd = "show ip route"
     
     # Run session start commands and save session information into a dictionary
@@ -144,16 +145,16 @@ def Main():
     # Generate filename used for output files.
     fullFileName = GetFilename(session, settings, "NextHopSummary")
 
-    # Detect and store the OS of the attached device
-    DetectNetworkOS(session)
-
     if session['OS'] in SupportedOS:
         # Save raw "show ip route" output to a file.  Dumping directly to a huge 
         # string has problems when the route table is large (1000+ lines)
         WriteOutput(session, SendCmd, fullFileName)
 
         routes = ReadFileToList(fullFileName)
-        routelist = ParseIOSRoutes(routes)
+        if session['OS'] == "NX-OS":
+            routelist = ParseNXOSRoutes(routes)
+        else:
+            routelist = ParseIOSRoutes(routes)
 
         # If the settings allow it, delete the temporary file that holds show cmd output
         if settings['delete_temp']:    

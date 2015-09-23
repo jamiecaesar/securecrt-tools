@@ -12,11 +12,9 @@ Scripts:
 ========
 * Document_Device - A script that will run a list of commands on the connected device, saving each command output into an individual file.  All outputs are saved into a folder based on the device's hostname.
 * InterfaceStats.py - Outputs a CSV file for a quick and easy view of some high level details about all interfaces that are "up", such as total packets in/out, packet rate in/out and errors in/out.
+* NextHopSummary.py - Outputs a CSV file with all the next hops and a detailed breakdown of each type of route pointing at that next hop.
 * SaveRunning.py - Captures the running config to a file, named based on the prompt and current date.
 * SaveCDPtoCSV.py - Captures CDP information and saves the important info (interfaces, remote device, IP address) to a CSV file
 * SaveOutput.py - Generic script that prompts for a command and saves that output to a file.
 * ToggleNo.py - Script that will capture the highlighted text and send those commands to the device with a prepended "no ".  If the command starts with "no ", it will remove it before sending.
 * UsedVLANs.py - A script that will output a CSV file with a list of VLANs that have ports assigned to them from the switch.  Settings in the script allow for changing the behavior to list all VLANs with their associated count.
-
-*IOS Only Scripts (Plans to support NX-OS):*
-* NextHopSummary.py - Outputs a CSV file with all the next hops and a detailed breakdown of each type of route pointing at that next hop.
