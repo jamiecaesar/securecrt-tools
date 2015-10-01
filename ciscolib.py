@@ -217,7 +217,8 @@ def DetectNetworkOS(session):
 
     if "IOS XE" in ver_lines[0]:
         session['OS'] = "IOS XE"
-    elif "Cisco IOS Software" in ver_lines[0]:
+    elif "Cisco IOS Software" in ver_lines[0] or \
+         "Cisco Internetwork Operating System" in ver_lines[0]:
         session['OS'] = "IOS"
     elif "Cisco Nexus Operating System" in ver_lines[0]:
         session['OS'] = "NX-OS"
