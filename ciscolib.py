@@ -381,7 +381,11 @@ def WriteOutput(session, command, filename, ext=".txt"):
             nextline = nextline.strip('\r\n')
             # If there is something left, write it.
             if nextline != "":
-                newfile.write(nextline.strip('\r\n') + "\r\n")
+                # Strip line endings from line.  Also re-encode line as ASCII
+                # and ignore the character if it can't be done (rare error on 
+                # Nexus)
+                newfile.write(nextline.strip('\r\n').encode('ascii', 'ignore') + 
+                    "\r\n")
         else:
             # We got our prompt (MatchIndex is 2), so break the loop
             break
