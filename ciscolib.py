@@ -359,9 +359,15 @@ def WriteOutput(session, command, filename, ext=".txt"):
     '''
     prompt = session['prompt']
     tab = session['tab']
+    
 
     endings=["\r\n", prompt]
-    newfile = open(filename + ext, 'wb')
+    try:
+        newfile = open(filename + ext, 'wb')
+    except IOError, err:
+        crt = session['crt']
+        error_str = "IO Error for:\n{0}\n\n{1}".format(filename, err)
+        crt.Dialog.MessageBox(err, "IO Error", ICON_STOP)
 
     # Send command
     tab.Send(command + "\n")
