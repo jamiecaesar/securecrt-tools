@@ -12,25 +12,13 @@
 # 
 
 
-settings = {}
 ###############################  SCRIPT SETTING  ###############################
-#### WHERE TO SAVE FILES:
-# Enter the path to the directory where the script output should be stored.
-# This can either be a relative path (which will start in the user's home
-#   directory) or an absolute path (i.e. C:\Output or /Users/Jamie/Output).
-settings['savepath'] = 'Dropbox/SecureCRT/Output/'
-# The script will use the correct variable based on which OS is running.
 #
+# Settings for this script are saved in the "script_settings.py" file that
+# should be located in the same directory as this script.
 #
-#### FILENAME FORMAT
-# Choose the format of the date string added to filenames created by this script.
-# Example = '%Y-%m-%d-%H-%M-%S'
-# See the bottom of https://docs.python.org/2/library/datetime.html for all 
-# available directives that can be used.
-settings['date_format'] = '%Y-%m-%d-%H-%M-%S'
-###############################  END OF SETTINGS ###############################
 
-
+##################################  IMPORTS  ##################################
 # Import OS and Sys module to be able to perform required operations for adding
 # the script directory to the python path (for loading modules), and manipulating
 # paths for saving files.
@@ -43,6 +31,9 @@ script_dir = os.path.dirname(crt.ScriptFullName)
 if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
 
+# Import Settings from Settings File
+from script_settings import settings
+
 # Imports from Cisco SecureCRT library
 from ciscolib import StartSession
 from ciscolib import EndSession
@@ -50,10 +41,15 @@ from ciscolib import GetDateString
 from ciscolib import GetAbsolutePath
 from ciscolib import WriteOutput
 
+##################################  SCRIPT  ###################################
+
 
 # Be careful when adding to this list.  If you forget a "," then those two
-# commands will run together.  The last entry must not have a comma after it, 
-# which might happen if you comment out the last line.
+# commands strings will run together into a single string and sent to the
+# device, meaning that neither output will be captures.
+#
+# The last entry MUST NOT have a comma after it, which might happen if you 
+# comment out the last line.
 COMMANDS = [
     # "show call active voice brief",
     # "show call history voice brief",
@@ -69,6 +65,7 @@ COMMANDS = [
     # "show dial-peer voice summary",
     "show environment power",
     "show etherchannel summary",
+    # "show hsrp brief",
     # "show interface counters error",
     # "show interface description",
     # "show interface stats",
@@ -106,7 +103,7 @@ COMMANDS = [
     "show running",
     "show spanning-tree",
     "show spanning-tree root",
-    # "show standby brief",
+    "show standby brief",
     "show stack-power",
     "show switch detail",
     "show version",

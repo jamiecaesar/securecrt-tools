@@ -12,37 +12,14 @@
 # the settings section below.
 
 
-settings = {}
 ###############################  SCRIPT SETTING  ###############################
-#### WHERE TO SAVE FILES:
-# Enter the path to the directory where the script output should be stored.
-# This can either be a relative path (which will start in the user's home
-#   directory) or an absolute path (i.e. C:\Output or /Users/Jamie/Output).
-settings['savepath'] = 'Dropbox/SecureCRT/Output/'
-# The script will use the correct variable based on which OS is running.
 #
+# Settings for this script are saved in the "script_settings.py" file that
+# should be located in the same directory as this script.
 #
-#### FILENAME FORMAT
-# Choose the format of the date string added to filenames created by this script.
-# Example = '%Y-%m-%d-%H-%M-%S'
-# See the bottom of https://docs.python.org/2/library/datetime.html for all 
-# available directives that can be used.
-settings['date_format'] = '%Y-%m-%d-%H-%M-%S'
-#
-#### DELETE TEMP FILES
-# This script saves the output into a file so that the output can be worked
-# with easier (large outputs going directly into variables can bog down and 
-# crash).  If you want to keep the file, set this to False.
-settings['delete_temp'] = True
-#
-#### SHOW ALL VLANs
-# If this value is true, then the output will list all VLANs, even those with 0 
-# ports allocated.   If False, it will only list VLANs with at least 1 port
-# allocated.
-settings['show_all_VLANs'] = False
-###############################  END OF SETTINGS ###############################
 
 
+##################################  IMPORTS  ##################################
 # Import OS and Sys module to be able to perform required operations for adding
 # the script directory to the python path (for loading modules), and manipulating
 # paths for saving files.
@@ -56,6 +33,9 @@ script_dir = os.path.dirname(crt.ScriptFullName)
 if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
 
+# Import Settings from Settings File
+from script_settings import settings
+
 # Imports from common SecureCRT library
 from ciscolib import StartSession
 from ciscolib import EndSession
@@ -64,6 +44,7 @@ from ciscolib import WriteOutput
 from ciscolib import FixedColumnsToList
 from ciscolib import ListToCSV
 
+##################################  SCRIPT  ###################################
 
 def PortCountList(vlan_table):
     '''
