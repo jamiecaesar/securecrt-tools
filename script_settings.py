@@ -1,3 +1,6 @@
+# $language = "python"
+# $interface = "1.0"
+
 ################################  MODULE  INFO  ################################
 # Author: Jamie Caesar
 # Twitter: @j_cae
