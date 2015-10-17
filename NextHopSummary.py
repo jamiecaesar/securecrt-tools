@@ -125,10 +125,16 @@ def NextHopSummary(routelist):
 def Main():
     SupportedOS = ["IOS", "IOS XE", "NX-OS"]
     SendCmd = "show ip route"
-    
+
     # Run session start commands and save session information into a dictionary
     session = StartSession(crt)
 
+    # Get VRF that we are interested in
+    selected_vrf = crt.Dialog.Prompt("Enter the VRF name.\n(Leave blank for default VRF)")
+    if selected_vrf != "":
+        SendCmd = SendCmd + " vrf {0}".format(selected_vrf)
+        session['hostname'] = session['hostname'] + "-VRF-{0}".format(selected_vrf)
+    
     # Generate filename used for output files.
     fullFileName = GetFilename(session, settings, "NextHopSummary")
 
