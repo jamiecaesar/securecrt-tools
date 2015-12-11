@@ -344,7 +344,7 @@ def CaptureOutput(session, command):
     return result.strip('\r\n')
 
 
-def WriteOutput(session, command, filename, ext=".txt"):
+def WriteOutput(session, command, filename, ext=".txt", writemode="wb"):
     '''
     This function captures the raw output of the command supplied and writes
     it to a file.
@@ -363,7 +363,7 @@ def WriteOutput(session, command, filename, ext=".txt"):
 
     endings=["\r\n", prompt]
     try:
-        newfile = open(filename + ext, 'wb')
+        newfile = open(filename + ext, writemode)
     except IOError, err:
         crt = session['crt']
         error_str = "IO Error for:\n{0}\n\n{1}".format(filename, err)
