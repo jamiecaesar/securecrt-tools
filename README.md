@@ -10,7 +10,8 @@ These scripts have been testing with SecureCRT 7.x on multiple machines of varyi
 
 Scripts:
 ========
-* Document_Device - A script that will run a list of commands on the connected device, saving each command output into an individual file.  All outputs are saved into a folder based on the device's hostname.
+* ConfigLoad.py - A script that will load a config file to a cisco device and mark any errors
+* Document_Device.py - A script that will run a list of commands on the connected device, saving each command output into an individual file.  All outputs are saved into a folder based on the device's hostname.
 * InterfaceStats.py - Outputs a CSV file for a quick and easy view of some high level details about all interfaces that are "up", such as total packets in/out, packet rate in/out and errors in/out.
 * NextHopSummary.py - Outputs a CSV file with all the next hops and a detailed breakdown of each type of route pointing at that next hop.
 * SaveRunning.py - Captures the running config to a file, named based on the prompt and current date.
