@@ -198,7 +198,9 @@ def ParseNXOSIntfStats(raw_int_output):
         # Check if this is the start of a new interface block
         line = line.strip()
         regex = reIntf.match(line)
-        if regex:
+        # If we get a match on the "interface is up" line, and the line does NOT contain "Vlan"
+        # (because Vlan interfaces don't have stats)
+        if regex and "Vlan" not in line:
             # If so, write the previous block and reset
             if intfentry['Interface'] is not None:
                 intftable.append(intfentry)
