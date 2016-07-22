@@ -5,16 +5,49 @@
 # Author: Jamie Caesar
 # Twitter: @j_cae
 # 
-# This script will scrape some stats (packets, rate, errors) from all the UP 
-# interfaces on the device and put it into a CSV file.  The path where the file 
-# is saved is specified in the settings section.
+# This script will record interface statistics (if the interface is "up") every
+# X seconds, for Y number of samples.  X and Y can be changed in the local
+# settings section below.
+
+# The data is output as a CSV file in a
+# table layout, where each row is an interface, and each column is the value
+# at a particular timestamp.  Each statistic (Input bps, Input pps, etc) is
+# written as a separate table in the file.
+#
+# This CSV file can be opened in Excel, allowing the user to select the data
+# for one type of statistic, and insert a line graph to automatically generate
+# a graph with each line corresponding to an interface, and each point for a 
+# line is the value at a particular point in time.
+
+##############################  GLOBAL SETTING  ###############################
+#
+# Settings that are referenced by all scripts (save location, etc) are saved in 
+# the "script_settings.py" file that should be located in the same directory as 
+# this script.
 #
 
-###############################  SCRIPT SETTING  ###############################
+###############################  LOCAL SETTING  ###############################
+# Below are local settings use specifically for this script.
 #
-# Settings for this script are saved in the "script_settings.py" file that
-# should be located in the same directory as this script.
-#
+
+# Stats that we are interested in capture data over time for
+
+measurements = [    "InBPS",            #Bits per second, Inbound
+                    "OutBPS",           #Bits per second, Outbound
+                    "InPPS",            #Packets per second, Inbound
+                    "OutPPS",           #Packets per second, Outbound
+                    #"InputPackets",    #Total Packets Input
+                    "InputErr",         #Input Errors
+                    #"OutputPackets",   #Total Packets Output
+                    "OutputErr"         #Output Errors
+]
+
+# Time between samples (in seconds)
+interval = 30
+
+# Total number of samples to take.
+stat_count = 12
+
 
 
 ##################################  IMPORTS  ##################################
@@ -23,7 +56,10 @@
 # paths for saving files.
 import os
 import sys
-import re 
+import re
+import time
+from datetime import datetime
+import pprint
 
 # Add the script directory to the python path (if not there) so we can import 
 # modules.
@@ -41,7 +77,9 @@ from ciscolib import DetectNetworkOS
 from ciscolib import GetFilename
 from ciscolib import WriteOutput
 from ciscolib import ReadFileToList
+from ciscolib import ListToCSV
 from ciscolib import DictListToCSV
+from ciscolib import alphanum_key
 
 ##################################  SCRIPT  ###################################
 
@@ -256,56 +294,98 @@ def ParseNXOSIntfStats(raw_int_output):
 
 
 def Main():
+
+    def GetInterfaceSamples(ParseIntfStats):
+        for i in range(stat_count):
+            sample_time = datetime.now().strftime("%I:%M:%S")
+            timestamps.append(sample_time)
+
+            start = time.clock()
+            # Generate filename used for output files.
+            fullFileName = GetFilename(session, settings, "int_summary")
+
+            # Save raw output to a file.  Dumping directly to a var has problems with
+            # large outputs
+            tab.Send('\n')
+            WriteOutput(session, SendCmd, fullFileName)
+
+            if stat_count != (i + 1):
+                # Print status to the Cisco prompt to keep user aware of progress
+                # This must start with ! to be a Cisco comment, to prevent in-terminal errors
+                warning_msg = "! {0} samples left. DO NOT TYPE IN WINDOW.".format(stat_count - (i + 1))
+                tab.Send(warning_msg + '\n')
+                tab.WaitForString(session['prompt'])
+
+            # Read text file into a list of lines (no line endings)
+            intf_raw = ReadFileToList(fullFileName)
+
+            # If the settings allow it, delete the temporary file that holds show cmd output
+            if settings['delete_temp']:    
+                os.remove(fullFileName + ".txt")
+
+            summarytable = ParseIntfStats(intf_raw)
+
+            for stat in measurements:
+                for entry in summarytable:
+                    if entry['Interface'] in output[stat]:
+                        output[stat][entry['Interface']][sample_time] = entry[stat]
+                    else:
+                        output[stat][entry['Interface']] = {}
+                        output[stat][entry['Interface']][sample_time] = entry[stat]
+
+            end = time.clock()
+            if interval - (end - start) > 0:
+                if stat_count != (i + 1):
+                    time.sleep(interval - (end - start))
+            else:
+                 crt.Dialog.MessageBox("Did not complete within interval time", 
+                                    "Took Too Long", ICON_STOP)
+                 sys.exit(0)
+
+
     SupportedOS = ["IOS", "IOS XE", "NX-OS"]
     
-
     # Run session start commands and save session information into a dictionary
     session = StartSession(crt)
+    SendCmd = "show interface"
+    tab = session['tab']
 
-    # Generate filename used for output files.
-    fullFileName = GetFilename(session, settings, "int_summary")
+    output = {}
+    for name in measurements:
+        output[name] = {}
+
+    timestamps = []
 
     if session['OS'] in SupportedOS:
         if session['OS'] == "NX-OS":
-            SendCmd = "show interface"
-            # Save raw output to a file.  Dumping directly to a var has problems with
-            # large outputs
-            WriteOutput(session, SendCmd, fullFileName)
-        
-            # Create a list that contains all the route entries (minus their line endings)
-            intf_raw = ReadFileToList(fullFileName)
-            
-            # If the settings allow it, delete the temporary file that holds show cmd output
-            if settings['delete_temp']:    
-                os.remove(fullFileName + ".txt")
-
-            summarytable = ParseNXOSIntfStats(intf_raw)
-            field_names =   [ "Interface", "Description", "InBPS", "InPPS", "OutBPS", "OutPPS", 
-                              "InputPackets", "InputErr", "OutputPackets", "OutputErr"]
-            DictListToCSV(field_names, summarytable, fullFileName)
+            GetInterfaceSamples(ParseNXOSIntfStats)
         else:
-            SendCmd = "show interfaces"
-            # Save raw output to a file.  Dumping directly to a var has problems with
-            # large outputs
-            WriteOutput(session, SendCmd, fullFileName)
-        
-            # Create a list that contains all the route entries (minus their line endings)
-            intf_raw = ReadFileToList(fullFileName)
-            
-            # If the settings allow it, delete the temporary file that holds show cmd output
-            if settings['delete_temp']:    
-                os.remove(fullFileName + ".txt")
-            
-            summarytable = ParseIOSIntfStats(intf_raw)
-            field_names =   [ "Interface", "Description", "InBPS", "InPPS", "OutBPS", "OutPPS", 
-                              "InputPackets", "InputErr", "OutputPackets", "OutputErr"]
-            DictListToCSV(field_names, summarytable, fullFileName)
+            GetInterfaceSamples(ParseIOSIntfStats)
     else:
         error_str = "This script does not support {}.\n" \
                     "It will currently only run on IOS Devices.".format(session['OS'])
         crt.Dialog.MessageBox(error_str, "Unsupported Network OS", 16)
     
+    field_names = [ "Interface" ]
+    field_names.extend(timestamps)
+
+    fullFileName = GetFilename(session, settings, "graph")
+    
+    for stat in measurements:
+        temp_csv_list = []
+        header = [ [stat] ]
+        empty_line = [ [] ] 
+        for key in sorted(output[stat].keys(), key=alphanum_key):
+            temp_dict = { "Interface" : key }
+            temp_dict.update(output[stat][key])
+            temp_csv_list.append(temp_dict)
+        ListToCSV(header, fullFileName, mode='ab')
+        DictListToCSV(field_names, temp_csv_list, fullFileName, mode='ab')
+        # Add seperator line
+        ListToCSV(empty_line, fullFileName, mode='ab')
+
     EndSession(session)
+    crt.Dialog.MessageBox("Interface Statistic Gathering Complete", "Script Complete", 64)
 
 
 if __name__ == "__builtin__":

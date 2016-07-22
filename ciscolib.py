@@ -442,7 +442,7 @@ def FixedColumnsToList(filepath, field_lens, ext='.txt'):
     return table
 
 
-def ListToCSV(data, filename, suffix=".csv"):
+def ListToCSV(data, filename, suffix=".csv", mode="wb"):
     '''
     This function takes a list of lists, such as:
     
@@ -455,14 +455,14 @@ def ListToCSV(data, filename, suffix=".csv"):
     The default extension is .csv unless a different one is passed in.
     '''
 
-    newfile = open(filename + suffix, 'wb')
+    newfile = open(filename + suffix, mode)
     csvOut = csv.writer(newfile)
     for line in data:
         csvOut.writerow(line)
     newfile.close()
 
 
-def DictListToCSV(fields, data, filename, ext=".csv"):
+def DictListToCSV(fields, data, filename, ext=".csv", mode="wb"):
     '''
     This function takes a list of dicts (passed in as data), such as:
     
@@ -479,7 +479,7 @@ def DictListToCSV(fields, data, filename, ext=".csv"):
     The default extension is .csv unless a different one is passed in.
     '''
 
-    with open(filename + ext, 'wb') as csvfile:
+    with open(filename + ext, mode) as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fields)
         writer.writerow(dict(zip(writer.fieldnames, writer.fieldnames)))
         for entry in data:
