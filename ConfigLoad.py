@@ -35,8 +35,11 @@ script_dir = os.path.dirname(crt.ScriptFullName)
 if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
 
-# Import Settings from Settings File
-from script_settings import settings
+# Import Settings from Settings File or Default settings
+try:
+    from script_settings import settings
+except IOError:
+    from script_settings_default import settings
 
 # Imports from Cisco SecureCRT library
 from ciscolib import StartSession
