@@ -3,3 +3,6 @@
 
 # OSX Files #
 .DS_Store
+
+### Ignore Settings file
+script_settings.py
