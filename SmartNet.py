@@ -35,8 +35,23 @@ if script_dir not in sys.path:
 # Import Settings from Settings File or Default settings
 try:
     from script_settings import settings
-except IOError:
-    from script_settings_default import settings
+except ImportError:
+    import shutil
+    src_file = os.path.join(script_dir, 'script_settings_default.py')
+    dst_file = os.path.join(script_dir, 'script_settings.py')
+    try:
+        shutil.copy(src_file, dst_file)
+        setting_msg = ("Personal settings file created in directory:\n'{}'\n\n"
+                       "Please edit this file to make any settings changes."
+                       ).format(script_dir)
+        crt.Dialog.MessageBox(setting_msg, "Settings Created", 64)
+        from script_settings import settings
+    except IOError, ImportError:
+        err_msg =   ('Cannot find settings file.\n\nPlease make sure either the file\n'
+                    '"script_settings_default.py"\n exists in the directory:\n"{}"\n'.format(script_dir)
+                    )
+        crt.Dialog.MessageBox(str(err_msg), "Settings Error", 16)
+        exit(0)
 
 # Imports from common SecureCRT library
 from ciscolib import StartSession
