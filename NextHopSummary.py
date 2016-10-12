@@ -71,8 +71,15 @@ def NextHopSummary(routelist):
         else:
             return 'Other' 
 
+    # There are 3 Dictionaries of information extracted from the route table:
+    # 1) Summary information - List each next-hop with how many routes from each 
+    #    protocol
+    # 2) Connected Interfaces - List of the subnets that are on connected intfs
+    # 3) Detailed information - List of each next-hop and all the networks that
+    #    flow to that next-hop.
     summaryDict = {}
     connectedDict = {}
+    detailDict = {}
     for entry in routelist:
         # Verify this entry has a next-hop parameter
         if entry['nexthop']:
@@ -95,12 +102,19 @@ def NextHopSummary(routelist):
                                                   }
                 summaryDict[nh]['Total'] += 1
                 summaryDict[nh][proto] += 1
+            if nh in detailDict:
+                # Append the network and protocol (in a tuple)
+                detailDict[nh].append((entry['network'], GetProtocol(entry['protocol'])))
+            else:
+                # Create an entry for the next-hop and add network/proto to list.
+                detailDict[nh] = [(entry['network'], GetProtocol(entry['protocol']))]
         elif entry['interface']:
             if entry['interface'] in connectedDict:
                 connectedDict[entry['interface']].append(entry['network'])
             else:
                 connectedDict[entry['interface']] = [ entry['network'] ]
 
+    # Process Summary Data
     nexthops = [['Next-hop', 'Interface', 'Total routes', 'Static', 'EIGRP', 'OSPF', 'BGP', 'ISIS', 'RIP', 'Other']]
     # Put next-hop stats into list for writing into a CSV file
     nexthops_data = []
@@ -110,7 +124,8 @@ def NextHopSummary(routelist):
     # Append sorted nexthops stats after header line
     nexthops.extend(sorted(nexthops_data, key=lambda x: alphanum_key(x[0])))
 
-    connected = [ ['',''],
+    # Process Connected Network Data
+    connected = [ ['',''], ['',''],
                   ['Connected', ''],
                   ['Interface', 'Network(s)']]
     conn_data = []
@@ -119,7 +134,24 @@ def NextHopSummary(routelist):
         this_row.extend(value)
         conn_data.append(this_row)
     connected.extend(sorted(conn_data, key=lambda x: alphanum_key(x[0])))
-    return nexthops, connected
+
+    # Process Detailed Route Data
+    detailed = [ ['','',''], ['','',''],
+                  ['Route Details', '', ''],
+                  ['Next-Hop', 'Network(s)', 'Protocol']]
+    detail_data = []
+    sorted_keys = sorted(detailDict, key=lambda x: alphanum_key(x))
+    for key in sorted_keys:
+        new_list = sorted(detailDict[key], key=lambda x: alphanum_key(x[0]))
+        for entry in new_list:
+            this_row = [ key ]
+            this_row.append(entry[0])
+            this_row.append(entry[1])
+            detail_data.append(this_row)
+        detail_data.extend([''])
+    detailed.extend(detail_data)
+
+    return nexthops, connected, detailed
 
 
 def Main():
@@ -154,10 +186,11 @@ def Main():
             os.remove(fullFileName + ".txt")
             
         # Get a list of all nexthop stats as well as connected networks (2 lists).
-        nexthops, connected = NextHopSummary(routelist)
+        nexthops, connected, detailed = NextHopSummary(routelist)
         
         # Merge the nexthops and connected interfaces into a single list before writing.
         nexthops.extend(connected)
+        nexthops.extend(detailed)
         
         # Write data into a CSV file.
         ListToCSV(nexthops, fullFileName)
