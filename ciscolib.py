@@ -617,7 +617,7 @@ def ParseNXOSRoutes(routelist):
     # Matches the Metric and AD: i.e. [110/203213]
     re_metric = r'[ ]+\[(?P<ad>\d+)\/(?P<metric>\d+)\],'
     # Matches the lifetime of the route, usually in a format like 2m3d. Optional
-    re_lifetime = r'[ ]+(?P<lifetime>\w+),'
+    re_lifetime = r'[ ]+(?P<lifetime>[\w:]+),'
     # Protocol (letter code identifying route entry)    
     re_prot= r'[ ]+(?P<protocol>\w+(-\w+)?)[,]?'
     
