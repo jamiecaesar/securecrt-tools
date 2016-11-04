@@ -26,7 +26,7 @@ settings = {}
 # Enter the path to the directory where the script output should be stored.
 # This can either be a relative path (which will start in the user's home
 #   directory) or an absolute path (i.e. C:\Output or /Users/Jamie/Output).
-settings['savepath'] = 'Dropbox/SecureCRT/Output/'
+settings['savepath'] = 'ScriptOutput'
 # The script will use the correct variable based on which OS is running.
 #
 #
