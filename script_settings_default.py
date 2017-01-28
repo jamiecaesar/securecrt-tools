@@ -38,6 +38,15 @@ settings['savepath'] = 'ScriptOutput'
 settings['date_format'] = '%Y-%m-%d-%H-%M-%S'
 #
 #
+#### MODIFY TERMINAL
+# If true, the script will modify the term length and width before running the 
+# automated commands, and then return the normal settings.  
+# If false, the script will not modify the term length and will need to advance
+# the "--More--" prompt by sending a space bar.  This may be needed in cases 
+# where command authorization doesn't allow terminal commands.
+settings['modify_term'] = True
+#
+#
 #------------------------------- Script Specific ------------------------------
 #
 #
@@ -55,6 +64,8 @@ settings['delete_temp'] = True
 # ports allocated.   If False, it will only list VLANs with at least 1 port
 # allocated.
 settings['show_all_VLANs'] = False
+#
+#
 ###############################  END OF SETTINGS ###############################
 
 
