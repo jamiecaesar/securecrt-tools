@@ -42,7 +42,7 @@ settings['date_format'] = '%Y-%m-%d-%H-%M-%S'
 #
 #
 #### DELETE TEMP FILES
-## Used by: NextHopSummary, InterfaceStats
+## Used by: NextHopSummary, InterfaceStats, SaveCDPtoCSV
 # For scripts that save the output into a file so that the output can be worked
 # with easier (large outputs going directly into variables can bog down and 
 # crash).  If you want to keep the raw output file, set this to False, otherwise
