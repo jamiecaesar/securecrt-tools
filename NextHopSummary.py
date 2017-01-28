@@ -32,27 +32,6 @@ script_dir = os.path.dirname(crt.ScriptFullName)
 if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
 
-# Import Settings from Settings File or Default settings
-try:
-    from script_settings import settings
-except ImportError:
-    import shutil
-    src_file = os.path.join(script_dir, 'script_settings_default.py')
-    dst_file = os.path.join(script_dir, 'script_settings.py')
-    try:
-        shutil.copy(src_file, dst_file)
-        setting_msg = ("Personal settings file created in directory:\n'{}'\n\n"
-                       "Please edit this file to make any settings changes."
-                       ).format(script_dir)
-        crt.Dialog.MessageBox(setting_msg, "Settings Created", 64)
-        from script_settings import settings
-    except IOError, ImportError:
-        err_msg =   ('Cannot find settings file.\n\nPlease make sure either the file\n'
-                    '"script_settings_default.py"\n exists in the directory:\n"{}"\n'.format(script_dir)
-                    )
-        crt.Dialog.MessageBox(str(err_msg), "Settings Error", 16)
-        exit(0)
-
 # Imports from common SecureCRT library
 from ciscolib import StartSession
 from ciscolib import EndSession
@@ -178,6 +157,7 @@ def Main():
 
     # Run session start commands and save session information into a dictionary
     session = StartSession(crt)
+    settings = session['settings']
 
     # Get VRF that we are interested in
     selected_vrf = crt.Dialog.Prompt("Enter the VRF name.\n(Leave blank for default VRF)")

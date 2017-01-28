@@ -110,6 +110,17 @@ def GetTermInfo(session):
     return (reNum.search(dim[0]).group(0), reNum.search(dim[1]).group(0))
 
 
+def valid_settings(imported):
+    ''' 
+    A function that validates the settings file is up-to-date
+    '''
+    all_settings = ['savepath', 'date_format', 'delete_temp', 'show_all_VLANs', 'modify_term']
+    for setting in all_settings:
+        if setting not in imported:
+            return False
+    return True
+
+
 def StartSession(crt):
     '''
     A function that just encapsulates all the usual session start commands, 
@@ -121,14 +132,49 @@ def StartSession(crt):
     The crt object has to be passed in because the module has no way to import
     the SecureCRT specific modules.
     '''
+    
+    # Create data structure to store our session data.  Additional info added later.
+    session = {}
+
+    # Import Settings from Settings File or Default settings
+    try:
+        from script_settings import settings
+    except ImportError:
+        import shutil
+        src_file = os.path.join(script_dir, 'script_settings_default.py')
+        dst_file = os.path.join(script_dir, 'script_settings.py')
+        try:
+            shutil.copy(src_file, dst_file)
+            setting_msg = ("Personal settings file created in directory:\n'{}'\n\n"
+                           "Please edit this file to make any settings changes."
+                           "**You MUST restart SecureCRT after edits to settings.**"
+                           ).format(script_dir)
+            crt.Dialog.MessageBox(setting_msg, "Settings Created", ICON_INFO)
+            from script_settings import settings
+        except IOError, ImportError:
+            err_msg =   ('Cannot find settings file.\n\nPlease make sure either the file\n'
+                        '"script_settings_default.py"\n exists in the directory:\n"{}"\n'.format(script_dir)
+                        )
+            crt.Dialog.MessageBox(str(err_msg), "Settings Error", ICON_STOP)
+            exit(0)
+
+    if not valid_settings(settings):
+        err_msg =   ('The current script_setings file is missing settings.\n'
+                    'Overwrite "script_settings.py" with script_settings_default.py" and update your settings.'
+                    '**Reload SecureCRT after making settings changes!**'
+                    )
+        crt.Dialog.MessageBox(str(err_msg), "Settings Error", ICON_STOP)
+        exit(0)
+    else:
+        session['settings'] = settings
+
+
     # Create a "Tab" object, so that all the output goes into the correct Tab.
     objTab = crt.GetScriptTab()
 
     # Allows us to type "tab.xxx" instead of "objTab.Screen.xxx"
     tab = objTab.Screen
 
-    # Create data structure to store our session data.  Additional info added later.
-    session = {}
     session['crt'] = crt
     session['tab'] = tab
     
@@ -158,16 +204,17 @@ def StartSession(crt):
         # Detect and store the OS of the attached device
         DetectNetworkOS(session)
 
-        # Send term length command and wait for prompt to return
-        tab.Send('term length 0\n')
-        tab.WaitForString(prompt)
+        if settings['modify_term']:
+            # Send term length command and wait for prompt to return
+            tab.Send('term length 0\n')
+            tab.WaitForString(prompt)
 
-        # Send term width command and wait for prompt to return
-        if session['OS'] == "NX-OS":
-            tab.Send('term width 511\n')
-        else:
-            tab.Send('term width 0\n')
-        tab.WaitForString(prompt)
+            # Send term width command and wait for prompt to return
+            if session['OS'] == "NX-OS":
+                tab.Send('term width 511\n')
+            else:
+                tab.Send('term width 0\n')
+            tab.WaitForString(prompt)
         
         # Added due to Nexus echoing twice if system hangs and hasn't printed the prompt yet.
         # Seems like maybe the previous WaitFor prompt isn't working correctly always.  Something to look into.
@@ -193,13 +240,15 @@ def EndSession(session):
         len_str = 'term length {0}\n'.format(session['termlength'])
         width_str = 'term width {0}\n'.format(session['termwidth'])
     
-        #Set term length back to saved values
-        tab.Send(len_str)
-        tab.WaitForString(prompt)
+        settings = session['settings']
+        if settings['modify_term']:
+            # Set term length back to saved values
+            tab.Send(len_str)
+            tab.WaitForString(prompt)
     
-        #Set term width back to saved values
-        tab.Send(width_str)
-        tab.WaitForString(prompt)
+            # Set term width back to saved values
+            tab.Send(width_str)
+            tab.WaitForString(prompt)
     
         tab.Synchronous = False
         tab.IgnoreEscape = False
@@ -359,9 +408,8 @@ def WriteOutput(session, command, filename, ext=".txt", writemode="wb"):
     '''
     prompt = session['prompt']
     tab = session['tab']
-    
 
-    endings=["\r\n", prompt]
+    matches=["\r\n", '--More--', prompt]
     try:
         newfile = open(filename + ext, writemode)
     except IOError, err:
@@ -380,7 +428,8 @@ def WriteOutput(session, command, filename, ext=".txt", writemode="wb"):
     # our prompt back (which won't have CRLF), break the loop b/c we found the
     # end of the output.
     while True:
-        nextline = tab.ReadString(endings)
+        nextline = tab.ReadString(matches)
+        # session['crt'].Dialog.MessageBox('{}-{}'.format(str(tab.MatchIndex), nextline))
         # If the match was the 1st index in the endings list -> \r\n
         if tab.MatchIndex == 1:
             # Strip newlines from front and back of line.
@@ -392,8 +441,12 @@ def WriteOutput(session, command, filename, ext=".txt", writemode="wb"):
                 # Nexus)
                 newfile.write(nextline.strip('\r\n').encode('ascii', 'ignore') + 
                     "\r\n")
-        else:
-            # We got our prompt (MatchIndex is 2), so break the loop
+        elif tab.MatchIndex == 2:
+            tab.Send(" ")
+            if session['OS'] == 'IOS':
+                tab.WaitForString("         ")
+        elif tab.MatchIndex == 3:
+            # We got our prompt, so break the loop
             break
     
     newfile.close()
@@ -739,10 +792,3 @@ def Main():
 
 if __name__ == "__builtin__":
     Main()
-
-
-
-
-
-
-
