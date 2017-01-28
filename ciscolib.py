@@ -136,6 +136,11 @@ def StartSession(crt):
     # Create data structure to store our session data.  Additional info added later.
     session = {}
 
+    # Add the script directory to the python path (if not there) so we can import modules.
+    script_dir = os.path.dirname(crt.ScriptFullName)
+    if script_dir not in sys.path:
+        sys.path.insert(0, script_dir)
+
     # Import Settings from Settings File or Default settings
     try:
         from script_settings import settings
@@ -151,7 +156,7 @@ def StartSession(crt):
                            ).format(script_dir)
             crt.Dialog.MessageBox(setting_msg, "Settings Created", ICON_INFO)
             from script_settings import settings
-        except IOError, ImportError:
+        except IOError:
             err_msg =   ('Cannot find settings file.\n\nPlease make sure either the file\n'
                         '"script_settings_default.py"\n exists in the directory:\n"{}"\n'.format(script_dir)
                         )
@@ -160,7 +165,7 @@ def StartSession(crt):
 
     if not valid_settings(settings):
         err_msg =   ('The current script_setings file is missing settings.\n'
-                    'Overwrite "script_settings.py" with script_settings_default.py" and update your settings.'
+                    'Overwrite "script_settings.py" with script_settings_default.py" and update your settings.\n\n'
                     '**Reload SecureCRT after making settings changes!**'
                     )
         crt.Dialog.MessageBox(str(err_msg), "Settings Error", ICON_STOP)
