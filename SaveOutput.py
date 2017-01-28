@@ -72,7 +72,7 @@ def Main():
         # Save command without spaces to use in output filename.
         CmdName = SendCmd.replace(" ", "_")
         # Add a newline to command before sending it to the remote device.
-        SendCmd = SendCmd + "\r\n"
+        # SendCmd = SendCmd + "\r\n"
 
     # Run session start commands and save session information into a dictionary
     session = StartSession(crt)
