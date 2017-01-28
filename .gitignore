@@ -6,3 +6,6 @@
 
 ### Ignore Settings file
 script_settings.py
+
+### Ignore Pycharm
+.idea/
