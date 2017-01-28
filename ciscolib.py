@@ -22,6 +22,13 @@ import datetime
 import csv
 import re
 import struct
+import ipaddress
+# # Add the script directory to the python path (if not there) so we can import modules.
+# script_dir = os.path.dirname(crt.ScriptFullName)
+# if script_dir not in sys.path:
+#     sys.path.insert(0, script_dir)
+
+
 
 
 ############################  MESSAGEBOX CONSTANTS  ############################
@@ -135,11 +142,6 @@ def StartSession(crt):
     
     # Create data structure to store our session data.  Additional info added later.
     session = {}
-
-    # Add the script directory to the python path (if not there) so we can import modules.
-    script_dir = os.path.dirname(crt.ScriptFullName)
-    if script_dir not in sys.path:
-        sys.path.insert(0, script_dir)
 
     # Import Settings from Settings File or Default settings
     try:
@@ -544,25 +546,56 @@ def DictListToCSV(fields, data, filename, ext=".csv", mode="wb"):
             writer.writerow(entry)
 
 
-def ParseIOSRoutes(routelist):
-    '''
-    This function parses the raw IOS route table into a datastucture that can 
-    be used to more easily extract information.  The data structure that is 
-    returned in a list of dictionaries.  Each dictionary entry represents an 
-    entry in the route table and contains the following keys:
-    
-    {"protocol", "network", "AD", "metric", "nexthop", "lifetime", "interface"}
-    
-    '''
+def update_empty_interfaces(route_table):
 
-    routetable = []
+    def recursive_lookup(nexthop):
+        for network in connected:
+            if nexthop in network:
+                return connected[network]
+        for network in statics:
+            if nexthop in network:
+                return recursive_lookup(statics[network])
+        return None
+
+    connected = {}
+    unknowns = {}
+    statics = {}
+    for route in route_table:
+        if route['protocol'][0] == 'C' or 'direct' in route['protocol']:
+            connected[route['network']] = route['interface']
+        if route['protocol'][0] == 'S' or 'static' in route['protocol']:
+            statics[route['network']] = route['nexthop']
+        if route['nexthop'] and not route['interface']:
+            unknowns[route['nexthop']] = None
+
+    for nexthop in unknowns:
+        unknowns[nexthop] = recursive_lookup(nexthop)
+
+    for route in route_table:
+        if not route['interface']:
+            if route['nexthop'] in unknowns:
+                route['interface'] = unknowns[route['nexthop']]
+
+
+def ParseIOSRoutes(routelist):
+    """
+    This function parses the raw IOS route table into a datastucture that can
+    be used to more easily extract information.  The data structure that is
+    returned in a list of dictionaries.  Each dictionary entry represents an
+    entry in the route table and contains the following keys:
+
+    {"protocol", "network", "AD", "metric", "nexthop", "lifetime", "interface"}
+
+    """
+
+    route_table = []
     # Various RegEx expressions to match varying parts of a route table line
-    # I did it this way to break up the regex into more manageable parts, 
+    # I did it this way to break up the regex into more manageable parts,
     # Plus some of these parts can be found in mutliple line types
     # I'm also using named groups to more easily extract the needed data.
     #
     # Protocol (letter code identifying route entry)
-    re_prot= r'(?P<protocol>\w[\* ][\w]{0,2})[ ]+'
+    re_prot = r'(?P<protocol>\w[\* ][\w]{0,2})[ ]+'
     # Matches network address of route:  x.x.x.x/yy
     re_net = r'(?P<network>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(/\d+)?)[ ]+'
     # Matches the Metric and AD: i.e. [110/203213]
@@ -580,6 +613,10 @@ def ParseIOSRoutes(routelist):
     re_single = re_prot + re_net + re_metric + re_nexthop + re_lifetime + re_interface
     # Directly connected route
     re_connected = re_prot + re_net + 'is directly connected, ' + re_interface
+    # Subnetted routes, where the mask is only learned from the title line, such as
+    # '2.0.0.0/24 is subnetted, 4 subnets'.   This is different from 'variably subnetted'
+    # as the mask it given on every route that is variably subnetted.
+    re_subnetted = r'[ ]*' + re_net + 'is subnetted,'
     # When the route length exceeds 80 chars, it is split across lines.  This is
     # the first line -- just the protocol and network.
     re_multiline = re_prot + re_net
@@ -587,81 +624,98 @@ def ParseIOSRoutes(routelist):
     # been broken up across lines because of the length.
     re_ecmp = r'[ ]*' + re_metric + re_nexthop + re_lifetime + re_interface
 
-    #Compile RegEx expressions
+    # Compile RegEx expressions
     reSingle = re.compile(re_single)
     reConnected = re.compile(re_connected)
+    reSubnetted = re.compile(re_subnetted)
     reMultiline = re.compile(re_multiline)
     reECMP = re.compile(re_ecmp)
 
     # Start parsing raw route table into a data structure.  Each route entry goes
     # into a dict, and all the entries are collected into a list.
     for entry in routelist:
-        routeentry = {}
+        route_entry = {}
+
+        regex = reSubnetted.match(entry)
+        if regex:
+            supernet = ipaddress.ip_network(u'{}'.format(regex.group('network')))
+            prev_mask = str(supernet.netmask)
+
         regex = reSingle.match(entry)
         if regex:
             # Need to track protocol and network in case the next line is a 2nd
             # equal cost path (which doesn't show that info)
-            prev_prot = regex.group('protocol') 
-            prev_net = regex.group('network')
-            routeentry = {  "protocol" : prev_prot,
-                            "network" : prev_net,
-                            "AD" : regex.group('ad'),
-                            "metric" : regex.group('metric'),
-                            "nexthop" : regex.group('nexthop'),
-                            "lifetime" : regex.group('lifetime'),
-                            "interface" : regex.group('interface')
-                            }
+            prev_prot = regex.group('protocol')
+            net_string = regex.group('network')
+            if "/" not in net_string:
+                prev_net = ipaddress.ip_network(u'{}'.format(net_string + "/" + prev_mask))
+            else:
+                prev_net = ipaddress.ip_network(u'{}'.format(net_string))
+            route_entry = {"protocol": prev_prot,
+                           "network": prev_net,
+                           "AD": regex.group('ad'),
+                           "metric": regex.group('metric'),
+                           "nexthop": ipaddress.ip_address(u'{}'.format(regex.group('nexthop'))),
+                           "lifetime": regex.group('lifetime'),
+                           "interface": regex.group('interface')
+                          }
         else:
             regex = reConnected.match(entry)
             if regex:
-                routeentry = {  "protocol" : regex.group('protocol'),
-                                "network" : regex.group('network'),
-                                "AD" : 0,
-                                "metric" : 0,
-                                "nexthop" : None,
-                                "interface" : regex.group('interface')
-                                }
+                net_string = regex.group('network')
+                if "/" not in net_string:
+                    this_net = ipaddress.ip_network(u'{}'.format(net_string + "/" + prev_mask))
+                else:
+                    this_net = ipaddress.ip_network(u'{}'.format(net_string))
+                route_entry = {"protocol": regex.group('protocol'),
+                               "network": this_net,
+                               "AD": 0,
+                               "metric": 0,
+                               "nexthop": None,
+                               "interface": regex.group('interface')
+                              }
             else:
                 regex = reMultiline.match(entry)
                 if regex:
                     # Since this is the first line in an entry that was broken
                     # up due to length, only record protocol and network.
                     # The next line has the rest of the data needed.
-                    prev_prot = regex.group('protocol') 
-                    prev_net = regex.group('network')
+                    prev_prot = regex.group('protocol')
+                    prev_net = ipaddress.ip_network(u'{}'.format(regex.group('network')))
                 else:
                     regex = reECMP.match(entry)
                     if regex:
                         # Since this is a second equal cost entry, use
                         # protocol and network info from previous entry
-                        routeentry = {  "protocol" : prev_prot,
-                                        "network" : prev_net,
-                                        "AD" : regex.group('ad'),
-                                        "metric" : regex.group('metric'),
-                                        "nexthop" : regex.group('nexthop'),
-                                        "lifetime" : regex.group('lifetime'),
-                                        "interface" : regex.group('interface')
-                                        }
-        if routeentry != {}:
-            routetable.append(routeentry)
-    return routetable
+                        route_entry = {"protocol": prev_prot,
+                                       "network": prev_net,
+                                       "AD": regex.group('ad'),
+                                       "metric": regex.group('metric'),
+                                       "nexthop": ipaddress.ip_address(u'{}'.format(regex.group('nexthop'))),
+                                       "lifetime": regex.group('lifetime'),
+                                       "interface": regex.group('interface')
+                                      }
+        if route_entry != {}:
+            route_table.append(route_entry)
+    update_empty_interfaces(route_table)
+    return route_table
 
 
 def ParseNXOSRoutes(routelist):
-    '''
-    This function parses the raw NXOS route table into a datastucture that can 
-    be used to more easily extract information.  The data structure that is 
-    returned in a list of dictionaries.  Each dictionary entry represents an 
+    """
+    This function parses the raw NXOS route table into a datastucture that can
+    be used to more easily extract information.  The data structure that is
+    returned in a list of dictionaries.  Each dictionary entry represents an
     entry in the route table and contains the following keys:
-    
+
     {"protocol", "network", "AD", "metric", "nexthop", "lifetime", "interface"}
-    
-    '''
+
+    """
 
     routetable = []
     ignore_protocols = ["local", "hsrp"]
     # Various RegEx expressions to match varying parts of a route table line
-    # I did it this way to break up the regex into more manageable parts, 
+    # I did it this way to break up the regex into more manageable parts,
     # Plus some of these parts can be found in mutliple line types
     # I'm also using named groups to more easily extract the needed data.
     #
@@ -676,16 +730,16 @@ def ParseNXOSRoutes(routelist):
     re_metric = r'[ ]+\[(?P<ad>\d+)\/(?P<metric>\d+)\],'
     # Matches the lifetime of the route, usually in a format like 2m3d. Optional
     re_lifetime = r'[ ]+(?P<lifetime>[\w:]+),'
-    # Protocol (letter code identifying route entry)    
-    re_prot= r'[ ]+(?P<protocol>\w+(-\w+)?)[,]?'
-    
+    # Protocol (letter code identifying route entry)
+    re_prot = r'[ ]+(?P<protocol>\w+(-\w+)?)[,]?'
+
     # Combining expressions above to build possible lines found in the route table
     # Standard via line from routing protocol
     re_nh_line = re_via + re_nexthop + re_interface + re_metric + re_lifetime + re_prot
     # Static routes don't have an outgoing interface.
     re_static = re_via + re_nexthop + re_metric + re_lifetime + re_prot
 
-    #Compile RegEx expressions
+    # Compile RegEx expressions
     reNet = re.compile(re_net)
     reVia = re.compile(re_nh_line)
     reStatic = re.compile(re_static)
@@ -698,7 +752,7 @@ def ParseNXOSRoutes(routelist):
         if regex:
             # Need to remember the network so the following next-hop lines
             # can be associated with the correct net in the dict.
-            prev_net = regex.group('network')
+            prev_net = ipaddress.ip_network(u'{}'.format(regex.group('network')))
         else:
             regex = reVia.match(entry)
             if regex:
@@ -706,37 +760,38 @@ def ParseNXOSRoutes(routelist):
                 if proto in ignore_protocols:
                     pass
                 elif proto == "direct":
-                    routeentry = {  "network" : prev_net,
-                                    "nexthop" : None,
-                                    "interface" : regex.group('interface'),
-                                    "AD" : regex.group('ad'),
-                                    "metric" : regex.group('metric'),
-                                    "lifetime" : regex.group('lifetime'),
-                                    "protocol" : proto
-                                    }
+                    routeentry = {"network": prev_net,
+                                  "nexthop": None,
+                                  "interface": regex.group('interface'),
+                                  "AD": regex.group('ad'),
+                                  "metric": regex.group('metric'),
+                                  "lifetime": regex.group('lifetime'),
+                                  "protocol": proto
+                                  }
                 else:
-                    routeentry = {  "network" : prev_net,
-                                    "nexthop" : regex.group('nexthop'),
-                                    "interface" : regex.group('interface'),
-                                    "AD" : regex.group('ad'),
-                                    "metric" : regex.group('metric'),
-                                    "lifetime" : regex.group('lifetime'),
-                                    "protocol" : proto
-                                    }
+                    routeentry = {"network": prev_net,
+                                  "nexthop": ipaddress.ip_address(u'{}'.format(regex.group('nexthop'))),
+                                  "interface": regex.group('interface'),
+                                  "AD": regex.group('ad'),
+                                  "metric": regex.group('metric'),
+                                  "lifetime": regex.group('lifetime'),
+                                  "protocol": proto
+                                  }
             else:
                 regex = reStatic.match(entry)
                 if regex:
-                    routeentry = {  "network" : prev_net,
-                                    "nexthop" : regex.group('nexthop'),
-                                    "interface" : None,
-                                    "AD" : regex.group('ad'),
-                                    "metric" : regex.group('metric'),
-                                    "lifetime" : regex.group('lifetime'),
-                                    "protocol" : regex.group('protocol')
-                                    }
+                    routeentry = {"network": prev_net,
+                                  "nexthop": ipaddress.ip_address(u'{}'.format(regex.group('nexthop'))),
+                                  "interface": None,
+                                  "AD": regex.group('ad'),
+                                  "metric": regex.group('metric'),
+                                  "lifetime": regex.group('lifetime'),
+                                  "protocol": regex.group('protocol')
+                                  }
 
         if routeentry != {}:
             routetable.append(routeentry)
+    update_empty_interfaces(routetable)
     return routetable
 
 
