@@ -644,7 +644,7 @@ def ParseIOSRoutes(routelist):
 
 def ParseNXOSRoutes(routelist):
     '''
-    This function parses the raw IOS route table into a datastucture that can 
+    This function parses the raw NXOS route table into a datastucture that can 
     be used to more easily extract information.  The data structure that is 
     returned in a list of dictionaries.  Each dictionary entry represents an 
     entry in the route table and contains the following keys:
