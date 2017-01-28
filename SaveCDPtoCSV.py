@@ -62,7 +62,7 @@ except ImportError:
 from ciscolib import StartSession
 from ciscolib import EndSession
 from ciscolib import GetFilename
-from ciscolib import CaptureOutput
+from ciscolib import WriteOutput
 from ciscolib import short_int
 from ciscolib import short_name
 from ciscolib import DictListToCSV
@@ -121,8 +121,15 @@ def Main():
     # Generate filename used for output files.
     fullFileName = GetFilename(session, settings, "cdp")
 
-    raw = CaptureOutput(session, SendCmd)
+    WriteOutput(session, SendCmd, fullFileName)
 
+    with open(fullFileName + ".txt", 'r') as newfile:
+        raw = newfile.read()
+
+    # If the settings allow it, delete the temporary file that holds show cmd output
+    if settings['delete_temp']:    
+        os.remove(fullFileName + ".txt")
+        
     cdpInfo = ParseCDP(raw)
     field_names =  ['Local Intf', 'Remote ID', 'Remote Intf', 'IP Address', 'Platform']
     DictListToCSV(field_names, cdpInfo, fullFileName)
