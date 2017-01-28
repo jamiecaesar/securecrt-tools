@@ -43,6 +43,7 @@ from ciscolib import ParseIOSRoutes
 from ciscolib import ParseNXOSRoutes
 from ciscolib import alphanum_key
 from ciscolib import ListToCSV
+import ipaddress
 
 ##################################  SCRIPT  ###################################
 
@@ -80,14 +81,14 @@ def NextHopSummary(routelist):
     for entry in routelist:
         # Verify this entry has a next-hop parameter
         if entry['nexthop']:
-            nh = entry['nexthop']
+            nh = str(entry['nexthop'])
             proto = GetProtocol(entry['protocol'])
             intf = entry['interface']
             if nh in summaryDict:
                 summaryDict[nh]['Total'] += 1
                 summaryDict[nh][proto] += 1
             else:
-                summaryDict[entry['nexthop']] = { 'int' : entry['interface'],
+                summaryDict[nh] = { 'int' : entry['interface'],
                                                   'Total': 0, 
                                                   'Static': 0, 
                                                   'EIGRP': 0, 
@@ -101,15 +102,15 @@ def NextHopSummary(routelist):
                 summaryDict[nh][proto] += 1
             if nh in detailDict:
                 # Append the network and protocol (in a tuple)
-                detailDict[nh].append((entry['network'], GetProtocol(entry['protocol'])))
+                detailDict[nh].append((str(entry['network']), proto))
             else:
                 # Create an entry for the next-hop and add network/proto to list.
-                detailDict[nh] = [(entry['network'], GetProtocol(entry['protocol']))]
+                detailDict[nh] = [(str(entry['network']), proto)]
         elif entry['interface']:
             if entry['interface'] in connectedDict:
-                connectedDict[entry['interface']].append(entry['network'])
+                connectedDict[entry['interface']].append(str(entry['network']))
             else:
-                connectedDict[entry['interface']] = [ entry['network'] ]
+                connectedDict[entry['interface']] = [ str(entry['network']) ]
 
     # Process Summary Data
     nexthops = [['Next-hop', 'Interface', 'Total routes', 'Static', 'EIGRP', 'OSPF', 'BGP', 'ISIS', 'RIP', 'Other']]
