@@ -56,6 +56,8 @@ def NextHopSummary(routelist):
     def GetProtocol(raw_protocol):
         if raw_protocol[0] == 'S' or "static" in raw_protocol:
             return 'Static'
+        elif raw_protocol[0] == 'C' or 'direct' in raw_protocol:
+            return 'Connected'
         elif raw_protocol[0] == 'D' or "eigrp" in raw_protocol:
             return 'EIGRP'
         elif raw_protocol[0] == 'O' or "ospf" in raw_protocol:
