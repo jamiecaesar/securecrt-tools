@@ -416,7 +416,14 @@ def WriteOutput(session, command, filename, ext=".txt", writemode="wb"):
     prompt = session['prompt']
     tab = session['tab']
 
+    # RegEx to match the whitespace and backspace commands after --More-- prompt
+    exp_more = r' [\b]+[ ]+[\b]+(?P<line>.*)'
+    re_more = re.compile(exp_more)
+
+    # The 3 different types of lines we want to match (MatchIndex) and treat differntly
     matches=["\r\n", '--More--', prompt]
+
+    # Open our output file
     try:
         newfile = open(filename + ext, writemode)
     except IOError, err:
@@ -436,22 +443,23 @@ def WriteOutput(session, command, filename, ext=".txt", writemode="wb"):
     # end of the output.
     while True:
         nextline = tab.ReadString(matches)
-        # session['crt'].Dialog.MessageBox('{}-{}'.format(str(tab.MatchIndex), nextline))
         # If the match was the 1st index in the endings list -> \r\n
         if tab.MatchIndex == 1:
             # Strip newlines from front and back of line.
             nextline = nextline.strip('\r\n')
             # If there is something left, write it.
             if nextline != "":
+                # Check for backspace and spaces after --More-- prompt and strip them out if needed.
+                regex = re_more.match(nextline)
+                if regex:
+                    nextline = regex.group('line')
                 # Strip line endings from line.  Also re-encode line as ASCII
                 # and ignore the character if it can't be done (rare error on 
                 # Nexus)
-                newfile.write(nextline.strip('\r\n').encode('ascii', 'ignore') + 
-                    "\r\n")
+                newfile.write(nextline.strip('\r\n').encode('ascii', 'ignore') + "\r\n")
         elif tab.MatchIndex == 2:
+            # If we get a --More-- send a space character
             tab.Send(" ")
-            if session['OS'] == 'IOS':
-                tab.WaitForString("         ")
         elif tab.MatchIndex == 3:
             # We got our prompt, so break the loop
             break
