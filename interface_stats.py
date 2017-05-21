@@ -29,18 +29,8 @@ script_dir = os.path.dirname(crt.ScriptFullName)
 if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
 
-# Imports from custom SecureCRT modules
-import os
-import sys
-import re 
-
-# Add the script directory to the python path (if not there) so we can import 
-# modules.
-script_dir = os.path.dirname(crt.ScriptFullName)
-if script_dir not in sys.path:
-    sys.path.insert(0, script_dir)
-
 # Imports from Cisco SecureCRT library
+from imports.cisco_securecrt import ICON_STOP
 from imports.cisco_securecrt import start_session
 from imports.cisco_securecrt import end_session
 from imports.cisco_securecrt import create_output_filename
@@ -52,14 +42,12 @@ from imports.py_utils import list_of_lists_to_csv
 
 
 def main():
+    send_cmd = "show interface"
     SupportedOS = ["IOS", "IOS XE", "NX-OS"]
 
     # Run session start commands and save session information into a dictionary
     session = start_session(crt, script_dir)
 
-    # Generate filename used for output files.
-    output_filename = create_output_filename(session, "show-interfaces")
-    send_cmd = "show interface"
     raw_intf_output = get_output(session, send_cmd)
 
     if session['OS'] in SupportedOS:
@@ -71,10 +59,15 @@ def main():
         interface_template = None
         error_str = "This script does not support {}.\n" \
                     "It will currently only run on {}.".format(session['OS'], ", ".join(SupportedOS))
-        crt.Dialog.MessageBox(error_str, "Unsupported Network OS", 16)
+        crt.Dialog.MessageBox(error_str, "Unsupported Network OS", ICON_STOP)
 
-    interface_stats = parse_with_textfsm(raw_intf_output, interface_template)
-    list_of_lists_to_csv(interface_stats, output_filename)
+    if interface_template:
+        # Generate filename used for output files.
+        output_filename = create_output_filename(session, "show-interfaces", ext=".csv")
+        # Build path to template, process output and export to CSV
+        template_path = os.path.join(script_dir, interface_template)
+        interface_stats = parse_with_textfsm(raw_intf_output, template_path)
+        list_of_lists_to_csv(interface_stats, output_filename)
     
     end_session(session)
 
