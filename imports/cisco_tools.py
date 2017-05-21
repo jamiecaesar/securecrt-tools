@@ -31,7 +31,6 @@ def parse_with_textfsm(raw_output, template_path):
     return output
 
 
-
 def update_empty_interfaces(route_table):
 
     def recursive_lookup(nexthop):
