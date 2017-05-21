@@ -1,0 +1,11 @@
+# Compiled Python Code #
+*.pyc
+
+# OSX Files #
+.DS_Store
+
+# Ignore Pycharm data #
+.idea/
+
+# Ignore JSON files - specifically the generated settings file #
+*.json
