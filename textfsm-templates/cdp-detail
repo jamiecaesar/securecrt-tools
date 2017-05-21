@@ -1,7 +1,7 @@
 Value Required DeviceID (\S+)
 Value SystemName (\S+)
 Value InterfaceIP (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})
-Value Platform (\S+)
+Value Platform (.+)
 Value Capabilities (.+)
 Value Required LocalIntf (\S+)
 Value Required RemoteIntf (\S+)
