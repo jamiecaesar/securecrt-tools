@@ -16,19 +16,17 @@ from imports.google import ipaddress
 from imports.google import textfsm
 
 
-def parse_with_textfsm(raw_cdp_output, template_path):
-
-
+def parse_with_textfsm(raw_output, template_path):
 
     # Create file object to the TextFSM template and create TextFSM object.
-    with open(cdp_template_path, 'r') as template:
-        cdp_table = textfsm.TextFSM(template)
+    with open(template_path, 'r') as template:
+        fsm_table = textfsm.TextFSM(template)
 
     # Process our raw data vs the template with TextFSM
-    output = cdp_table.ParseText(raw_cdp_output)
+    output = fsm_table.ParseText(raw_output)
 
     # Insert a header row into the list, so that when output to a CSV there is a header row.
-    output.insert(0, cdp_table.header)
+    output.insert(0, fsm_table.header)
 
     return output
 
