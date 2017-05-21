@@ -31,12 +31,11 @@ if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
 
 # Imports from custom SecureCRT modules
-
 from imports.cisco_securecrt import start_session
 from imports.cisco_securecrt import end_session
 from imports.cisco_securecrt import create_output_filename
 from imports.cisco_securecrt import get_output
-from imports.cisco_tools import parse_cdp_details
+from imports.cisco_tools import parse_with_textfsm
 from imports.py_utils import list_of_lists_to_csv
 
 ##################################  SCRIPT  ###################################
@@ -55,7 +54,9 @@ def main():
     raw_cdp_list = get_output(session, send_cmd)
 
     # Parse CDP information into a list of lists.
-    cdp_table = parse_cdp_details(raw_cdp_list)
+    # TextFSM template for parsing "show cdp neighbor detail" output
+    cdp_template_path = "textfsm-templates/show-cdp-detail"
+    cdp_table = parse_with_textfsm(raw_cdp_list, cdp_template_path)
     output_filename = create_output_filename(session, "cdp", ext=".csv")
     list_of_lists_to_csv(cdp_table, output_filename)
 
