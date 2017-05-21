@@ -16,10 +16,9 @@ from imports.google import ipaddress
 from imports.google import textfsm
 
 
-def parse_cdp_details(raw_cdp_output):
+def parse_with_textfsm(raw_cdp_output, template_path):
 
-    # TextFSM template for parsing "show cdp neighbor detail" output
-    cdp_template_path = "textfsm-templates/cdp-detail"
+
 
     # Create file object to the TextFSM template and create TextFSM object.
     with open(cdp_template_path, 'r') as template:
