@@ -52,7 +52,7 @@ def main():
     session = start_session(crt, script_dir)
 
     # Capture output from show cdp neighbor detail
-    get_output(session, send_cmd)
+    raw_cdp_list = get_output(session, send_cmd)
 
     # Parse CDP information into a list of lists.
     cdp_table = parse_cdp_details(raw_cdp_list)
