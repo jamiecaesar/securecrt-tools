@@ -1,0 +1,33 @@
+Value Required Interface (\S+)
+Value MACAddr ([\da-fA-F]{4}\.[\da-fA-F]{4}\.[\da-fA-F]{4})
+Value BIA ([\da-fA-F]{4}\.[\da-fA-F]{4}\.[\da-fA-F]{4})
+Value Desc (.+)
+Value IP (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d+)
+Value MTU (\d+)
+Value TotalDrops (\d+)
+Value Rate (\d+ (minute|second))
+Value InputRate (\d+)
+Value InputPPS (\d+)
+Value OutputRate (\d+)
+Value OutputPPS (\d+)
+Value PacketsIn (\d+)
+Value BytesIn (\d+)
+Value PacketsOut (\d+)
+Value BytesOut (\d+)
+Value InputErrors (\d+)
+Value OutputErrors (\d+)
+
+
+Start
+  ^${Interface} is up,
+  ^\s+Hardware is.*address is ${MACAddr}\s*\(bia ${BIA}
+  ^\s+Description: ${Desc}
+  ^\s+Internet address is ${IP}
+  ^\s+MTU ${MTU} bytes
+  ^.*Total output drops: ${TotalDrops}
+  ^\s+${Rate} input rate ${InputRate} bits/sec, ${InputPPS} packets/sec
+  ^\s+${Rate} output rate ${OutputRate} bits/sec, ${OutputPPS} packets/sec
+  ^\s+${PacketsIn} packets input, ${BytesIn} bytes
+  ^\s+${InputErrors} input errors,
+  ^\s+${PacketsOut} packets output, ${BytesOut} bytes
+  ^\s+${OutputErrors} output errors, -> Record
