@@ -2,22 +2,34 @@ SecureCRT Scripts
 ==================
 SecureCRT Python scripts for doing various tasks on Cisco equipment.
 
-These scripts have been testing with SecureCRT 7.x on multiple machines of varying operating systems (OSX 10.9, 10.10.  Windows 7, 8.1).  If you find that a script won't work on your machine, please post an issue to let us know!
+These scripts should work on any version of SecureCRT that supports python scripts.  If you find that a script won't work on your machine, please post an issue to let us know!
 
-**NOTE**: These scripts have been recently refactored to use a shared module called `ciscolib.py`.  The majority of the functions that all of these scripts used are stored in that file.  That means at a minimum you need the script and the `ciscolib.py` file for the script to run (and in the same directory).   If you clone the entire repository you shouldn't need to worry about this.
+**After the first attempt at running a script with SecureCRT, a file named "script_settings.json" will be created.  You will need to modify this file to select the default location for script outputs if you don't like the default value.**
 
-**Before using, you will need to modify the "Settings" section of the scripts to reference a valid output directory for your particular machine.**
+The output files are automatically named based on the hostname of the device connected to.   This name is taken from the prompt of the device, so these scripts will work whether you are directly connected, or connected via a jumpbox or other intermediate device.
 
 Scripts:
 ========
-* ConfigLoad.py - A script that will load a config file to a cisco device and mark any errors
-* Document_Device.py - A script that will run a list of commands on the connected device, saving each command output into an individual file.  All outputs are saved into a folder based on the device's hostname.
-* InterfaceStats.py - Outputs a CSV file for a quick and easy view of some high level details about all interfaces that are "up", such as total packets in/out, packet rate in/out and errors in/out.
-* IntStatsOverTime.py - Outputs a CSV file with interface statistics over a configurable time period for each interface that is "up".  Allows easy graph creation by opening the file in Excel, highlighting the data and inserting a graph object.
-* NextHopSummary.py - Outputs a CSV file with all the next hops and a detailed breakdown of each type of route pointing at that next hop.
-* SaveRunning.py - Captures the running config to a file, named based on the prompt and current date.
-* SaveCDPtoCSV.py - Captures CDP information and saves the important info (interfaces, remote device, IP address) to a CSV file
-* SaveMACtoCSV.py - Captures the MAC table and saves the VLAN, MAC and Interface to a CSV file.
-* SaveOutput.py - Generic script that prompts for a command and saves that output to a file.
-* ToggleNo.py - Script that will capture the highlighted text and send those commands to the device with a prepended "no ".  If the command starts with "no ", it will remove it before sending.
-* UsedVLANs.py - A script that will output a CSV file with a list of VLANs that have ports assigned to them from the switch.  Settings in the script allow for changing the behavior to list all VLANs with their associated count.
+* **interface_stats.py** - Outputs a CSV file for a quick and easy view of some high level details about all interfaces that are "up", such as total packets in/out, packet rate in/out and errors in/out.
+* **nexthop_summary.py** - Outputs a CSV file with all the next hops and a detailed breakdown of each type of route pointing at that next hop.
+* **save_running.py** - Captures the running config to a file, using a name based on the device's name and current date.
+* **cdp_to_csv.py** - Captures detailed CDP information and saves it to a CSV file.
+* **save_output.py** - Generic script that prompts for a command and saves that output to a file.
+* **securecrt_python_version.py** - A script that returns a pop-up window with the python version being used by SecureCRT (mostly for troubleshooting)
+
+Modules:
+========
+A handful of different modules are used to store commonly used functions for interacting with CLI sessions to Cisco devices, process the outputs and read/write to files.  All modules are saved in the *imports* directory.
+
+Custom modules
+--------------
+* **imports.cisco_securecrt** - This module contains the functions used to interact with telnet/ssh sessions to Cisco devices.  There are functions for things like setting up and tearing down a session for interaction with the scripts, sending commands to a device, and capturing the output for use in other functions.  Most of these functions require the use of the session data to operate.
+* **imports.cisco_tools** - This module contains functions for parsing or processing the output from Cisco commands into python data structures so that the data can be more easily used in the different scripts.
+* **imports.py_utils** - This module contains small utility functions that are used to simply reading and writing data structures to file, getting the current date/time, provide human sorting, etc.
+
+3rd Party modules
+-----------------
+Two modules written by Google are leveraged in these scripts to simplify some of the operations.
+
+* **ipaddress** - (https://pypi.python.org/pypi/py2-ipaddress) This module allows for IP address and IP networks to be stored in special objects that allow for easy manipulation and comparison of IPs/networks (overlap, subnet membership, etc).  They also allow for IP addresses to be represented in a variety of ways (IP only, bit length, subnet mask, etc).
+* **TextFSM** - (https://github.com/google/textfsm) This module provides an easier way to process semi-structured data, such as the output of CLI commands.  A template file is used to describe the structure of the output and the variables that are interesting and this module will extract those variables.
