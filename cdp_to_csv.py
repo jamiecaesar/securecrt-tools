@@ -55,8 +55,12 @@ def main():
 
     # Parse CDP information into a list of lists.
     # TextFSM template for parsing "show cdp neighbor detail" output
-    cdp_template_path = "textfsm-templates/show-cdp-detail"
-    cdp_table = parse_with_textfsm(raw_cdp_list, cdp_template_path)
+    cdp_template = "textfsm-templates/show-cdp-detail"
+    # Build path to template, process output and export to CSV
+    template_path = os.path.join(script_dir, cdp_template)
+
+    cdp_table = parse_with_textfsm(raw_cdp_list, template_path)    
+    # Write TextFSM output to a .csv file.
     output_filename = create_output_filename(session, "cdp", ext=".csv")
     list_of_lists_to_csv(cdp_table, output_filename)
 
