@@ -47,13 +47,12 @@ def main():
 
     # Run session start commands and save session information into a dictionary
     session = start_session(crt, script_dir)
-    settings = session['settings']
 
     # Capture output from show cdp neighbor detail
     raw_mac_list = get_output(session, send_cmd)
 
     # TextFSM template for parsing "show mac address-table" output
-    if settings['OS'] == "NX-OS":
+    if session['OS'] == "NX-OS":
         mac_template = "textfsm-templates/show-mac-addr-table-nxos"
     else:
         mac_template = "textfsm-templates/show-mac-addr-table-ios"
