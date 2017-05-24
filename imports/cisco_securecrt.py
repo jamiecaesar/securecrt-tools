@@ -351,20 +351,26 @@ def get_output(session, command):
     return result.strip('\r\n')
 
 
-def create_output_filename(session, desc, ext=".txt"):
+def create_output_filename(session, desc, ext=".txt", include_date=True):
     """
     Generates a filename based on information from the user settings and a supplied description
 
     :param session:  Session data from start_session()
     :param desc:  Started
     :param ext:  Default extension is ".txt", but other extension can be supplied.
+    :param include_date"  A boolean to specify whether the date string shoudl be included in the filename.
     :return:
     """
     # Extract path and format information from our tuple
     crt = session['crt']
     settings = session['settings']
     save_path = settings['save path']
-    date_format = settings['date format']
+    if include_date:
+        date_format = settings['date format']
+        # Get the current date in the format supplied in date_format
+        mydate = get_date_string(date_format)
+    else:
+        mydate = ""
 
     # If environment vars were used, expand them
     save_path = os.path.expandvars(save_path)
@@ -373,9 +379,6 @@ def create_output_filename(session, desc, ext=".txt"):
 
     # Extract hostname from the session information
     hostname = session['hostname']
-
-    # Get the current date in the format supplied in date_format
-    mydate = get_date_string(date_format)
 
     # Create Filename based on hostname and date format string.
     file_bits = [hostname, desc, mydate]
