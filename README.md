@@ -23,12 +23,16 @@ The output files are automatically named based on the hostname of the device con
 
 ## Scripts:
 
+* **cdp_to_csv.py** - Captures detailed CDP information and saves it to a CSV file.
+* **create_intf_desc.py** - Outputs a config script to label interfaces based on CDP info.
 * **interface_stats.py** - Outputs a CSV file for a quick and easy view of some high level details about all interfaces that are "up", such as total packets in/out, packet rate in/out and errors in/out.
+* **mac_to_csv.py** - Outputs the mac address table into a CSV file.
 * **nexthop_summary.py** - Outputs a CSV file with all the next hops and a detailed breakdown of each type of route pointing at that next hop.
 * **save_running.py** - Captures the running config to a file, using a name based on the device's name and current date.
-* **cdp_to_csv.py** - Captures detailed CDP information and saves it to a CSV file.
 * **save_output.py** - Generic script that prompts for a command and saves that output to a file.
 * **securecrt_python_version.py** - A script that returns a pop-up window with the python version being used by SecureCRT (mostly for troubleshooting)
+
+**Note**:  *empty_script_template.py* can be used as a starting point for writing new scripts.
 
 ## Modules:
 
