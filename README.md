@@ -9,8 +9,11 @@ These scripts should work on any version of SecureCRT that supports python.  If 
 
 To run any of the below scripts, do the following:
 1) Clone this repository to your computer
+
 2) **AFTER** connecting to a device in SecureCRT, go to the *Scripts* menu and select "Run"
+
 3) Choose the script you want to run
+
 4) Find the output file in the directory specified in the "script_settings.json" file.
 
 **After the first attempt at running a script with SecureCRT, a file named "script_settings.json" will be created.  You will need to modify this file to select the default location for script outputs if you don't like the default value.**
