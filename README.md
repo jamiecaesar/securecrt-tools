@@ -8,6 +8,7 @@ These scripts should work on any version of SecureCRT that supports python.  If 
 
 
 To run any of the below scripts, do the following:
+
 1) Clone this repository to your computer
 
 2) **AFTER** connecting to a device in SecureCRT, go to the *Scripts* menu and select "Run"
