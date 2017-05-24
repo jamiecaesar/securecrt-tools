@@ -365,13 +365,6 @@ def create_output_filename(session, desc, ext=".txt", include_date=True):
     crt = session['crt']
     settings = session['settings']
     save_path = settings['save path']
-    if include_date:
-        date_format = settings['date format']
-        # Get the current date in the format supplied in date_format
-        mydate = get_date_string(date_format)
-    else:
-        mydate = ""
-
     # If environment vars were used, expand them
     save_path = os.path.expandvars(save_path)
     # If a relative path was specified in the settings file, expand it.
@@ -380,8 +373,15 @@ def create_output_filename(session, desc, ext=".txt", include_date=True):
     # Extract hostname from the session information
     hostname = session['hostname']
 
+    if include_date:
+        date_format = settings['date format']
+        # Get the current date in the format supplied in date_format
+        mydate = get_date_string(date_format)
+        file_bits = [hostname, desc, mydate]
+    else:
+        file_bits = [hostname, desc]
+
     # Create Filename based on hostname and date format string.
-    file_bits = [hostname, desc, mydate]
     filename = '-'.join(file_bits)
     filename = filename + ext
     file_path = os.path.normpath(os.path.join(save_path, filename))
