@@ -71,8 +71,8 @@ def main():
         remote_intf = entry[3]
         if system_name == "":
             system_name = extract_system_name(device_id)
-        config_script += "interface {}".format(local_intf)
-        config_script += "  description {}, {}".format(system_name, short_int(remote_intf))
+        config_script += "interface {}\n".format(local_intf)
+        config_script += "  description {}, {}\n".format(system_name, short_int(remote_intf))
 
     output_filename = create_output_filename(session, "intf-desc", include_date=False)
     with open(output_filename, 'wb') as output_file:
