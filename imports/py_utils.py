@@ -45,9 +45,9 @@ def expanded_path(base_path):
     return base_path
 
 
-def alphanum_key(s):
+def human_sort_key(s):
     """
-    A key function to sort alpha-numerically
+    A key function to sort alpha-numerically, not by string
     
     From http://nedbatchelder.com/blog/200712/human_sorting.html
     This function can be used as the key for a sort algorithm to give it an understanding of numbers, 

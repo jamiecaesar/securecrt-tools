@@ -41,7 +41,7 @@ from imports.cisco_tools import parse_nxos_routes
 
 from imports.py_utils import read_file_to_list
 from imports.py_utils import list_of_lists_to_csv
-from imports.py_utils import alphanum_key
+from imports.py_utils import human_sort_key
 
 
 # #################################  SCRIPT  ###################################
@@ -109,7 +109,7 @@ def nexthop_summary(route_list):
                               value['OSPF'], value['BGP'], value['ISIS'], value['RIP'], value['Other']])
 
     # Append sorted nexthops stats after header line
-    nexthops.extend(sorted(nexthops_data, key=lambda x: alphanum_key(x[0])))
+    nexthops.extend(sorted(nexthops_data, key=lambda x: human_sort_key(x[0])))
 
     # Process Connected Network Data
     connected = [['', ''], ['', ''], ['Connected', ''], ['Interface', 'Network(s)']]
@@ -118,14 +118,14 @@ def nexthop_summary(route_list):
         this_row = [key]
         this_row.extend(value)
         conn_data.append(this_row)
-    connected.extend(sorted(conn_data, key=lambda x: alphanum_key(x[0])))
+    connected.extend(sorted(conn_data, key=lambda x: human_sort_key(x[0])))
 
     # Process Detailed Route Data
     detailed = [['', '', ''], ['', '', ''], ['Route Details', '', ''], ['Next-Hop', 'Network(s)', 'Protocol']]
     detail_data = []
-    sorted_keys = sorted(detail_dict, key=lambda x: alphanum_key(x))
+    sorted_keys = sorted(detail_dict, key=lambda x: human_sort_key(x))
     for key in sorted_keys:
-        new_list = sorted(detail_dict[key], key=lambda x: alphanum_key(x[0]))
+        new_list = sorted(detail_dict[key], key=lambda x: human_sort_key(x[0]))
         for entry in new_list:
             this_row = [key, entry[0], entry[1]]
             detail_data.append(this_row)
