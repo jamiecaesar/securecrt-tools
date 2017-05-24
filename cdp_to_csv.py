@@ -36,6 +36,7 @@ from imports.cisco_securecrt import end_session
 from imports.cisco_securecrt import create_output_filename
 from imports.cisco_securecrt import get_output
 from imports.cisco_tools import parse_with_textfsm
+from imports.cisco_tools import extract_system_name
 from imports.py_utils import list_of_lists_to_csv
 
 ##################################  SCRIPT  ###################################
@@ -59,7 +60,15 @@ def main():
     # Build path to template, process output and export to CSV
     template_path = os.path.join(script_dir, cdp_template)
 
+    # Use TextFSM to parse our output
     cdp_table = parse_with_textfsm(raw_cdp_list, template_path)    
+
+    # Since "System Name" is a newer N9K feature -- try to extract it from the device ID when its empty.
+    for entry in cdp_table:
+        # entry[2] is system name, entry[1] is device ID
+        if entry[2] == "":
+            entry[2] = extract_system_name(entry[1])
+
     # Write TextFSM output to a .csv file.
     output_filename = create_output_filename(session, "cdp", ext=".csv")
     list_of_lists_to_csv(cdp_table, output_filename)
