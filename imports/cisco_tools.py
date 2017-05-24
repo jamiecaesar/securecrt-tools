@@ -322,16 +322,35 @@ def short_int(str):
         return str
 
 
-def short_name(name):
-    """
-    This function will remove any domain suffixes (.cisco.com) or serial numbers that show up in parenthesis after the 
-    hostname of the CDP output
+def extract_system_name(device_id):
+    cisco_serial_format = r'[A-Z]{3}[A-Z0-9]{8}'
+    ip_format = r'\d{1-3}\.\d{1-3}\.\d{1-3}\.\d{1-3}'
+    re_serial = re.compile(cisco_serial_format)
+    re_ip = re.compile(ip_format)
 
-    :param name: 
-    :return: 
-    """
-    # TODO: Some devices give IP address instead of name.  Need to ignore
-    #       IP format.
-    # TODO: Some CatOS devices put hostname in (), instead of serial number.
-    #       Find a way to catch this when it happens.
-    return name.split('.')[0].split('(')[0]
+    # If we find an open paren, then we either have "SYSTEM_NAME(SERIAL)" or "SERIAL(SYSTEM-NAME)" format.  The latter
+    # format is often seen in older devices.  Determine which is the system_name by matching regex for a Cisco serial.
+    if "(" in device_id:
+        left, right = device_id.split('(')
+        right = right.strip(')')
+        left_serial = re_serial.match(left)
+        right_serial = re_serial.match(right)
+        if right_serial:
+            system_name = left
+        elif left_serial:
+            system_name = right
+        else:
+            system_name = device_id
+    else:
+        system_name = device_id
+
+    # If FQDN, only take the host portion, otherwise return what we have.
+    if "." in system_name:
+        is_ip = re_ip.match(system_name)
+        # Some device return IP as device_id.  In those cases, just return IP -- don't treat it like FQDN
+        if is_ip:
+            return system_name
+        else:
+            return system_name.split('.')[0]
+    else:
+        return system_name
