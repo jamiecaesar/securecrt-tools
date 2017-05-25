@@ -36,21 +36,21 @@ from imports.cisco_securecrt import create_output_filename
 from imports.cisco_securecrt import get_output
 from imports.cisco_tools import parse_with_textfsm
 from imports.cisco_tools import extract_system_name
-from imports.cisco_tools import short_int
+from imports.cisco_tools import short_int_name
+from imports.cisco_tools import long_int_name
 from imports.py_utils import human_sort_key
 
 
 ##################################  SCRIPT  ###################################
 
 
-def extract_cdp_data(raw_cdp):
-
-    # TextFSM template for parsing "show cdp neighbor detail" output.  Must supply TextFSM template and output string.
-    cdp_template = "textfsm-templates/show-cdp-detail"
-    # Build path to template, process output and export to CSV
-    template_path = os.path.join(script_dir, cdp_template)
-    cdp_table = parse_with_textfsm(raw_cdp, template_path)
-
+def extract_cdp_data(cdp_table):
+    """
+    Extract remote host and interface for each local interface in the CDP table
+    
+    :param cdp_table:  The TextFSM output for CDP neighbor detail 
+    :return:  A dictionary for each local interface with corresponding remote host and interface.
+    """
     cdp_data = {}
     found_intfs = set()
 
@@ -68,14 +68,25 @@ def extract_cdp_data(raw_cdp):
             # Remove from our description list
             cdp_data.pop(system_name, None)
         else:
-            cdp_data[local_intf] = (system_name, short_int(remote_intf))
+            cdp_data[local_intf] = (system_name, remote_intf)
             found_intfs.add(local_intf)
 
     return cdp_data
 
 
-# def add_port_channels(desc_data):
-#     pass
+def add_port_channels(desc_data, pc_data):
+
+    for entry in pc_data:
+        po_name = entry[0]
+        intf_list = entry[4]
+        neighbor_set = set()
+        # For each index in the intf_list
+        for intf in intf_list:
+            long_name = long_int_name(intf)
+            if long_name in desc_data:
+                neighbor_set.add(desc_data[long_name][0])
+        if len(neighbor_set) > 0:
+            desc_data[po_name] = list(neighbor_set)
 
 
 def main():
@@ -87,19 +98,25 @@ def main():
 
     # Capture output from show cdp neighbor detail
     raw_cdp_output = get_output(session, "show cdp neighbors detail")
+    # TextFSM template for parsing "show cdp neighbor detail" output.  Must supply TextFSM template and output string.
+    cdp_template = "textfsm-templates/show-cdp-detail"
+    # Build path to template, process output and export to CSV
+    cdp_template_path = os.path.join(script_dir, cdp_template)
+    cdp_table = parse_with_textfsm(raw_cdp_output, cdp_template_path)
+    description_data = extract_cdp_data(cdp_table)
 
-    description_data = extract_cdp_data(raw_cdp_output)
+    # Capture port-channel output
+    if session['OS'] == "NX-OS":
+        raw_pc_output = get_output(session, "show port-channel summary")
+        pc_template = "textfsm-templates/show-pc-summary-nxos"
+        pc_template_path = os.path.join(script_dir, pc_template)
+        pc_table = parse_with_textfsm(raw_pc_output, pc_template_path)
+        add_port_channels(description_data, pc_table)
+    elif "IOS" in session['OS']:
+        pass
+    else:
+        pass
 
-    #TODO Add descriptions for port-channels where possible.
-    # # Capture port-channel output
-    # if session['OS'] == "NX-OS":
-    #     raw_pc_output = get_output(session, "show port-channel summary")
-    # elif "IOS" in session['OS']:
-    #     raw_pc_output = get_output(session, "show etherchannel summary")
-    # else:
-    #     raw_pc_output = ""
-    #
-    # add_port_channels(description_data)
 
     # This will contain our configuration commands as CDP neighbors are found.
     config_script = ""
@@ -107,7 +124,16 @@ def main():
     intf_list = sorted(description_data.keys(), key=human_sort_key)
     for interface in intf_list:
         config_script += "interface {}\n".format(interface)
-        config_script += "  description {}, {}\n".format(description_data[interface][0], description_data[interface][1])
+        if "Po" in interface:
+            neigh_list = description_data[interface]
+            if len(neigh_list) == 1:
+                config_script += "  description {}\n".format(neigh_list[0])
+            if len(neigh_list) == 2:
+                neigh_list = sorted(neigh_list, key=human_sort_key)
+                config_script += "  description vPC from {}, {}\n".format(neigh_list[0], neigh_list[1])
+        else:
+            config_script += "  description {}, {}\n".format(description_data[interface][0],
+                                                             short_int_name(description_data[interface][1]))
 
     output_filename = create_output_filename(session, "intf-desc", include_date=False)
     with open(output_filename, 'wb') as output_file:
