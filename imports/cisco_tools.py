@@ -299,7 +299,7 @@ def get_protocol(raw_protocol):
         return 'Other'
 
 
-def short_int(str):
+def short_int_name(str):
     """
     This function shortens the interface name for easier reading
   
@@ -307,8 +307,9 @@ def short_int(str):
     :return:  The shortened interface name
     """
     replace_pairs = [
-        ('tengigabitethernet', 'T'),
-        ('gigabitethernet', 'G'),
+        ('fortygigabitethernet', 'Fo'),
+        ('tengigabitethernet', 'Te'),
+        ('gigabitethernet', 'Gi'),
         ('fastethernet', 'F'),
         ('ethernet', 'e'),
         ('eth', 'e'),
@@ -318,6 +319,29 @@ def short_int(str):
     for pair in replace_pairs:
         if pair[0] in lower_str:
             return lower_str.replace(pair[0], pair[1])
+    else:
+        return str
+
+
+def long_int_name(int_name):
+    """
+    This function expands a short interface name to the full name
+
+    :param str:  The input string (short interface name) 
+    :return:  The shortened interface name
+    """
+    replace_pairs = [
+        ('Fo', 'FortyGigabitEthernet'),
+        ('Te', 'TenGigabitEthernet'),
+        ('Gi', 'gigabitethernet'),
+        ('F', 'FastEthernet'),
+        ('Eth', 'Ethernet'),
+        ('e', 'Ethernet'),
+        ('Po', 'port-channel')
+    ]
+    for pair in replace_pairs:
+        if pair[0] in int_name:
+            return int_name.replace(pair[0], pair[1])
     else:
         return str
 
