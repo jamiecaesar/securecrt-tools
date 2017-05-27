@@ -1,0 +1,18 @@
+# From: https://github.com/networktocode/ntc-templates
+Value Required,Filldown BUNDLE_IFACE (Po\d+)
+Value Filldown BUNDLE_STATUS (\(\w+\))
+Value Filldown BUNDLE_PROTO (\S+)
+Value Filldown BUNDLE_PROTO_STATE (\(\w+\))
+Value List PHYS_IFACE ([\w\/]+)
+Value List PHYS_IFACE_STATUS (\(.+?\))
+
+
+Start
+  ^----- -> Next
+  ^\d+ -> Continue.Record
+  ^\d+\s+${BUNDLE_IFACE}${BUNDLE_STATUS}\s+${BUNDLE_PROTO}\s+${PHYS_IFACE}${PHYS_IFACE_STATUS} -> Continue
+  ^\d+\s+Po\d+\(\w+\)\s+\S+\s+[\w\/]+\(.+?\)\s+${PHYS_IFACE}${PHYS_IFACE_STATUS} -> Continue
+  ^\d+\s+Po\d+\(\w+\)\s+\S+\s+[\w\/]+\(.+?\)\s+[\w\/]+\(.+?\)${PHYS_IFACE}${PHYS_IFACE_STATUS} -> Continue
+  ^\s{33}${PHYS_IFACE}${PHYS_IFACE_STATUS} -> Continue
+  ^\s{33}[\w\/]+\(.+?\)\s+${PHYS_IFACE}${PHYS_IFACE_STATUS} -> Continue
+  ^\s{33}[\w\/]+\(.+?\)\s+[\w\/]+\(.+?\)\s+${PHYS_IFACE}${PHYS_IFACE_STATUS} -> Continue

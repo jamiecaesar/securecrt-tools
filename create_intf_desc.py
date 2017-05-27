@@ -113,7 +113,11 @@ def main():
         pc_table = parse_with_textfsm(raw_pc_output, pc_template_path)
         add_port_channels(description_data, pc_table)
     elif "IOS" in session['OS']:
-        pass
+        raw_pc_output = get_output(session, "show etherchannel summary")
+        pc_template = "textfsm-templates/show-ec-summary-ios"
+        pc_template_path = os.path.join(script_dir, pc_template)
+        pc_table = parse_with_textfsm(raw_pc_output, pc_template_path)
+        add_port_channels(description_data, pc_table)
     else:
         pass
 
