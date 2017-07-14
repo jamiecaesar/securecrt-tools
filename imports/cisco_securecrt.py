@@ -370,6 +370,15 @@ def create_output_filename(session, desc, ext=".txt", include_date=True):
     # If a relative path was specified in the settings file, expand it.
     save_path = expanded_path(save_path)
 
+    # Remove reserved filename characters from filename
+    clean_desc = desc.replace("/", "-")
+    clean_desc = clean_desc.replace(".", "-")
+    clean_desc = clean_desc.replace(":", "-")
+    clean_desc = clean_desc.replace("\\", "")
+    clean_desc = clean_desc.replace("| ", "")
+    # Just in case the trailing space from the above replacement was missing.
+    clean_desc = clean_desc.replace("|", "")
+
     # Extract hostname from the session information
     hostname = session['hostname']
 
@@ -377,7 +386,7 @@ def create_output_filename(session, desc, ext=".txt", include_date=True):
         date_format = settings['date format']
         # Get the current date in the format supplied in date_format
         mydate = get_date_string(date_format)
-        file_bits = [hostname, desc, mydate]
+        file_bits = [hostname, clean_desc, mydate]
     else:
         file_bits = [hostname, desc]
 

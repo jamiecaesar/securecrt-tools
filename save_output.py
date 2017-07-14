@@ -47,16 +47,12 @@ def main():
 
     if send_cmd == "":
         return
-    else:
-        # Save command without spaces to use in output filename.
-        cmd_desc = send_cmd.replace(" ", "_")
-        # Add a newline to command before sending it to the remote device.
 
     # Run session start commands and save session information into a dictionary
     session = start_session(crt, script_dir)
 
     # Generate filename used for output files.
-    full_file_name = create_output_filename(session, cmd_desc)
+    full_file_name = create_output_filename(session, send_cmd)
 
     # Get the output of our command and save it to the filename specified
     write_output_to_file(session, send_cmd, full_file_name)
