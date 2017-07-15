@@ -4,8 +4,8 @@
 # OSX Files #
 .DS_Store
 
-### Ignore Settings file
-script_settings.py
-
-### Ignore Pycharm
+# Ignore Pycharm data #
 .idea/
+
+# Ignore JSON files - specifically the generated settings file #
+*.json
