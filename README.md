@@ -17,7 +17,7 @@ To run any of the below scripts, do the following:
 
 4) Find the output file in the directory specified in the "script_settings.json" file.
 
-**After the first attempt at running a script with SecureCRT, a file named "script_settings.json" will be created.  You will need to modify this file to select the default location for script outputs if you don't like the default value.**
+**After the first attempt at running a script with SecureCRT, a JSON file named `script_settings.json` will be created.  You will need to modify this file to select the default location for script outputs if you don't like the default value.**
 
 The output files are automatically named based on the hostname of the device connected to.   This name is taken from the prompt of the device, so these scripts will work whether you are directly connected, or connected via a jumpbox or other intermediate device.
 
@@ -25,6 +25,7 @@ The output files are automatically named based on the hostname of the device con
 
 * **cdp_to_csv.py** - Captures detailed CDP information and saves it to a CSV file.
 * **create_intf_desc.py** - Outputs a config script to label interfaces based on CDP info.
+* **document_device.py** - Saves multiple command outputs at once.  The first time this script is run a JSON file named `document_device.json` will be created.  This file can be edited to include all commands that should be captured when this script is run.
 * **interface_stats.py** - Outputs a CSV file for a quick and easy view of some high level details about all interfaces that are "up", such as total packets in/out, packet rate in/out and errors in/out.
 * **mac_to_csv.py** - Outputs the mac address table into a CSV file.
 * **nexthop_summary.py** - Outputs a CSV file with all the next hops and a detailed breakdown of each type of route pointing at that next hop.
@@ -48,5 +49,5 @@ A handful of different modules are used to store commonly used functions for int
 
 Two modules written by Google are leveraged in these scripts to simplify some of the operations.
 
-* **ipaddress** - (https://pypi.python.org/pypi/py2-ipaddress) This module allows for IP address and IP networks to be stored in special objects that allow for easy manipulation and comparison of IPs/networks (overlap, subnet membership, etc).  They also allow for IP addresses to be represented in a variety of ways (IP only, bit length, subnet mask, etc).
-* **TextFSM** - (https://github.com/google/textfsm) This module provides an easier way to process semi-structured data, such as the output of CLI commands.  A template file is used to describe the structure of the output and the variables that are interesting and this module will extract those variables.
+* **ipaddress** - (https://pypi.python.org/pypi/py2-ipaddress) This module provides a special data structure for IP addresses and IP networks to be stored in a way that allows for easy manipulation and comparison of IPs/networks (overlap, subnet membership, etc).  It also allows for IP addresses to be represented in a variety of ways (IP only, bit length, subnet mask, etc).
+* **TextFSM** - (https://github.com/google/textfsm) This module provides an easier way to process semi-structured data, such as the output of CLI commands.  A template file is used to describe the structure of the output and the variables that are interesting and this module will extract those variables.  All the templates used by these scripts are stored in the `textfsm-templates` directory.
