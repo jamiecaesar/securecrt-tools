@@ -173,7 +173,7 @@ def get_term_info(session):
     re_num_exp = r'\d+'
     re_num = re.compile(re_num_exp)
 
-    if session['OS'] == "IOS" or session['OS'] == "IOS XE" or session['OS'] == "NX-OS":
+    if session['OS'] == "IOS" or session['OS'] == "NX-OS":
         result = get_output(session, "show terminal | i Length")
         term_info = result.split(',')
 
@@ -223,7 +223,7 @@ def get_network_os(session):
     raw_version = get_output(session, SendCmd)
 
     if "IOS XE" in raw_version:
-        version = "IOS XE"
+        version = "IOS"
     elif "Cisco IOS Software" in raw_version or "Cisco Internetwork Operating System" in raw_version:
         version = "IOS"
     elif "Cisco Nexus Operating System" in raw_version:
@@ -318,19 +318,19 @@ def start_session(crt, script_dir):
 
         # If modify_term setting is True, then prevent "--More--" prompt (length) and wrapping of lines (width)
         if settings['modify term']:
-            if session['OS'] == "IOS" or session['OS'] == "IOS XE" or session['OS'] == "NX-OS":
+            if session['OS'] == "IOS" or session['OS'] == "NX-OS":
                 # Send term length command and wait for prompt to return
                 if session['term length']:
                     tab.Send('term length 0\n')
                     tab.WaitForString(prompt)
-            # elif session['OS'] == "ASA":
-            #     if session['term length']:
-            #         tab.Send('terminal pager 0\r\n')
-            #         tab.WaitForString(prompt)
+            elif session['OS'] == "ASA":
+                if session['term length']:
+                    tab.Send('terminal pager 0\r\n')
+                    tab.WaitForString(prompt)
 
             # Send term width command and wait for prompt to return (depending on platform)
 
-            if session['OS'] == "IOS" or session['OS'] == "IOS XE":
+            if session['OS'] == "IOS":
                 if session['term width']:
                     tab.Send('term width 0\n')
                     tab.WaitForString(prompt)
@@ -360,7 +360,7 @@ def end_session(session):
 
         settings = session['settings']
         if settings['modify term']:
-            if session['OS'] == "IOS" or session['OS'] == "IOS XE" or session['OS'] == "NX-OS":
+            if session['OS'] == "IOS" or session['OS'] == "NX-OS":
                 if session['term length']:
                     # Set term length back to saved values
                     tab.Send('term length {0}\n'.format(session['term length']))
@@ -514,7 +514,7 @@ def write_output_to_file(session, command, filename):
     re_more = re.compile(exp_more)
 
     # The 3 different types of lines we want to match (MatchIndex) and treat differntly
-    if session['OS'] == "IOS" or session['OS'] == "IOS XE" or session['OS'] == "NX-OS":
+    if session['OS'] == "IOS" or session['OS'] == "NX-OS":
         matches = ["\r\n", '--More--', prompt]
     elif session['OS'] == "ASA":
         matches = ["\r\n", '<--- More --->', prompt]
