@@ -143,18 +143,23 @@ def get_prompt(tab):
     """
 
     # Send two line feeds to the device
-    tab.Send("\n\n")
+    tab.Send("\r\n\r\n")
 
     # Waits for first linefeed to be echoed back to us
-    tab.WaitForString("\n")
-
-    # Capture the text until we receive the next line feed
-    prompt = tab.ReadString("\n")
-
-    # Remove any trailing control characters from what we captured
-    prompt = prompt.strip()
-
-    return prompt
+    wait_result = tab.WaitForString("\n",5)
+    if wait_result == 1:
+        # Capture the text until we receive the next line feed
+        prompt = tab.ReadString("\n", 5)
+        # Remove any trailing control characters from what we captured
+        prompt = prompt.strip()
+        # If our ReadString timed out (received empty string) return None, otherwise return what we received.
+        if prompt == "":
+            return None
+        else:
+            return prompt
+    else:
+        # If WaitForString timed out, return None to signal failure
+        return None
 
 
 def get_term_info(session):
@@ -168,10 +173,42 @@ def get_term_info(session):
     re_num_exp = r'\d+'
     re_num = re.compile(re_num_exp)
 
-    result = get_output(session, "show terminal | i Length")
-    dim = result.split(',')
+    if session['OS'] == "IOS" or session['OS'] == "IOS XE" or session['OS'] == "NX-OS":
+        result = get_output(session, "show terminal | i Length")
+        term_info = result.split(',')
 
-    return re_num.search(dim[0]).group(0), re_num.search(dim[1]).group(0)
+        re_length = re_num.search(term_info[0])
+        if re_length:
+            length = re_length.group(0)
+        else:
+            length = None
+
+        re_width = re_num.search(term_info[1])
+        if re_width:
+            width = re_width.group(0)
+        else:
+            width = None
+
+        return length, width
+    elif session['OS'] == "ASA":
+        pager = get_output(session, "show pager")
+        re_length = re_num.search(pager)
+        if re_length:
+            length = re_length.group(0)
+        else:
+            length = None
+
+        term_info = get_output(session, "show terminal")
+        re_width = re_num.search(term_info[1])
+        if re_width:
+            width = re_width.group(0)
+        else:
+            width = None
+
+        return length, width
+    else:
+        return None, None
+
 
 
 def get_network_os(session):
@@ -183,18 +220,19 @@ def get_network_os(session):
 
     SendCmd = "show version | i Cisco"
 
-    version = get_output(session, SendCmd)
-    ver_lines = version.split("\n")
+    raw_version = get_output(session, SendCmd)
 
-    if "IOS XE" in ver_lines[0]:
-        return "IOS XE"
-    elif "Cisco IOS Software" in ver_lines[0] or \
-         "Cisco Internetwork Operating System" in ver_lines[0]:
-        return "IOS"
-    elif "Cisco Nexus Operating System" in ver_lines[0]:
-        return "NX-OS"
+    if "IOS XE" in raw_version:
+        version = "IOS XE"
+    elif "Cisco IOS Software" in raw_version or "Cisco Internetwork Operating System" in raw_version:
+        version = "IOS"
+    elif "Cisco Nexus Operating System" in raw_version:
+        version = "NX-OS"
+    elif "Adaptive Security Appliance" in raw_version:
+        version = "ASA"
     else:
-        return "Unknown"
+        version = "Unknown"
+    return version
 
 
 def start_session(crt, script_dir):
@@ -273,23 +311,33 @@ def start_session(crt, script_dir):
         session['prompt'] = prompt
         session['hostname'] = prompt[:-1]
 
-        session['term length'], session['term width'] = get_term_info(session)
-
         # Detect and store the OS of the attached device
         session['OS'] = get_network_os(session)
 
+        session['term length'], session['term width'] = get_term_info(session)
+
         # If modify_term setting is True, then prevent "--More--" prompt (length) and wrapping of lines (width)
         if settings['modify term']:
-            # Send term length command and wait for prompt to return
-            tab.Send('term length 0\n')
-            tab.WaitForString(prompt)
+            if session['OS'] == "IOS" or session['OS'] == "IOS XE" or session['OS'] == "NX-OS":
+                # Send term length command and wait for prompt to return
+                if session['term length']:
+                    tab.Send('term length 0\n')
+                    tab.WaitForString(prompt)
+            # elif session['OS'] == "ASA":
+            #     if session['term length']:
+            #         tab.Send('terminal pager 0\r\n')
+            #         tab.WaitForString(prompt)
 
-            # Send term width command and wait for prompt to return
-            if session['OS'] == "NX-OS":
-                tab.Send('term width 511\n')
-            else:
-                tab.Send('term width 0\n')
-            tab.WaitForString(prompt)
+            # Send term width command and wait for prompt to return (depending on platform)
+
+            if session['OS'] == "IOS" or session['OS'] == "IOS XE":
+                if session['term width']:
+                    tab.Send('term width 0\n')
+                    tab.WaitForString(prompt)
+            elif session['OS'] == "NX-OS":
+                if session['term length']:
+                    tab.Send('term width 511\n')
+                    tab.WaitForString(prompt)
 
         # Added due to Nexus echoing twice if system hangs and hasn't printed the prompt yet.
         # Seems like maybe the previous WaitFor prompt isn't always working correctly.  Something to look into.
@@ -310,18 +358,20 @@ def end_session(session):
         tab = session['tab']
         prompt = session['prompt']
 
-        len_str = 'term length {0}\n'.format(session['term length'])
-        width_str = 'term width {0}\n'.format(session['term width'])
-
         settings = session['settings']
         if settings['modify term']:
-            # Set term length back to saved values
-            tab.Send(len_str)
-            tab.WaitForString(prompt)
+            if session['OS'] == "IOS" or session['OS'] == "IOS XE" or session['OS'] == "NX-OS":
+                if session['term length']:
+                    # Set term length back to saved values
+                    tab.Send('term length {0}\n'.format(session['term length']))
+                    tab.WaitForString(prompt)
 
-            # Set term width back to saved values
-            tab.Send(width_str)
-            tab.WaitForString(prompt)
+                if session['term width']:
+                    # Set term width back to saved values
+                    tab.Send('term width {0}\n'.format(session['term width']))
+                    tab.WaitForString(prompt)
+            elif session['OS'] == "ASA":
+                tab.Send("terminal pager {}\n".format(session['term length']))
 
         tab.Synchronous = False
         tab.IgnoreEscape = False
@@ -362,7 +412,6 @@ def create_output_filename(session, desc, ext=".txt", include_date=True):
     :return:
     """
     # Extract path and format information from our tuple
-    crt = session['crt']
     settings = session['settings']
     save_path = settings['save path']
     # If environment vars were used, expand them
@@ -465,7 +514,12 @@ def write_output_to_file(session, command, filename):
     re_more = re.compile(exp_more)
 
     # The 3 different types of lines we want to match (MatchIndex) and treat differntly
-    matches = ["\r\n", '--More--', prompt]
+    if session['OS'] == "IOS" or session['OS'] == "IOS XE" or session['OS'] == "NX-OS":
+        matches = ["\r\n", '--More--', prompt]
+    elif session['OS'] == "ASA":
+        matches = ["\r\n", '<--- More --->', prompt]
+    else:
+        matches = ["\r\n", '--More--', prompt]
 
     # Write the output to the specified file
     try:
