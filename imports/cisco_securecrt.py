@@ -88,11 +88,13 @@ def load_settings(crt, script_dir):
     if os.path.isfile(settings_full_path):
         with open(settings_full_path, 'r') as json_file:
             settings = json.load(json_file)
-        return settings
+        settings["script_dir"] = script_dir
     else:
         settings = generate_settings()
         write_settings(crt, script_dir, settings)
-        return settings
+        settings["script_dir"] = script_dir
+
+    return settings
 
 
 def generate_settings(existing=None):
