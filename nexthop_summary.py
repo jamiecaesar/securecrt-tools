@@ -36,8 +36,7 @@ from imports.cisco_securecrt import create_output_filename
 from imports.cisco_securecrt import write_output_to_file
 
 from imports.cisco_tools import get_protocol
-from imports.cisco_tools import parse_ios_routes
-from imports.cisco_tools import parse_nxos_routes
+from imports.cisco_tools import parse_routes
 
 from imports.py_utils import read_file_to_list
 from imports.py_utils import list_of_lists_to_csv
@@ -46,19 +45,20 @@ from imports.py_utils import human_sort_key
 
 # #################################  SCRIPT  ###################################
 
+# TODO Re-write this script to use TextFSM directly, instead of intermediate conversion to a list of dicts.
 
 def nexthop_summary(route_list):
     """
-    This function will take the routelist datastructure (created by ParseIOSRoutes) and process it into
+    This function will take the route_list datastructure (created by parse_routes) and process it into
     a datastructure containing the summary data, that is then converted to a list so it can be easily written
     into a CSV file (by list_to_csv).
-     
-    :param route_list: 
+
+    :param route_list: A list of dictionaries - Each dictionary represents a single route entry.
     :return: 
     """
 
     # There are 3 Dictionaries of information extracted from the route table:
-    # 1) Summary information - List each next-hop with how many routes from each 
+    # 1) Summary information - List each next-hop with how many routes from each
     #    protocol
     # 2) Connected Interfaces - List of the subnets that are on connected intfs
     # 3) Detailed information - List of each next-hop and all the networks that
@@ -69,9 +69,10 @@ def nexthop_summary(route_list):
 
     for entry in route_list:
         # Verify this entry has a next-hop parameter
-        if entry['nexthop']:
+        proto = get_protocol(entry['protocol'])
+        if entry['nexthop'] and proto != "Connected":
             nh = str(entry['nexthop'])
-            proto = get_protocol(entry['protocol'])
+
             if nh in summary_dict:
                 summary_dict[nh]['Total'] += 1
                 summary_dict[nh][proto] += 1
@@ -136,7 +137,7 @@ def nexthop_summary(route_list):
 
 
 def main():
-    supported_os = ["IOS", "IOS XE", "NX-OS"]
+    supported_os = ["IOS", "NX-OS"]
     send_cmd = "show ip route"
 
     # Run session start commands and save session information into a dictionary
@@ -155,14 +156,12 @@ def main():
         # Dumping directly to a huge string has problems when the route table is large (1000+ lines)
         # Save raw "show ip route" output to a file, read it back in as a list of strings and delete temp file.
         write_output_to_file(session, send_cmd, temp_routes_filename)
-        routes = read_file_to_list(temp_routes_filename)
+        with open(temp_routes_filename, 'r') as route_file:
+            routes = route_file.read()
         os.remove(temp_routes_filename)
 
-        if session['OS'] == "NX-OS":
-            route_list = parse_nxos_routes(routes)
-        else:
-            route_list = parse_ios_routes(routes)
-            
+        route_list = parse_routes(session, routes)
+
         # Get a list of all nexthop stats as well as connected networks (2 lists).
         nexthops, connected, detailed = nexthop_summary(route_list)
         
