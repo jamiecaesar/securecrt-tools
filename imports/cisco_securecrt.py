@@ -63,8 +63,7 @@ IDNO = 7              # No button clicked
 
 default_settings = {
             '__comment': "USE FORWARD SLASHES IN WINDOWS PATHS! "
-                         "See https://gitlab.presidio.com/jcaesar/securecrt-scripts for settings details",
-            'debug-mode': False,
+                         "See https://github.com/PresidioCode/SecureCRT (and select appropriate branch) for settings details",
             'save path': 'SecureCRT/ScriptOutput',
             'date format': '%Y-%m-%d-%H-%M-%S',
             'modify term': True
