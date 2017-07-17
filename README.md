@@ -35,6 +35,19 @@ The output files are automatically named based on the hostname of the device con
 
 **Note**:  *empty_script_template.py* can be used as a starting point for writing new scripts.
 
+## Settings:
+The following options are available in the settings file:
+
+* 'save path': This is the path where you want the output from scripts to be saved.  *NOTE* For Windows systems, either use forward slashes (/) or double backslash (\\) to represent a single backslash.  If a single backslash is used, Python may interpret it as an escape character.
+* 'date format': Default is '%Y-%m-%d-%H-%M-%S'.  This string specifies how the date stamp in output filenames is formatted.
+  - %Y - 4-digit Year
+  - %m - numeric month
+  - %d - day of the month
+  - %H - Hours
+  - %M - Minutes
+  - %S - Seconds
+* 'modify term': True or False.  When True, the script will attempt to modify the terminal length and width to 0 so that output flows continuously.  When the output is complete the script will return the length and width to their original values.   If False, it will not change the values, but instead auto-advance when a "More" prompt is encountered.
+
 ## Modules:
 
 A handful of different modules are used to store commonly used functions for interacting with CLI sessions to Cisco devices, process the outputs and read/write to files.  All modules are saved in the *imports* directory.
