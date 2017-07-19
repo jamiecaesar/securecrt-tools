@@ -113,7 +113,7 @@ def write_settings(crt, script_dir, settings):
     with open(settings_full_path, 'w') as json_file:
         json.dump(settings, json_file, sort_keys=True, indent=4, separators=(',', ': '))
 
-    setting_msg = ("Personal settings file, {}, created in directory:\n'{}'\n\n"
+    setting_msg = ("Personal settings file, {0}, created in directory:\n'{1}'\n\n"
                    "Please edit this file to make any settings changes."
                    ).format(settings_filename, script_dir)
     crt.Dialog.MessageBox(setting_msg, "Settings Created", ICON_INFO)
@@ -271,7 +271,7 @@ def start_session(crt, script_dir):
             settings = load_settings(crt, script_dir)
         else:
             err_msg = ('The current script_settings file is incomplete.\n'
-                       'Delete your {} and run the script again to generate a new settings file from defaults.\n\n'
+                       'Delete your {0} and run the script again to generate a new settings file from defaults.\n\n'
                        )
             crt.Dialog.MessageBox(str(err_msg), "Settings Error", ICON_STOP)
             exit(0)
@@ -372,7 +372,7 @@ def end_session(session):
                     tab.Send('term width {0}\n'.format(session['term width']))
                     tab.WaitForString(prompt)
             elif session['OS'] == "ASA":
-                tab.Send("terminal pager {}\n".format(session['term length']))
+                tab.Send("terminal pager {0}\n".format(session['term length']))
 
         tab.Synchronous = False
         tab.IgnoreEscape = False
