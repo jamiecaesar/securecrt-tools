@@ -81,6 +81,8 @@ def parse_routes(session, routes):
     else:
         return []
 
+    # Normalize path before attempting to access (e.g. change slash to backslash for windows.)
+    template_file = os.path.normpath(template_file)
     route_list = parse_with_textfsm(routes, template_file, add_header=False)
 
     route_table = []
