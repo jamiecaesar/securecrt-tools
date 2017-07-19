@@ -92,7 +92,7 @@ def parse_routes(session, routes):
         else:
             nexthop = None
         route_entry = {"protocol": route[0],
-                       "network": ipaddress.ip_network(u"{}{}".format(route[2], route[3])),
+                       "network": ipaddress.ip_network(u"{0}{1}".format(route[2], route[3])),
                        "AD": route[4],
                        "metric": route[5],
                        "nexthop": nexthop,
