@@ -9,3 +9,6 @@
 
 # Ignore JSON files - specifically the generated settings file #
 *.json
+
+# Ignore directory to store working/testing versions of scripts.
+dev-test/
