@@ -107,6 +107,8 @@ def normalize_protocol(raw_protocol):
         return 'static'
     elif raw_protocol[0] == 'C' or 'direct' in raw_protocol:
         return 'connected'
+    elif raw_protocol[0] == 'L' or 'local' in raw_protocol:
+        return 'local'
     elif raw_protocol[0] == 'D':
         return 'eigrp'
     elif raw_protocol[0] == 'O':
