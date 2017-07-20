@@ -33,7 +33,7 @@ from imports.cisco_securecrt import start_session
 from imports.cisco_securecrt import end_session
 from imports.cisco_securecrt import create_output_filename
 from imports.cisco_securecrt import get_output
-from imports.cisco_tools import parse_with_textfsm
+from imports.cisco_tools import textfsm_parse_to_list
 from imports.py_utils import list_of_lists_to_csv
 
 ##################################  SCRIPT  ###################################
@@ -61,7 +61,7 @@ def main():
     # Build path to template, process output and export to CSV
     template_path = os.path.join(script_dir, mac_template)
 
-    cdp_table = parse_with_textfsm(raw_mac_list, template_path)
+    cdp_table = textfsm_parse_to_list(raw_mac_list, template_path, add_header=True)
     # Write TextFSM output to a .csv file.
     output_filename = create_output_filename(session, "mac-addr", ext=".csv")
     list_of_lists_to_csv(cdp_table, output_filename)
