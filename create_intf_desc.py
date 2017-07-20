@@ -34,7 +34,7 @@ from imports.cisco_securecrt import start_session
 from imports.cisco_securecrt import end_session
 from imports.cisco_securecrt import create_output_filename
 from imports.cisco_securecrt import get_output
-from imports.cisco_tools import parse_with_textfsm
+from imports.cisco_tools import textfsm_parse_to_list
 from imports.cisco_tools import extract_system_name
 from imports.cisco_tools import short_int_name
 from imports.cisco_tools import long_int_name
@@ -102,7 +102,7 @@ def main():
     cdp_template = "textfsm-templates/show-cdp-detail"
     # Build path to template, process output and export to CSV
     cdp_template_path = os.path.join(script_dir, cdp_template)
-    cdp_table = parse_with_textfsm(raw_cdp_output, cdp_template_path)
+    cdp_table = textfsm_parse_to_list(raw_cdp_output, cdp_template_path, add_header=True)
     description_data = extract_cdp_data(cdp_table)
 
     # Capture port-channel output
@@ -110,13 +110,13 @@ def main():
         raw_pc_output = get_output(session, "show port-channel summary")
         pc_template = "textfsm-templates/show-pc-summary-nxos"
         pc_template_path = os.path.join(script_dir, pc_template)
-        pc_table = parse_with_textfsm(raw_pc_output, pc_template_path)
+        pc_table = textfsm_parse_to_list(raw_pc_output, pc_template_path, add_header=True)
         add_port_channels(description_data, pc_table)
     elif "IOS" in session['OS']:
         raw_pc_output = get_output(session, "show etherchannel summary")
         pc_template = "textfsm-templates/show-ec-summary-ios"
         pc_template_path = os.path.join(script_dir, pc_template)
-        pc_table = parse_with_textfsm(raw_pc_output, pc_template_path)
+        pc_table = textfsm_parse_to_list(raw_pc_output, pc_template_path, add_header=True)
         add_port_channels(description_data, pc_table)
     else:
         pass
