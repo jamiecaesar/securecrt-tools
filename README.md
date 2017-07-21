@@ -1,7 +1,5 @@
 SecureCRT Scripts
 ==================
-**NOTE: This is a complete re-write of the scripts previously in this repository.  The code is updated to follow the PEP8 standard wherever I could, and also now leverages some third party modules where it makes the code easier and more stable.  For example, TextFSM is now used to parse the CLI output instead of writing large and complicated regular expressions.**
-
 SecureCRT Python scripts for doing various tasks on Cisco equipment.
 
 These scripts should work on any version of SecureCRT that supports python.  If you find that a script won't work on your machine, please post an issue to let us know!
