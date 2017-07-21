@@ -1,7 +1,5 @@
 SecureCRT Scripts
 ==================
-**NOTE: This is a complete re-write of the scripts previously in this repository.  The code is updated to follow the PEP8 standard wherever I could, and also now leverages some third party modules where it makes the code easier and more stable.  For example, TextFSM is now used to parse the CLI output instead of writing large and complicated regular expressions.**
-
 SecureCRT Python scripts for doing various tasks on Cisco equipment.
 
 These scripts should work on any version of SecureCRT that supports python.  If you find that a script won't work on your machine, please post an issue to let us know!
@@ -27,6 +25,7 @@ The output files are automatically named based on the hostname of the device con
 
 * **cdp_to_csv.py** - Captures detailed CDP information and saves it to a CSV file.
 * **create_intf_desc.py** - Outputs a config script to label interfaces based on CDP info.
+* **create_sessions_from_cdp.py** - A script that pulls the CDP information from the connected device and creates a SecureCRT session for each device in the CDP table.  Saved in the `_imports` directory when opening the `Connect` window.
 * **document_device.py** - Saves multiple command outputs at once.  The first time this script is run a JSON file named `document_device.json` will be created.  This file can be edited to include all commands that should be captured when this script is run.
 * **interface_stats.py** - Outputs a CSV file for a quick and easy view of some high level details about all interfaces that are "up", such as total packets in/out, packet rate in/out and errors in/out.
 * **mac_to_csv.py** - Outputs the mac address table into a CSV file.
@@ -49,7 +48,6 @@ The following options are available in the settings file:
   - %M - Minutes
   - %S - Seconds
 * 'modify term': True or False.  When True, the script will attempt to modify the terminal length and width to 0 so that output flows continuously.  When the output is complete the script will return the length and width to their original values.   If False, it will not change the values, but instead auto-advance when a "More" prompt is encountered.
-
 
 ## Modules:
 

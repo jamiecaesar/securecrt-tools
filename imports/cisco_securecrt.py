@@ -63,7 +63,8 @@ IDNO = 7              # No button clicked
 
 default_settings = {
             '__comment': "USE FORWARD SLASHES IN WINDOWS PATHS! "
-                         "See https://github.com/PresidioCode/SecureCRT (and select appropriate branch) for settings details",
+                         "See https://github.com/PresidioCode/SecureCRT for settings details",
+            'debug-mode': False,
             'save path': 'SecureCRT/ScriptOutput',
             'date format': '%Y-%m-%d-%H-%M-%S',
             'modify term': True
@@ -113,7 +114,7 @@ def write_settings(crt, script_dir, settings):
     with open(settings_full_path, 'w') as json_file:
         json.dump(settings, json_file, sort_keys=True, indent=4, separators=(',', ': '))
 
-    setting_msg = ("Personal settings file, {}, created in directory:\n'{}'\n\n"
+    setting_msg = ("Personal settings file, {0}, created in directory:\n'{1}'\n\n"
                    "Please edit this file to make any settings changes."
                    ).format(settings_filename, script_dir)
     crt.Dialog.MessageBox(setting_msg, "Settings Created", ICON_INFO)
@@ -271,7 +272,7 @@ def start_session(crt, script_dir):
             settings = load_settings(crt, script_dir)
         else:
             err_msg = ('The current script_settings file is incomplete.\n'
-                       'Delete your {} and run the script again to generate a new settings file from defaults.\n\n'
+                       'Delete your {0} and run the script again to generate a new settings file from defaults.\n\n'
                        )
             crt.Dialog.MessageBox(str(err_msg), "Settings Error", ICON_STOP)
             exit(0)
@@ -372,7 +373,7 @@ def end_session(session):
                     tab.Send('term width {0}\n'.format(session['term width']))
                     tab.WaitForString(prompt)
             elif session['OS'] == "ASA":
-                tab.Send("terminal pager {}\n".format(session['term length']))
+                tab.Send("terminal pager {0}\n".format(session['term length']))
 
         tab.Synchronous = False
         tab.IgnoreEscape = False
@@ -562,6 +563,24 @@ def write_output_to_file(session, command, filename):
         crt = session['crt']
         error_str = "IO Error for:\n{0}\n\n{1}".format(filename, err)
         crt.Dialog.MessageBox(error_str, "IO Error", ICON_STOP)
+
+
+def create_session(session, session_name, ip, protocol="SSH2", folder="_imports"):
+    crt = session['crt']
+    creation_date = get_date_string("%A, %B %d %Y at %H:%M:%S")
+
+    # Create a session from the configured default values.
+    new_session = crt.OpenSessionConfiguration("Default")
+
+    # Set options based)
+    new_session = crt.OpenSessionConfiguration("Default")
+    new_session.SetOption("Protocol Name", protocol)
+    new_session.SetOption("Hostname", ip)
+    desc = ["Created on {} by script:".format(creation_date), crt.ScriptFullName]
+    new_session.SetOption("Description", desc)
+    session_path = os.path.join(folder, session_name)
+    # Save session based on passed folder and session name.
+    new_session.Save(session_path)
 
 
 # ######################  DISPLAY ERROR IF RAN DIRECTLY  #######################
