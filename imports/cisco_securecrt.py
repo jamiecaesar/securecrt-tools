@@ -63,7 +63,7 @@ IDNO = 7              # No button clicked
 
 default_settings = {
             '__comment': "USE FORWARD SLASHES IN WINDOWS PATHS! "
-                         "See https://gitlab.presidio.com/jcaesar/securecrt-scripts for settings details",
+                         "See https://github.com/PresidioCode/SecureCRT for settings details",
             'debug-mode': False,
             'save path': 'SecureCRT/ScriptOutput',
             'date format': '%Y-%m-%d-%H-%M-%S',
@@ -563,6 +563,24 @@ def write_output_to_file(session, command, filename):
         crt = session['crt']
         error_str = "IO Error for:\n{0}\n\n{1}".format(filename, err)
         crt.Dialog.MessageBox(error_str, "IO Error", ICON_STOP)
+
+
+def create_session(session, session_name, ip, protocol="SSH2", folder="_imports"):
+    crt = session['crt']
+    creation_date = get_date_string("%A, %B %d %Y at %H:%M:%S")
+
+    # Create a session from the configured default values.
+    new_session = crt.OpenSessionConfiguration("Default")
+
+    # Set options based)
+    new_session = crt.OpenSessionConfiguration("Default")
+    new_session.SetOption("Protocol Name", protocol)
+    new_session.SetOption("Hostname", ip)
+    desc = ["Created on {} by script:".format(creation_date), crt.ScriptFullName]
+    new_session.SetOption("Description", desc)
+    session_path = os.path.join(folder, session_name)
+    # Save session based on passed folder and session name.
+    new_session.Save(session_path)
 
 
 # ######################  DISPLAY ERROR IF RAN DIRECTLY  #######################
