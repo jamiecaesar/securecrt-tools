@@ -80,9 +80,14 @@ def main():
     local_settings_file = script_name.replace(".py", ".json")
     # Define what local settings should be by default - REQUIRES __version
     local_settings_default = {'__version': "1.0",
-                              '__comment': "session_path roots in the SecureCRT Sessions directory.  USE FORWARD SLASHES "
-                                           "OR DOUBLE-BACKSLASHES IN SESSION PATHS! SINGLE BACKSLASHES WILL ERROR.",
-                              'session_path': "_imports"}
+                              '_session_path_comment': "session_path roots in the SecureCRT Sessions directory.  USE "
+                                                       "FORWARD SLASHES OR DOUBLE-BACKSLASHES IN SESSION PATHS! SINGLE "
+                                                       "BACKSLASHES WILL ERROR.",
+                              'session_path': "_imports",
+                              '_strip_domains_comment': "A list of strings to remove if found in the device ID of CDP "
+                                                        "output",
+                              'strip_domains': [".cisco.com"]
+                              }
 
     # Import JSON file containing list of commands that need to be run.  If it does not exist, create one and use it.
     local_settings = load_settings(crt, script_dir, local_settings_file, local_settings_default)

@@ -172,12 +172,13 @@ def long_int_name(int_name):
         return str
 
 
-def extract_system_name(device_id):
+def extract_system_name(device_id, strip_list=[]):
     """
     In the CDP output some systems return a Hostname(Serial Number) format, while others return Serial(Hostname) output.
     This function tries to extract the system name from the CDP output and ignore the serial number.
     
-    :param device_id: The device_id as learned from CDP. 
+    :param device_id: The device_id as learned from CDP.
+    :param strip_list: A list of strings that should be removed from the hostname, if found
     :return: 
     """
     cisco_serial_format = r'[A-Z]{3}[A-Z0-9]{8}'
@@ -208,6 +209,7 @@ def extract_system_name(device_id):
         if is_ip:
             return system_name
         else:
-            return system_name.split('.')[0]
-    else:
-        return system_name
+            for item in strip_list:
+                if item in system_name:
+                    system_name.replace(item, '')
+            return system_name
