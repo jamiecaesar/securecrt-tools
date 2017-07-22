@@ -35,8 +35,10 @@ from imports.cisco_securecrt import start_session
 from imports.cisco_securecrt import end_session
 from imports.cisco_securecrt import create_output_filename
 from imports.cisco_securecrt import get_output
+from imports.cisco_securecrt import list_of_lists_to_csv
+
 from imports.cisco_tools import textfsm_parse_to_list
-from imports.py_utils import list_of_lists_to_csv
+
 
 ##################################  SCRIPT  ###################################
 
@@ -48,28 +50,30 @@ def main():
     # Run session start commands and save session information into a dictionary
     session = start_session(crt, script_dir)
 
-    raw_intf_output = get_output(session, send_cmd)
+    # Make sure we completed session start.  If not, we'll receive None from start_session.
+    if session:
+        raw_intf_output = get_output(session, send_cmd)
 
-    if session['OS'] in SupportedOS:
-        if session['OS'] == "NX-OS":
-            interface_template = "textfsm-templates/show-interfaces-nxos"
+        if session['OS'] in SupportedOS:
+            if session['OS'] == "NX-OS":
+                interface_template = "textfsm-templates/show-interfaces-nxos"
+            else:
+                interface_template = "textfsm-templates/show-interfaces-ios"
         else:
-            interface_template = "textfsm-templates/show-interfaces-ios"
-    else:
-        interface_template = None
-        error_str = "This script does not support {}.\n" \
-                    "It will currently only run on {}.".format(session['OS'], ", ".join(SupportedOS))
-        crt.Dialog.MessageBox(error_str, "Unsupported Network OS", ICON_STOP)
+            interface_template = None
+            error_str = "This script does not support {}.\n" \
+                        "It will currently only run on {}.".format(session['OS'], ", ".join(SupportedOS))
+            crt.Dialog.MessageBox(error_str, "Unsupported Network OS", ICON_STOP)
 
-    if interface_template:
-        # Generate filename used for output files.
-        output_filename = create_output_filename(session, "show-interfaces", ext=".csv")
-        # Build path to template, process output and export to CSV
-        template_path = os.path.join(script_dir, interface_template)
-        interface_stats = textfsm_parse_to_list(raw_intf_output, template_path, add_header=True)
-        list_of_lists_to_csv(interface_stats, output_filename)
-    
-    end_session(session)
+        if interface_template:
+            # Generate filename used for output files.
+            output_filename = create_output_filename(session, "show-interfaces", ext=".csv")
+            # Build path to template, process output and export to CSV
+            template_path = os.path.join(script_dir, interface_template)
+            interface_stats = textfsm_parse_to_list(raw_intf_output, template_path, add_header=True)
+            list_of_lists_to_csv(session, interface_stats, output_filename)
+
+        end_session(session)
 
 
 if __name__ == "__builtin__":

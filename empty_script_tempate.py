@@ -42,12 +42,14 @@ def main():
         # Run session start commands and save session information into a dictionary
         session = start_session(crt, script_dir)
 
-        #    
-        # PUT YOUR CODE HERE
-        #
+        # Make sure we completed session start.  If not, we'll receive None from start_session.
+        if session:
+            #
+            # PUT YOUR CODE HERE
+            #
 
-        # Clean up before closing session
-        end_session(session)
+            # Clean up before closing session
+            end_session(session)
 
 if __name__ == "__builtin__":
     main()

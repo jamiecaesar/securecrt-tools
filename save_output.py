@@ -51,14 +51,16 @@ def main():
     # Run session start commands and save session information into a dictionary
     session = start_session(crt, script_dir)
 
-    # Generate filename used for output files.
-    full_file_name = create_output_filename(session, send_cmd)
+    # Make sure we completed session start.  If not, we'll receive None from start_session.
+    if session:
+        # Generate filename used for output files.
+        full_file_name = create_output_filename(session, send_cmd)
 
-    # Get the output of our command and save it to the filename specified
-    write_output_to_file(session, send_cmd, full_file_name)
+        # Get the output of our command and save it to the filename specified
+        write_output_to_file(session, send_cmd, full_file_name)
 
-    # Clean up before closing session
-    end_session(session)
+        # Clean up before closing session
+        end_session(session)
 
 if __name__ == "__builtin__":
     main()
