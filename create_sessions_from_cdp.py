@@ -10,8 +10,6 @@
 # 
 #
 
-# TODO: Create a settings file to specify the session directory
-
 # ##############################  SCRIPT SETTING  ###############################
 #
 # Other Settings for this script are saved in the "script_settings.json" file that should be located in the same
@@ -33,6 +31,9 @@ if script_dir not in sys.path:
 # Imports from custom SecureCRT modules
 from imports.cisco_securecrt import start_session
 from imports.cisco_securecrt import end_session
+from imports.cisco_securecrt import load_settings
+from imports.cisco_securecrt import generate_settings
+from imports.cisco_securecrt import write_settings
 from imports.cisco_securecrt import get_output
 from imports.cisco_securecrt import create_session
 
@@ -44,7 +45,8 @@ from imports.cisco_tools import extract_system_name
 ##################################  SCRIPT  ###################################
 
 
-def create_sessions_from_cdp(session, cdp_list):
+def create_sessions_from_cdp(session, cdp_list, settings):
+    count = 0
     for device in cdp_list:
         # Extract hostname and IP to create session
         system_name = device[2]
@@ -62,42 +64,72 @@ def create_sessions_from_cdp(session, cdp_list):
                 mgmt_ip = device[4]
 
         # Create a new session from the default information.
-        create_session(session, system_name, mgmt_ip)
+        create_session(session, system_name, mgmt_ip, folder=settings['session_path'])
+        count += 1
+
+    return count
 
 
 def main():
     """
     Capture the CDP information from the connected device and ouptut it into a CSV file. 
     """
-    send_cmd = "show cdp neighbors detail"
+    # Get last entry in full script path as script filename.
+    script_name = crt.ScriptFullName.split(os.path.sep)[-1]
+    # Create settings filename by replacing .py in script name with .json
+    local_settings_file = script_name.replace(".py", ".json")
+    # Define what local settings should be by default - REQUIRES __version
+    local_settings_default = {'__version': "1.0",
+                              '__comment': "session_path roots in the SecureCRT Sessions directory.  USE FORWARD SLASHES "
+                                           "OR DOUBLE-BACKSLASHES IN SESSION PATHS! SINGLE BACKSLASHES WILL ERROR.",
+                              'session_path': "_imports"}
 
-    # Run session start commands and save session information into a dictionary
-    session = start_session(crt, script_dir)
+    # Import JSON file containing list of commands that need to be run.  If it does not exist, create one and use it.
+    local_settings = load_settings(crt, script_dir, local_settings_file, local_settings_default)
 
-    # Make sure we completed session start.  If not, we'll receive None from start_session.
-    if session:
-        # Capture output from show cdp neighbor detail
-        raw_cdp_list = get_output(session, send_cmd)
+    if local_settings:
+        send_cmd = "show cdp neighbors detail"
 
-        # Parse CDP information into a list of lists.
-        # TextFSM template for parsing "show cdp neighbor detail" output
-        cdp_template = "textfsm-templates/show-cdp-detail"
-        # Build path to template, process output and export to CSV
-        template_path = os.path.join(script_dir, cdp_template)
+        # Run session start commands and save session information into a dictionary
+        session = start_session(crt, script_dir)
 
-        # Use TextFSM to parse our output
-        cdp_table = textfsm_parse_to_list(raw_cdp_list, template_path, add_header=True)
+        # Make sure we completed session start.  If not, we'll receive None from start_session.
+        if session:
+            # Capture output from show cdp neighbor detail
+            raw_cdp_list = get_output(session, send_cmd)
 
-        # Since "System Name" is a newer N9K feature -- try to extract it from the device ID when its empty.
-        for entry in cdp_table:
-            # entry[2] is system name, entry[1] is device ID
-            if entry[2] == "":
-                entry[2] = extract_system_name(entry[1])
+            # Parse CDP information into a list of lists.
+            # TextFSM template for parsing "show cdp neighbor detail" output
+            cdp_template = "textfsm-templates/show-cdp-detail"
+            # Build path to template, process output and export to CSV
+            template_path = os.path.join(script_dir, cdp_template)
 
-        create_sessions_from_cdp(session, cdp_table)
+            # Use TextFSM to parse our output
+            cdp_table = textfsm_parse_to_list(raw_cdp_list, template_path, add_header=True)
 
-        # Clean up before exiting
-        end_session(session)
+            # Since "System Name" is a newer N9K feature -- try to extract it from the device ID when its empty.
+            for entry in cdp_table:
+                # entry[2] is system name, entry[1] is device ID
+                if entry[2] == "":
+                    entry[2] = extract_system_name(entry[1])
+
+            num_created = create_sessions_from_cdp(session, cdp_table, local_settings)
+
+            setting_msg = "{0} sessions created in the directory {1} under Sessions".format(num_created,
+                                                                              local_settings['session_path'])
+            crt.Dialog.MessageBox(setting_msg, "Sessions Created", ICON_INFO)
+
+            # Clean up before exiting
+            end_session(session)
+    else:
+        new_settings = generate_settings(local_settings_default)
+        write_settings(crt, script_dir, local_settings_file, new_settings)
+        setting_msg = ("Script specific settings file, {0}, created in directory:\n'{1}'\n\n"
+                       "Please edit this file to make any settings changes.\n\n"
+                       "After editing the settings, please run the script again."
+                       ).format(local_settings_file, script_dir)
+        crt.Dialog.MessageBox(setting_msg, "Script-Specific Settings Created", ICON_INFO)
+        return
 
 
 if __name__ == "__builtin__":
