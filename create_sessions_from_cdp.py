@@ -88,7 +88,7 @@ def main():
                               'session_path': "_imports",
                               '_strip_domains_comment': "A list of strings to remove if found in the device ID of CDP "
                                                         "output",
-                              'strip_domains': [".cisco.com"]
+                              'strip_domains': [".cisco.com", ".Cisco.com"]
                               }
 
     # Import JSON file containing list of commands that need to be run.  If it does not exist, create one and use it.
