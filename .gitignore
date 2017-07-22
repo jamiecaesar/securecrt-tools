@@ -7,7 +7,10 @@
 # Ignore Pycharm data #
 .idea/
 
-# Ignore JSON files - specifically the generated settings file #
+# Ignore the settings directory -- All settings files are specific to each individual
+settings/
+
+# Ignore JSON files, which are used as the settings files.#
 *.json
 
 # Ignore directory to store working/testing versions of scripts.
