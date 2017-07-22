@@ -11,7 +11,6 @@
 #
 
 # TODO: Create a settings file to specify the session directory
-# TODO: Modify the settings functions to accept setting filename
 
 # ##############################  SCRIPT SETTING  ###############################
 #
@@ -36,6 +35,7 @@ from imports.cisco_securecrt import start_session
 from imports.cisco_securecrt import end_session
 from imports.cisco_securecrt import get_output
 from imports.cisco_securecrt import create_session
+
 from imports.cisco_tools import textfsm_parse_to_list
 from imports.cisco_tools import extract_system_name
 
@@ -74,28 +74,30 @@ def main():
     # Run session start commands and save session information into a dictionary
     session = start_session(crt, script_dir)
 
-    # Capture output from show cdp neighbor detail
-    raw_cdp_list = get_output(session, send_cmd)
+    # Make sure we completed session start.  If not, we'll receive None from start_session.
+    if session:
+        # Capture output from show cdp neighbor detail
+        raw_cdp_list = get_output(session, send_cmd)
 
-    # Parse CDP information into a list of lists.
-    # TextFSM template for parsing "show cdp neighbor detail" output
-    cdp_template = "textfsm-templates/show-cdp-detail"
-    # Build path to template, process output and export to CSV
-    template_path = os.path.join(script_dir, cdp_template)
+        # Parse CDP information into a list of lists.
+        # TextFSM template for parsing "show cdp neighbor detail" output
+        cdp_template = "textfsm-templates/show-cdp-detail"
+        # Build path to template, process output and export to CSV
+        template_path = os.path.join(script_dir, cdp_template)
 
-    # Use TextFSM to parse our output
-    cdp_table = textfsm_parse_to_list(raw_cdp_list, template_path, add_header=True)
+        # Use TextFSM to parse our output
+        cdp_table = textfsm_parse_to_list(raw_cdp_list, template_path, add_header=True)
 
-    # Since "System Name" is a newer N9K feature -- try to extract it from the device ID when its empty.
-    for entry in cdp_table:
-        # entry[2] is system name, entry[1] is device ID
-        if entry[2] == "":
-            entry[2] = extract_system_name(entry[1])
+        # Since "System Name" is a newer N9K feature -- try to extract it from the device ID when its empty.
+        for entry in cdp_table:
+            # entry[2] is system name, entry[1] is device ID
+            if entry[2] == "":
+                entry[2] = extract_system_name(entry[1])
 
-    create_sessions_from_cdp(session, cdp_table)
+        create_sessions_from_cdp(session, cdp_table)
 
-    # Clean up before exiting
-    end_session(session)
+        # Clean up before exiting
+        end_session(session)
 
 
 if __name__ == "__builtin__":

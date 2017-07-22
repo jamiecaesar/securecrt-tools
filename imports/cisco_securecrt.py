@@ -16,6 +16,7 @@ import sys
 import time
 import json
 import re
+import csv
 from py_utils import get_date_string
 from py_utils import expanded_path
 
@@ -61,43 +62,79 @@ IDNO = 7              # No button clicked
 
 # Default settings that should be in the settings file.
 
-default_settings = {
+global_defaults = {
             '__comment': "USE FORWARD SLASHES IN WINDOWS PATHS! "
                          "See https://github.com/PresidioCode/SecureCRT for settings details",
+            '__version': "1.0",
             'debug-mode': False,
-            'save path': 'SecureCRT/ScriptOutput',
+            'save_path': 'SecureCRT/ScriptOutput',
             'date format': '%Y-%m-%d-%H-%M-%S',
             'modify term': True
         }
-settings_filename = 'script_settings.json'
+global_settings_name = 'global_settings.json'
 
 
 # ################################  FUNCTIONS   #################################
 
 
-def load_settings(crt, script_dir):
+def load_settings(crt, script_dir, filename, defaults):
     """
-    Loads settings from "script_settings.json" if it exists.  Otherwise create it with default settings.
-
+    Loads the specified settings file.  Defaults to "global_settings.json".  If the settings file doesn't exist, create 
+    it with default settings.
+    
     :param crt: The provided SecureCRT object that controls the interaction with a SecureCRT window.
     :param script_dir: Directory where the script is being executed from
-    :return settings: A dictionary with the settings found in "script_settings.json"
+    :param filename: The settings filename to look for.
+    :param defaults: The defaults settings to be compared against, or written if no settings exist.
+    :return: settings: A dictionary with the settings found in "script_settings.json" 
     """
-    # TODO Update to handle backslashes in path (escape backslash on write?)
-    settings_full_path = os.path.join(script_dir, settings_filename)
+
+    settings_full_path = os.path.join(script_dir, filename)
+
+    # If the settings file exists, read file and return settings.
     if os.path.isfile(settings_full_path):
         with open(settings_full_path, 'r') as json_file:
-            settings = json.load(json_file)
-        settings["script_dir"] = script_dir
+            try:
+                settings = json.load(json_file)
+            except ValueError as err:
+                error_str = "Settings import error.\n\nFor Windows paths you must either use forward-slashes " \
+                            "(C:/Output) or double-backslashes (C:\\\\Output).\n\n Orignial Error: {0}".format(err)
+                crt.Dialog.MessageBox(error_str, "Settings Error", ICON_STOP)
+                settings = None
+                exit(0)
+
+        # Validate settings contains everything it should, or fix it.
+        if not valid_settings(settings, defaults):
+            message_str = "The current global settings file is invalid.\n\nOverwriting file with new settings."
+            crt.Dialog.MessageBox(message_str, "Settings Error", ICON_STOP)
+            return None
+        else:
+            # If settings are valid, add script_dir and validate path
+            settings['script_dir'] = script_dir
+
+        # If the imported settings version is old, write the new version, copying original settings on top.
+        if "__version" not in settings.keys() or settings["__version"] != defaults["__version"]:
+            crt.Dialog.MessageBox("{0} was out of date and will be automatically updated to the latest version."
+                                  .format(filename))
+            settings = generate_settings(defaults, existing=settings)
+            write_settings(crt, script_dir, filename, settings)
+            settings["script_dir"] = script_dir
+        return settings
     else:
-        settings = generate_settings()
-        write_settings(crt, script_dir, settings)
-        settings["script_dir"] = script_dir
-
-    return settings
+        # If file doesn't exist, return None
+        return None
 
 
-def generate_settings(existing=None):
+def generate_settings(default_settings, existing=None):
+    """
+    A function to generate a settings JSON file, based on the provided defaults.  If existing settings are passed in,
+    those will be written on top of the new defaults.  In the end, only the new fields should be added to the existing
+    settings.
+    
+    :param default_settings: The default settings used as the base of the JSON file. 
+    :param existing: (Optional) Existing settings that need to be preserved in the new settings.
+    :return: A new settings dictionary
+    """
     new_settings = dict(default_settings)
 
     if existing:
@@ -108,27 +145,23 @@ def generate_settings(existing=None):
     return new_settings
 
 
-def write_settings(crt, script_dir, settings):
-    settings_full_path = os.path.join(script_dir, settings_filename)
+def write_settings(crt, script_dir, filename, settings):
+    settings_full_path = os.path.join(script_dir, filename)
 
     with open(settings_full_path, 'w') as json_file:
         json.dump(settings, json_file, sort_keys=True, indent=4, separators=(',', ': '))
 
-    setting_msg = ("Personal settings file, {0}, created in directory:\n'{1}'\n\n"
-                   "Please edit this file to make any settings changes."
-                   ).format(settings_filename, script_dir)
-    crt.Dialog.MessageBox(setting_msg, "Settings Created", ICON_INFO)
 
-
-def valid_settings(imported):
+def valid_settings(imported, master):
     """
     Checks the imported settings to make sure all required items are included.
 
     :param imported:
+    :param master:
     :return:
     """
-    for setting in default_settings:
-        if setting not in imported:
+    for setting in master.keys():
+        if setting not in imported.keys():
             return False
     return True
 
@@ -171,7 +204,6 @@ def get_term_info(session):
     :param session:  Session data structure from start_session().
     :return: A 2-tuple containing the terminal length and the terminal width
     """
-
     re_num_exp = r'\d+'
     re_num = re.compile(re_num_exp)
 
@@ -212,14 +244,12 @@ def get_term_info(session):
         return None, None
 
 
-
 def get_network_os(session):
     """
     Discovers OS type so that scripts can use them when necessary (e.g. commands vary by version)
 
     :param session: Session data structure from start_session().
     """
-
     SendCmd = "show version | i Cisco"
 
     raw_version = get_output(session, SendCmd)
@@ -259,23 +289,18 @@ def start_session(crt, script_dir):
     session = {}
 
     # Import Settings from Settings File or Default settings
-    settings = load_settings(crt, script_dir)
+    settings = load_settings(crt, script_dir, global_settings_name, global_defaults)
 
-    if not valid_settings(settings):
-        message_str = "The current script_settings file is incomplete.\n\nWould you to attempt an automatic fix?"
-        result = crt.Dialog.MessageBox(message_str, "Rebuild Settings?", ICON_QUESTION |
-                                       BUTTON_CANCEL | DEFBUTTON2)
-
-        if result == IDOK:
-            new_settings = generate_settings(existing=settings)
-            write_settings(crt, script_dir, new_settings)
-            settings = load_settings(crt, script_dir)
-        else:
-            err_msg = ('The current script_settings file is incomplete.\n'
-                       'Delete your {0} and run the script again to generate a new settings file from defaults.\n\n'
-                       )
-            crt.Dialog.MessageBox(str(err_msg), "Settings Error", ICON_STOP)
-            exit(0)
+    # If settings file exists
+    if not settings:
+        new_settings = generate_settings(global_defaults)
+        write_settings(crt, script_dir, global_settings_name, new_settings)
+        setting_msg = ("Personal settings file, {0}, created in directory:\n'{1}'\n\n"
+                       "Please edit this file to make any settings changes.\n\n"
+                       "After editing the settings, please run the script again."
+                       ).format(global_settings_name, script_dir)
+        crt.Dialog.MessageBox(setting_msg, "Settings Created", ICON_INFO)
+        return None
 
     session['settings'] = settings
 
@@ -415,7 +440,7 @@ def create_output_filename(session, desc, ext=".txt", include_date=True):
     """
     # Extract path and format information from our tuple
     settings = session['settings']
-    save_path = settings['save path']
+    save_path = settings['save_path']
     # If environment vars were used, expand them
     save_path = os.path.expandvars(save_path)
     # If a relative path was specified in the settings file, expand it.
@@ -482,7 +507,7 @@ def validate_path(session, path, create_on_notexist=True):
             if result == IDOK:
                 os.makedirs(base_dir)
             else:
-                crt.Dialog.MessageBox("Save path does not exist.  Exiting.",
+                crt.Dialog.MessageBox("Output directory does not exist.  Exiting.",
                                       "Invalid Path", ICON_STOP)
                 end_session(session)
                 sys.exit()
@@ -563,6 +588,62 @@ def write_output_to_file(session, command, filename):
         crt = session['crt']
         error_str = "IO Error for:\n{0}\n\n{1}".format(filename, err)
         crt.Dialog.MessageBox(error_str, "IO Error", ICON_STOP)
+
+
+def list_of_lists_to_csv(session, data, filename):
+    """
+    Takes a list of lists and writes it to a csv file.
+
+    This function takes a list of lists, such as:
+
+    [ ["IP", "Desc"], ["1.1.1.1", "Vlan 1"], ["2.2.2.2", "Vlan 2"] ]
+
+    and writes it into a CSV file with the filename supplied.   Each sub-list
+    in the outer list will be written as a row.  If you want a header row, it 
+    must be the first sub-list in the outer list.
+
+    :param data:  A list of lists data structure (one row per line of the CSV)
+    :param filename:  The output filename for the CSV file
+    """
+    # Validate path before creating file.
+    validate_path(session, filename)
+
+    # Binary mode required ('wb') to prevent Windows from adding linefeeds after each line.
+    newfile = open(filename, 'wb')
+    csv_out = csv.writer(newfile)
+    for line in data:
+        csv_out.writerow(line)
+    newfile.close()
+
+
+def list_of_dicts_to_csv(session, fields, data, filename):
+    """
+    Accepts a list of dictionaries and writes it to a CSV file.
+
+    This function takes a list of dicts (passed in as data), such as:
+
+    [ {"key1": value, "key2": value}, {"key1": value, "key2": value} ]
+
+    and puts it into a CSV file with the supplied filename.  The function requires 
+    a list of the keys found in the dictionaries (passed in as fields), such as:
+
+    [ "key1", "key2" ]
+
+    This will write a CSV file with all of the keys as the header row, and add a
+    row for every dict in the list, with the correct data in each column.
+
+    :param fields:  The list of header fields
+    :param data:   The list of dictionaries, where each key in the dict corresponds to a header value
+    :param filename:  The output filename to write
+    """
+    # Validate path before creating file.
+    validate_path(session, filename)
+
+    with open(filename, "wb") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fields)
+        writer.writerow(dict(zip(writer.fieldnames, writer.fieldnames)))
+        for entry in data:
+            writer.writerow(entry)
 
 
 def create_session(session, session_name, ip, protocol="SSH2", folder="_imports"):

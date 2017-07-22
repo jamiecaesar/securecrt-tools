@@ -33,8 +33,10 @@ from imports.cisco_securecrt import start_session
 from imports.cisco_securecrt import end_session
 from imports.cisco_securecrt import create_output_filename
 from imports.cisco_securecrt import get_output
+from imports.cisco_securecrt import list_of_lists_to_csv
+
 from imports.cisco_tools import textfsm_parse_to_list
-from imports.py_utils import list_of_lists_to_csv
+
 
 ##################################  SCRIPT  ###################################
 
@@ -48,26 +50,28 @@ def main():
     # Run session start commands and save session information into a dictionary
     session = start_session(crt, script_dir)
 
-    # Capture output from show cdp neighbor detail
-    raw_mac_list = get_output(session, send_cmd)
+    # Make sure we completed session start.  If not, we'll receive None from start_session.
+    if session:
+        # Capture output from show cdp neighbor detail
+        raw_mac_list = get_output(session, send_cmd)
 
-    # TextFSM template for parsing "show mac address-table" output
-    if session['OS'] == "NX-OS":
-        mac_template = "textfsm-templates/show-mac-addr-table-nxos"
-    else:
-        mac_template = "textfsm-templates/show-mac-addr-table-ios"
+        # TextFSM template for parsing "show mac address-table" output
+        if session['OS'] == "NX-OS":
+            mac_template = "textfsm-templates/show-mac-addr-table-nxos"
+        else:
+            mac_template = "textfsm-templates/show-mac-addr-table-ios"
 
-    # Parse MAC information into a list of lists.
-    # Build path to template, process output and export to CSV
-    template_path = os.path.join(script_dir, mac_template)
+        # Parse MAC information into a list of lists.
+        # Build path to template, process output and export to CSV
+        template_path = os.path.join(script_dir, mac_template)
 
-    cdp_table = textfsm_parse_to_list(raw_mac_list, template_path, add_header=True)
-    # Write TextFSM output to a .csv file.
-    output_filename = create_output_filename(session, "mac-addr", ext=".csv")
-    list_of_lists_to_csv(cdp_table, output_filename)
+        cdp_table = textfsm_parse_to_list(raw_mac_list, template_path, add_header=True)
+        # Write TextFSM output to a .csv file.
+        output_filename = create_output_filename(session, "mac-addr", ext=".csv")
+        list_of_lists_to_csv(session, cdp_table, output_filename)
 
-    # Clean up before exiting
-    end_session(session)
+        # Clean up before exiting
+        end_session(session)
 
 
 if __name__ == "__builtin__":
