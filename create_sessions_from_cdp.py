@@ -12,8 +12,18 @@
 
 # ##############################  SCRIPT SETTING  ###############################
 #
-# Other Settings for this script are saved in the "script_settings.json" file that should be located in the same
-# directory as this script.
+# Global settings that affect all scripts (output directory, date format, etc) is stored in the "global_settings.json"
+# file in the "settings" directory.
+#
+# If any local settings are used for this script, they will be stored in the same settings folder, with the same name
+# as the script that uses them, except ending with ".json".
+#
+# All settings can be manually modified with the same syntax as Python lists and dictionaries.   Be aware of required
+# commas between items, or else options are likely to get run together and neither will work.
+#
+# **IMPORTANT**  All paths saved in .json files must contain either forward slashes (/home/jcaesar) or
+# DOUBLE back-slashes (C:\\Users\\Jamie).   Single backslashes will be considered part of a control character and will
+# cause an error on loading.
 #
 
 
@@ -90,9 +100,11 @@ def main():
                                                         "output",
                               'strip_domains': [".cisco.com", ".Cisco.com"]
                               }
+    # Define the directory to save the settings file in.
+    settings_dir = os.path.normpath(os.path.join(script_dir, "settings"))
 
     # Import JSON file containing list of commands that need to be run.  If it does not exist, create one and use it.
-    local_settings = load_settings(crt, script_dir, local_settings_file, local_settings_default)
+    local_settings = load_settings(crt, settings_dir, local_settings_file, local_settings_default)
 
     if local_settings:
         send_cmd = "show cdp neighbors detail"
