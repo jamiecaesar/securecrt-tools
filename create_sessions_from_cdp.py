@@ -47,6 +47,7 @@ from imports.cisco_tools import extract_system_name
 
 def create_sessions_from_cdp(session, cdp_list, settings):
     count = 0
+    skipped = 0
     for device in cdp_list:
         # Extract hostname and IP to create session
         system_name = device[2]
@@ -59,6 +60,7 @@ def create_sessions_from_cdp(session, cdp_list, settings):
         if mgmt_ip == "":
             if device[4] == "":
                 # If no mgmt IP or interface IP, skip device.
+                skipped += 1
                 continue
             else:
                 mgmt_ip = device[4]
@@ -67,7 +69,7 @@ def create_sessions_from_cdp(session, cdp_list, settings):
         create_session(session, system_name, mgmt_ip, folder=settings['session_path'])
         count += 1
 
-    return count
+    return count, skipped
 
 
 def main():
@@ -80,9 +82,14 @@ def main():
     local_settings_file = script_name.replace(".py", ".json")
     # Define what local settings should be by default - REQUIRES __version
     local_settings_default = {'__version': "1.0",
-                              '__comment': "session_path roots in the SecureCRT Sessions directory.  USE FORWARD SLASHES "
-                                           "OR DOUBLE-BACKSLASHES IN SESSION PATHS! SINGLE BACKSLASHES WILL ERROR.",
-                              'session_path': "_imports"}
+                              '_session_path_comment': "session_path roots in the SecureCRT Sessions directory.  USE "
+                                                       "FORWARD SLASHES OR DOUBLE-BACKSLASHES IN SESSION PATHS! SINGLE "
+                                                       "BACKSLASHES WILL ERROR.",
+                              'session_path': "_imports",
+                              '_strip_domains_comment': "A list of strings to remove if found in the device ID of CDP "
+                                                        "output",
+                              'strip_domains': [".cisco.com", ".Cisco.com"]
+                              }
 
     # Import JSON file containing list of commands that need to be run.  If it does not exist, create one and use it.
     local_settings = load_settings(crt, script_dir, local_settings_file, local_settings_default)
@@ -111,12 +118,12 @@ def main():
             for entry in cdp_table:
                 # entry[2] is system name, entry[1] is device ID
                 if entry[2] == "":
-                    entry[2] = extract_system_name(entry[1])
+                    entry[2] = extract_system_name(entry[1], strip_list=local_settings['strip_domains'])
 
-            num_created = create_sessions_from_cdp(session, cdp_table, local_settings)
+            num_created, num_skipped = create_sessions_from_cdp(session, cdp_table, local_settings)
 
-            setting_msg = "{0} sessions created in the directory {1} under Sessions".format(num_created,
-                                                                              local_settings['session_path'])
+            setting_msg = "{0} sessions created in the directory {1} under Sessions\n\n{2} sessions skipped (no IP)"\
+                .format(num_created, local_settings['session_path'], num_skipped)
             crt.Dialog.MessageBox(setting_msg, "Sessions Created", ICON_INFO)
 
             # Clean up before exiting

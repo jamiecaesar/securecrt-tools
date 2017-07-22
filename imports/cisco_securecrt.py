@@ -105,9 +105,11 @@ def load_settings(crt, script_dir, filename, defaults):
 
         # Validate settings contains everything it should, or fix it.
         if not valid_settings(settings, defaults):
-            message_str = "The settings file {} is invalid.\n\nUnable to read settings file.".format(filename)
-            crt.Dialog.MessageBox(message_str, "Settings Error", ICON_STOP)
-            return None
+            message_str = "The settings file {} is invalid or out-of-date.\n\nAttempting to update.".format(filename)
+            crt.Dialog.MessageBox(message_str, "Settings Repair", ICON_INFO)
+            settings = generate_settings(defaults, existing=settings)
+            write_settings(crt, script_dir, filename, settings)
+            return settings
         else:
             # If settings are valid, add script_dir and validate path
             settings['script_dir'] = script_dir
@@ -657,7 +659,6 @@ def create_session(session, session_name, ip, protocol="SSH2", folder="_imports"
     new_session = crt.OpenSessionConfiguration("Default")
 
     # Set options based)
-    new_session = crt.OpenSessionConfiguration("Default")
     new_session.SetOption("Protocol Name", protocol)
     new_session.SetOption("Hostname", ip)
     desc = ["Created on {} by script:".format(creation_date), crt.ScriptFullName]
