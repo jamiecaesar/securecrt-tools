@@ -63,7 +63,7 @@ IDNO = 7              # No button clicked
 # Default settings that should be in the settings file.
 
 global_defaults = {
-            '__comment': "USE FORWARD SLASHES IN WINDOWS PATHS! "
+            '__comment': "USE FORWARD SLASHES OR DOUBLE-BACKSLASHES IN WINDOWS PATHS! SINGLE BACKSLASHES WILL ERROR."
                          "See https://github.com/PresidioCode/SecureCRT for settings details",
             '__version': "1.0",
             'debug-mode': False,
@@ -105,7 +105,7 @@ def load_settings(crt, script_dir, filename, defaults):
 
         # Validate settings contains everything it should, or fix it.
         if not valid_settings(settings, defaults):
-            message_str = "The current global settings file is invalid.\n\nOverwriting file with new settings."
+            message_str = "The settings file {} is invalid.\n\nUnable to read settings file.".format(filename)
             crt.Dialog.MessageBox(message_str, "Settings Error", ICON_STOP)
             return None
         else:
@@ -160,10 +160,13 @@ def valid_settings(imported, master):
     :param master:
     :return:
     """
-    for setting in master.keys():
-        if setting not in imported.keys():
-            return False
-    return True
+    if not isinstance(imported, dict):
+        return False
+    else:
+        for setting in master.keys():
+            if setting not in imported.keys():
+                return False
+        return True
 
 
 def get_prompt(tab):

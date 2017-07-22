@@ -31,6 +31,9 @@ if script_dir not in sys.path:
 # Imports from custom SecureCRT modules
 from imports.cisco_securecrt import start_session
 from imports.cisco_securecrt import end_session
+from imports.cisco_securecrt import load_settings
+from imports.cisco_securecrt import generate_settings
+from imports.cisco_securecrt import write_settings
 from imports.cisco_securecrt import create_output_filename
 from imports.cisco_securecrt import write_output_to_file
 from imports.cisco_securecrt import ICON_INFO
@@ -43,39 +46,43 @@ def main():
     """
     Captures the output from "show running-config" and saves it to a file.
     """
+    local_settings_file = "document_device.json"
+    local_settings_default = {"__version": "1.0",
+                              "command_list": ["show ver",
+                                               "show int status",
+                                               "show run"]
+                              }
 
     # Import JSON file containing list of commands that need to be run.  If it does not exist, create one and use it.
-    command_list = None
-    command_list_filename = "document_device.json"
-    command_list_full_path = os.path.join(script_dir, command_list_filename)
-    if os.path.isfile(command_list_full_path):
-        with open(command_list_full_path, 'r') as json_file:
-            command_list = json.load(json_file)
+    local_settings = load_settings(crt, script_dir, local_settings_file, local_settings_default)
+
+    if local_settings:
+        command_list = local_settings["command_list"]
+
+        # Run session start commands and save session information into a dictionary
+        session = start_session(crt, script_dir)
+
+        # Make sure we completed session start.  If not, we'll receive None from start_session.
+        if session:
+            for command in command_list:
+
+                # Generate filename used for output files.
+                full_file_name = create_output_filename(session, command)
+
+                # Get the output of our command and save it to the filename specified
+                write_output_to_file(session, command, full_file_name)
+
+            # Clean up before closing session
+            end_session(session)
     else:
-        command_list = ["show ver", "show int status", "show run"]
-        with open(command_list_full_path, 'w') as json_file:
-            json.dump(command_list, json_file, indent=4, separators=(',', ': '))
-
-        setting_msg = ("A file containing the commands to capture, {0}, has been created at:\n'{1}'\n\n"
-                       "Please edit this file to change the list of commands."
-                       ).format(command_list_full_path, script_dir)
-        crt.Dialog.MessageBox(setting_msg, "Settings Created", ICON_INFO)
-
-    # Run session start commands and save session information into a dictionary
-    session = start_session(crt, script_dir)
-
-    # Make sure we completed session start.  If not, we'll receive None from start_session.
-    if session:
-        for command in command_list:
-
-            # Generate filename used for output files.
-            full_file_name = create_output_filename(session, command)
-
-            # Get the output of our command and save it to the filename specified
-            write_output_to_file(session, command, full_file_name)
-
-        # Clean up before closing session
-        end_session(session)
+        new_settings = generate_settings(local_settings_default)
+        write_settings(crt, script_dir, local_settings_file, new_settings)
+        setting_msg = ("Script specific settings file, {0}, created in directory:\n'{1}'\n\n"
+                       "Please edit this file to make any settings changes.\n\n"
+                       "After editing the settings, please run the script again."
+                       ).format(local_settings_file, script_dir)
+        crt.Dialog.MessageBox(setting_msg, "Script-Specific Settings Created", ICON_INFO)
+        return
 
 if __name__ == "__builtin__":
     main()
