@@ -77,19 +77,19 @@ global_settings_name = 'global_settings.json'
 # ################################  FUNCTIONS   #################################
 
 
-def load_settings(crt, script_dir, filename, defaults):
+def load_settings(crt, settings_dir, filename, defaults):
     """
     Loads the specified settings file.  Defaults to "global_settings.json".  If the settings file doesn't exist, create 
     it with default settings.
     
     :param crt: The provided SecureCRT object that controls the interaction with a SecureCRT window.
-    :param script_dir: Directory where the script is being executed from
+    :param settings_dir: Directory where the script is being executed from
     :param filename: The settings filename to look for.
     :param defaults: The defaults settings to be compared against, or written if no settings exist.
     :return: settings: A dictionary with the settings found in "script_settings.json" 
     """
-
-    settings_full_path = os.path.join(script_dir, filename)
+    settings_full_path = os.path.join(settings_dir, filename)
+    settings_full_path = os.path.normpath(settings_full_path)
 
     # If the settings file exists, read file and return settings.
     if os.path.isfile(settings_full_path):
@@ -108,22 +108,24 @@ def load_settings(crt, script_dir, filename, defaults):
             message_str = "The settings file {} is invalid or out-of-date.\n\nAttempting to update.".format(filename)
             crt.Dialog.MessageBox(message_str, "Settings Repair", ICON_INFO)
             settings = generate_settings(defaults, existing=settings)
-            write_settings(crt, script_dir, filename, settings)
+            write_settings(crt, settings_dir, filename, settings)
             return settings
         else:
             # If settings are valid, add script_dir and validate path
-            settings['script_dir'] = script_dir
+            settings['script_dir'] = os.path.dirname(crt.ScriptFullName)
+            settings['settings_dir'] = settings_dir
 
         # If the imported settings version is old, write the new version, copying original settings on top.
         if "__version" not in settings.keys() or settings["__version"] != defaults["__version"]:
             crt.Dialog.MessageBox("{0} was out of date and will be automatically updated to the latest version."
                                   .format(filename))
             settings = generate_settings(defaults, existing=settings)
-            write_settings(crt, script_dir, filename, settings)
-            settings["script_dir"] = script_dir
+            write_settings(crt, settings_dir, filename, settings)
+            settings['script_dir'] = os.path.dirname(crt.ScriptFullName)
+            settings['settings_dir'] = settings_dir
         return settings
     else:
-        # If file doesn't exist, return None
+        # If file doesn't exist, return None.  Let the calling script/function deal with creating the file.
         return None
 
 
@@ -147,8 +149,12 @@ def generate_settings(default_settings, existing=None):
     return new_settings
 
 
-def write_settings(crt, script_dir, filename, settings):
-    settings_full_path = os.path.join(script_dir, filename)
+def write_settings(crt, settings_dir, filename, settings):
+    if not os.path.isdir(settings_dir):
+        os.mkdir(settings_dir)
+
+    settings_full_path = os.path.join(settings_dir, filename)
+    settings_full_path = os.path.normpath(settings_full_path)
 
     with open(settings_full_path, 'w') as json_file:
         json.dump(settings, json_file, sort_keys=True, indent=4, separators=(',', ': '))
@@ -293,8 +299,10 @@ def start_session(crt, script_dir):
     # Create data structure to store our session data.  Additional info added later.
     session = {}
 
+    settings_dir = os.path.normpath(os.path.join(script_dir, "settings"))
+
     # Import Settings from Settings File or Default settings
-    settings = load_settings(crt, script_dir, global_settings_name, global_defaults)
+    settings = load_settings(crt, settings_dir, global_settings_name, global_defaults)
 
     # If settings file exists
     if not settings:
