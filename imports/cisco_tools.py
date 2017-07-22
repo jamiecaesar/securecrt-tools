@@ -211,5 +211,7 @@ def extract_system_name(device_id, strip_list=[]):
         else:
             for item in strip_list:
                 if item in system_name:
-                    system_name.replace(item, '')
+                    system_name = system_name.replace(item, '')
             return system_name
+    else:
+        return system_name

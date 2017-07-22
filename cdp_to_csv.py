@@ -90,7 +90,7 @@ def main():
             for entry in cdp_table:
                 # entry[2] is system name, entry[1] is device ID
                 if entry[2] == "":
-                    entry[2] = extract_system_name(entry[1])
+                    entry[2] = extract_system_name(entry[1], strip_list=local_settings['strip_domains'])
 
             # Write TextFSM output to a .csv file.
             output_filename = create_output_filename(session, "cdp", ext=".csv")
