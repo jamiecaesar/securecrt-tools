@@ -13,7 +13,7 @@
 import os
 import re
 import datetime
-import csv
+
 
 def get_date_string(format):
     """
@@ -82,86 +82,3 @@ def read_file_to_list(file_path):
     :return:  A list of strings, each entry being a line in the file.
     """
     return [line.rstrip('\r\n') for line in open(file_path, 'r')]
-
-
-def list_of_lists_to_csv(data, filename):
-    """
-    Takes a list of lists and writes it to a csv file.
-    
-    This function takes a list of lists, such as:
-
-    [ ["IP", "Desc"], ["1.1.1.1", "Vlan 1"], ["2.2.2.2", "Vlan 2"] ]
-
-    and writes it into a CSV file with the filename supplied.   Each sub-list
-    in the outer list will be written as a row.  If you want a header row, it 
-    must be the first sub-list in the outer list.
-    
-    :param data:  A list of lists data structure (one row per line of the CSV)
-    :param filename:  The output filename for the CSV file
-    """
-    # Binary mode required ('wb') to prevent Windows from adding linefeeds after each line.
-    newfile = open(filename, 'wb')
-    csv_out = csv.writer(newfile)
-    for line in data:
-        csv_out.writerow(line)
-    newfile.close()
-
-
-def list_of_dicts_to_csv(fields, data, filename):
-    """
-    Accepts a list of dictionaries and writes it to a CSV file.
-    
-    This function takes a list of dicts (passed in as data), such as:
-
-    [ {"key1": value, "key2": value}, {"key1": value, "key2": value} ]
-
-    and puts it into a CSV file with the supplied filename.  The function requires 
-    a list of the keys found in the dictionaries (passed in as fields), such as:
-
-    [ "key1", "key2" ]
-
-    This will write a CSV file with all of the keys as the header row, and add a
-    row for every dict in the list, with the correct data in each column.
-
-    :param fields:  The list of header fields
-    :param data:   The list of dictionaries, where each key in the dict corresponds to a header value
-    :param filename:  The output filename to write
-    """
-    with open(filename, "wb") as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=fields)
-        writer.writerow(dict(zip(writer.fieldnames, writer.fieldnames)))
-        for entry in data:
-            writer.writerow(entry)
-
-
-def fixed_columns_to_list(filepath, field_lens, ext='.txt'):
-    '''
-    Reads in the text input of a file (.txt default extension).  This file is 
-    meant to hold a text table with fixed column widths (like "show mac 
-    address-table" or "show int status").  
-
-    The "field_lens" variable must be a tuple (i.e. (5, 10, 23, 14) ) which 
-    has the column widths for each column.  Since the last column will often
-    be as long as whatever output should fit there, without being truncated,
-    the last value can be set to -1.  In this case, the script will detect 
-    the longest line and select the last column width appropriately.
-
-    For example:  (5, 10, 23, 14, -1) is a 5 column table, and the script
-    will automatically detect the width of the last column.
-    '''
-
-    table = []
-    list_of_lines = ReadFileToList(filepath, ext=ext)
-    max_line = max([len(line) for line in list_of_lines])
-    min_line_len = sum(list(field_lens)[:-1])
-    fmtstring = ' '.join('{0}{1}'.format(fw if fw > 0 else str(max_line - min_line_len), 's') for fw in field_lens)
-    fieldstruct = struct.Struct(fmtstring)
-    parse = fieldstruct.unpack_from
-    for line in list_of_lines:
-        if len(line) >= min_line_len and len(line) < max_line:
-            line = line + ' ' * (max_line - len(line))
-            fields = parse(line)
-            next_line = [item.strip(' -\r\n\t') for item in fields]
-            if next_line[0]:
-                table.append(next_line)
-    return table

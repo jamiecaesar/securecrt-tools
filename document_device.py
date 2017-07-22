@@ -56,7 +56,7 @@ def main():
         with open(command_list_full_path, 'w') as json_file:
             json.dump(command_list, json_file, indent=4, separators=(',', ': '))
 
-        setting_msg = ("A file containing the commands to capture, {}, has been created at:\n'{}'\n\n"
+        setting_msg = ("A file containing the commands to capture, {0}, has been created at:\n'{1}'\n\n"
                        "Please edit this file to change the list of commands."
                        ).format(command_list_full_path, script_dir)
         crt.Dialog.MessageBox(setting_msg, "Settings Created", ICON_INFO)
@@ -64,16 +64,18 @@ def main():
     # Run session start commands and save session information into a dictionary
     session = start_session(crt, script_dir)
 
-    for command in command_list:
+    # Make sure we completed session start.  If not, we'll receive None from start_session.
+    if session:
+        for command in command_list:
 
-        # Generate filename used for output files.
-        full_file_name = create_output_filename(session, command)
+            # Generate filename used for output files.
+            full_file_name = create_output_filename(session, command)
 
-        # Get the output of our command and save it to the filename specified
-        write_output_to_file(session, command, full_file_name)
+            # Get the output of our command and save it to the filename specified
+            write_output_to_file(session, command, full_file_name)
 
-    # Clean up before closing session
-    end_session(session)
+        # Clean up before closing session
+        end_session(session)
 
 if __name__ == "__builtin__":
     main()

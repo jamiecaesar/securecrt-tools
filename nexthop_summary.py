@@ -34,12 +34,12 @@ from imports.cisco_securecrt import start_session
 from imports.cisco_securecrt import end_session
 from imports.cisco_securecrt import create_output_filename
 from imports.cisco_securecrt import write_output_to_file
+from imports.cisco_securecrt import list_of_lists_to_csv
 
 from imports.cisco_tools import normalize_protocol
 from imports.cisco_tools import textfsm_parse_to_dict
 from imports.cisco_tools import update_empty_interfaces
 
-from imports.py_utils import list_of_lists_to_csv
 from imports.py_utils import human_sort_key
 
 import imports.google.ipaddress as ipaddress
@@ -198,38 +198,40 @@ def main():
     # Run session start commands and save session information into a dictionary
     session = start_session(crt, script_dir)
 
-    # Get VRF that we are interested in
-    selected_vrf = crt.Dialog.Prompt("Enter the VRF name.\n(Leave blank for default VRF)")
-    if selected_vrf != "":
-        send_cmd = send_cmd + " vrf {0}".format(selected_vrf)
-        session['hostname'] = session['hostname'] + "-VRF-{0}".format(selected_vrf)
-    
-    # Generate filename used for output files.
-    temp_routes_filename = create_output_filename(session, "NextHopSummary")
+    # Make sure we completed session start.  If not, we'll receive None from start_session.
+    if session:
+        # Get VRF that we are interested in
+        selected_vrf = crt.Dialog.Prompt("Enter the VRF name.\n(Leave blank for default VRF)")
+        if selected_vrf != "":
+            send_cmd = send_cmd + " vrf {0}".format(selected_vrf)
+            session['hostname'] = session['hostname'] + "-VRF-{0}".format(selected_vrf)
 
-    if session['OS'] in supported_os:
-        # Dumping directly to a huge string has problems when the route table is large (1000+ lines)
-        # Save raw "show ip route" output to a file, read it back in as a list of strings and delete temp file.
-        write_output_to_file(session, send_cmd, temp_routes_filename)
-        with open(temp_routes_filename, 'r') as route_file:
-            routes = route_file.read()
-        os.remove(temp_routes_filename)
+        # Generate filename used for output files.
+        temp_routes_filename = create_output_filename(session, "NextHopSummary")
 
-        route_list = parse_routes(session, routes)
+        if session['OS'] in supported_os:
+            # Dumping directly to a huge string has problems when the route table is large (1000+ lines)
+            # Save raw "show ip route" output to a file, read it back in as a list of strings and delete temp file.
+            write_output_to_file(session, send_cmd, temp_routes_filename)
+            with open(temp_routes_filename, 'r') as route_file:
+                routes = route_file.read()
+            os.remove(temp_routes_filename)
 
-        output_filename = create_output_filename(session, "NextHopSummary", ext='.csv')
+            route_list = parse_routes(session, routes)
 
-        # Process TextFSM output into list of lists (for direct output to CSV)
-        output_data = nexthop_summary(route_list)
-        # Write data into a CSV file.
-        list_of_lists_to_csv(output_data, output_filename)
-    else:
-        error_str = "This script does not support {}.\n" \
-                    "It will currently only run on IOS Devices.".format(session['OS'])
-        crt.Dialog.MessageBox(error_str, "Unsupported Network OS", 16)
+            output_filename = create_output_filename(session, "NextHopSummary", ext='.csv')
 
-    # Clean up before exiting
-    end_session(session)
+            # Process TextFSM output into list of lists (for direct output to CSV)
+            output_data = nexthop_summary(route_list)
+            # Write data into a CSV file.
+            list_of_lists_to_csv(session, output_data, output_filename)
+        else:
+            error_str = "This script does not support {}.\n" \
+                        "It will currently only run on IOS Devices.".format(session['OS'])
+            crt.Dialog.MessageBox(error_str, "Unsupported Network OS", 16)
+
+        # Clean up before exiting
+        end_session(session)
 
 
 if __name__ == "__builtin__":
