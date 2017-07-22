@@ -105,7 +105,7 @@ def main():
             template_path = os.path.join(script_dir, cdp_template)
 
             # Use TextFSM to parse our output
-            cdp_table = textfsm_parse_to_list(raw_cdp_list, template_path, add_header=True)
+            cdp_table = textfsm_parse_to_list(raw_cdp_list, template_path, add_header=False)
 
             # Since "System Name" is a newer N9K feature -- try to extract it from the device ID when its empty.
             for entry in cdp_table:
