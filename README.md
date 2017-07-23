@@ -4,6 +4,8 @@ SecureCRT Python scripts for doing various tasks on Cisco equipment.
 
 These scripts should work on any version of SecureCRT that supports python.  If you find that a script won't work on your machine, please post an issue to let us know!
 
+**NOTE:** The master branch now contains the re-written versions of these scripts.  Not all have been ported yet, but some new additions only exist here.   Please see the `Pre-2017` branch if you need to access the old version.
+
 ## Scripts:
 
 * **arp_to_csv.py** - Captures the ARP table and outputs the data to a CSV file.  This output is requird for `switchport_mapping.py`.
