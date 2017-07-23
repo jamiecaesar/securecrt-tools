@@ -55,6 +55,7 @@ def main():
     """
     Capture the CDP information from the connected device and ouptut it into a CSV file. 
     """
+    supported_os = ["IOS", "NX-OS"]
     send_cmd = "show mac address-table"
 
     # Run session start commands and save session information into a dictionary
@@ -62,6 +63,10 @@ def main():
 
     # Make sure we completed session start.  If not, we'll receive None from start_session.
     if session:
+        if session['OS'] not in supported_os:
+            crt.Dialog.Messagebox("This device OS is not supported by this script.  Exiting.")
+            return
+
         # Capture output from show cdp neighbor detail
         raw_mac_list = get_output(session, send_cmd)
 
@@ -71,14 +76,15 @@ def main():
         else:
             mac_template = "textfsm-templates/show-mac-addr-table-ios"
 
-        # Parse MAC information into a list of lists.
         # Build path to template, process output and export to CSV
         template_path = os.path.join(script_dir, mac_template)
 
-        cdp_table = textfsm_parse_to_list(raw_mac_list, template_path, add_header=True)
+        # Parse MAC information into a list of lists.
+        mac_table = textfsm_parse_to_list(raw_mac_list, template_path, add_header=True)
+
         # Write TextFSM output to a .csv file.
         output_filename = create_output_filename(session, "mac-addr", ext=".csv")
-        list_of_lists_to_csv(session, cdp_table, output_filename)
+        list_of_lists_to_csv(session, mac_table, output_filename)
 
         # Clean up before exiting
         end_session(session)
