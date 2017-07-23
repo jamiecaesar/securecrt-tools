@@ -86,10 +86,12 @@ def main():
     """
     Capture the CDP information from the connected device and ouptut it into a CSV file. 
     """
-    # Get last entry in full script path as script filename.
+    # Extract the script name from the full script path.
     script_name = crt.ScriptFullName.split(os.path.sep)[-1]
+
     # Create settings filename by replacing .py in script name with .json
     local_settings_file = script_name.replace(".py", ".json")
+
     # Define what local settings should be by default - REQUIRES __version
     local_settings_default = {'__version': "1.0",
                               '_session_path_comment': "session_path roots in the SecureCRT Sessions directory.  USE "
