@@ -1,8 +1,8 @@
 Value Required ADDRESS (\d+\.\d+\.\d+\.\d+)
 Value Required AGE ([-\d+]+)
 Value Required MAC (\S+)
-Value Required TYPE (\S+)
 Value INTERFACE (\S+)
+Value Required TYPE (\S+)
 
 Start
   ^Internet\s+${ADDRESS}\s+${AGE}\s+${MAC}\s+${TYPE}\s+${INTERFACE} -> Record
