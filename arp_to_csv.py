@@ -56,28 +56,36 @@ def main():
     """
     Capture the ARP information from the connected device and ouptut it to a CSV file. 
     """
-    send_cmd = "show ip arp"
+    supported_os = ["IOS", "NX-OS"]
 
     # Run session start commands and save session information into a dictionary
     session = start_session(crt, script_dir)
 
     # Make sure we completed session start.  If not, we'll receive None from start_session.
     if session:
+        if session['OS'] not in supported_os:
+            crt.Dialog.Messagebox("This device OS is not supported by this script.  Exiting.")
+            return
+
+        if session['OS'] == "IOS":
+            send_cmd = "show ip arp"
+            arp_template = "textfsm-templates/cisco_ios_show_ip_arp.template"
+        else:
+            send_cmd = "show ip arp detail"
+            arp_template = "textfsm-templates/cisco_nxos_show_ip_arp_detail.template"
+
         # Capture output from show cdp neighbor detail
         raw_arp_list = get_output(session, send_cmd)
 
-        # Parse CDP information into a list of lists.
-        # TextFSM template for parsing "show cdp neighbor detail" output
-        arp_template = "textfsm-templates/show-ip-arp-ios"
-        # Build path to template, process output and export to CSV
+        # Build full path to template
         template_path = os.path.join(script_dir, arp_template)
 
         # Use TextFSM to parse our output
-        cdp_table = textfsm_parse_to_list(raw_arp_list, template_path, add_header=True)
+        arp_table = textfsm_parse_to_list(raw_arp_list, template_path, add_header=True)
 
         # Write TextFSM output to a .csv file.
         output_filename = create_output_filename(session, "arp", ext=".csv")
-        list_of_lists_to_csv(session, cdp_table, output_filename)
+        list_of_lists_to_csv(session, arp_table, output_filename)
 
         # Clean up before exiting
         end_session(session)
