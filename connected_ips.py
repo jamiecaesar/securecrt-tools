@@ -5,7 +5,7 @@
 # Author: XXXXXXXX
 # Email: XXXXXXX@presidio.com
 # 
-# ****WRITE A DESCRIPTION OF WHAT THIS SCRIPT SHOULD DO HERE*****
+# This script will grab the running configuration of a Cisco IOS or NX-OS device and save it into a file.
 #
 
 # ##############################  SCRIPT SETTING  ###############################
