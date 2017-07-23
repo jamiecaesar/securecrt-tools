@@ -1,8 +1,7 @@
 Value Required INTERFACE (\S+)
 Value DESCRIPTION (\S+)
-Value TYPE (\S+)
-Value SPEED (\S+)
+Value STATUS (\S+)
+Value PROTOCOL (\S+)
 
 Start
-  ^${INTERFACE}\s+${TYPE}\s+${SPEED}\s+(--|${DESCRIPTION}) -> Record
-  ^${INTERFACE}\s+(--|${DESCRIPTION}) -> Record
+  ^${INTERFACE}\s+${STATUS}\s+${PROTOCOL}\s+(${DESCRIPTION})? -> Record

@@ -53,6 +53,49 @@ from imports.py_utils import human_sort_key
 
 # #################################  SCRIPT  ###################################
 
+def get_mac_table(session):
+    # TextFSM template for parsing "show mac address-table" output
+    if session['OS'] == "NX-OS":
+        send_cmd = "show mac address-table"
+        mac_template = "textfsm-templates/show-mac-addr-table-nxos"
+    else:
+        send_cmd = "show mac address-table"
+        mac_template = "textfsm-templates/show-mac-addr-table-ios"
+
+    raw_mac_list = get_output(session, send_cmd)
+
+    template_path = os.path.join(script_dir, mac_template)
+
+    mac_table = textfsm_parse_to_list(raw_mac_list, template_path, add_header=False)
+
+    output = {}
+    for entry in mac_table:
+        vlan = entry[0]
+        mac = entry[1]
+        intf = entry[2]
+        output[intf] = (mac, vlan)
+
+    return output
+
+
+def get_desc_table(session):
+    # TextFSM template for parsing "show mac address-table" output
+    if session['OS'] == "NX-OS":
+        send_cmd = "show interface description"
+        desc_template = "textfsm-templates/cisco_nxos_show_interface_description.template"
+    else:
+        send_cmd = "show interface description"
+        desc_template = "textfsm-templates/cisco_ios_show_interfaces_description.template"
+
+    raw_desc_list = get_output(session, send_cmd)
+
+    template_path = os.path.join(script_dir, desc_template)
+
+    desc_table = textfsm_parse_to_list(raw_desc_list, template_path, add_header=False)
+
+    return desc_table
+
+
 def get_arp_info(session):
     crt = session['crt']
 
@@ -102,37 +145,36 @@ def main():
                 crt.Dialog.Messagebox("This device OS is not supported by this script.  Exiting.")
                 return
 
-            send_cmd = "show mac address-table"
-            raw_mac_list = get_output(session, send_cmd)
+            mac_table = get_mac_table(session)
 
-            # TextFSM template for parsing "show mac address-table" output
-            if session['OS'] == "NX-OS":
-                mac_template = "textfsm-templates/show-mac-addr-table-nxos"
-            else:
-                mac_template = "textfsm-templates/show-mac-addr-table-ios"
-
-            template_path = os.path.join(script_dir, mac_template)
-
-            mac_table = textfsm_parse_to_list(raw_mac_list, template_path, add_header=False)
+            desc_table = get_desc_table(session)
 
             arp_lookup = get_arp_info(session)
 
             if arp_lookup:
-                output = [["Interface", "MAC", "IP Address", "VLAN"]]
-                for entry in mac_table:
-                    mac = entry[0]
-                    intf = entry[3]
-                    ip = None
+                output = []
+                for desc_entry in desc_table:
+                    intf = desc_entry[0]
+                    # Exclude VLAN interfaces
+                    if intf.lower().startswith("v"):
+                        continue
+                    desc = desc_entry[1]
+                    mac = None
                     vlan = None
-                    if mac in arp_lookup.keys():
-                        lookup = arp_lookup[mac]
-                        ip = lookup[0]
-                        vlan = lookup[1]
-                    output_line = [intf, mac, ip, vlan]
+                    if intf in mac_table.keys():
+                        mac, vlan = mac_table[intf]
+                    ip = None
+                    if mac and mac in arp_lookup.keys():
+                        ip = arp_lookup[mac][0]
+                        if not vlan:
+                            vlan = arp_lookup[mac][1]
+
+                    output_line = [intf, mac, ip, vlan, desc]
                     output.append(output_line)
                     output.sort(key=lambda x: human_sort_key(x[0]))
+                output.insert(0, ["Interface", "MAC", "IP Address", "VLAN", "Description"])
                 output_filename = create_output_filename(session, "PortMap", ext=".csv")
-                list_of_lists_to_csv(output, output_filename)
+                list_of_lists_to_csv(session, output, output_filename,)
 
             # Clean up before closing session
             end_session(session)

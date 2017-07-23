@@ -4,8 +4,24 @@ SecureCRT Python scripts for doing various tasks on Cisco equipment.
 
 These scripts should work on any version of SecureCRT that supports python.  If you find that a script won't work on your machine, please post an issue to let us know!
 
-## Running The Scripts:
+## Scripts:
 
+* **arp_to_csv.py** - Captures the ARP table and outputs the data to a CSV file.  This output is requird for `switchport_mapping.py`.
+* **cdp_to_csv.py** - Captures detailed CDP information and saves it to a CSV file.  A local settings file is used to specify strings (such as domain suffixes) to be stripped off hostnames.
+* **create_intf_desc.py** - Outputs a config script to label interfaces based on CDP info.
+* **create_sessions_from_cdp.py** - A script that pulls the CDP information from the connected device and creates a SecureCRT session for each device in the CDP table.  Save location (rooted in the SecureCRT sessions directory) is specified in the local settings file for this script.
+* **document_device.py** - Saves multiple command outputs at once.  The list of commands that will be captured is saved in the local settings file for this script.
+* **interface_stats.py** - Outputs a CSV file for a quick and easy view of some high level details about all interfaces that are "up", such as total packets in/out, packet rate in/out and errors in/out.
+* **mac_to_csv.py** - Outputs the mac address table into a CSV file.
+* **nexthop_summary.py** - Outputs a CSV file with all the next hops and a detailed breakdown of each type of route pointing at that next hop.
+* **save_running.py** - Captures the running config to a file, using a name based on the device's name and current date.
+* **save_output.py** - Generic script that prompts for a command and saves that output to a file.
+* **securecrt_python_version.py** - A script that returns a pop-up window with the python version being used by SecureCRT (mostly for troubleshooting)
+* **switchport_mapping.py** - This script will output a CSV file that lists each port on the switch and the associated MAC address, IP address and description (if available).  This script will launch a file open dialog window and the ARP CSV (from `arp_to_csv.py`) to use should be selected.
+
+**Note:** The file **empty_script_template.py** can be used as a starting point for writing new scripts.  This code skeleton contains all the required function calls for the majority of the provided functions to work properly.
+
+## Running The Scripts:
 
 To run any of the below scripts, do the following:
 
@@ -20,6 +36,7 @@ To run any of the below scripts, do the following:
 5) If the script produces an output, find the output file in the directory specified in the global settings file.
 
 The output files are automatically named based on the hostname of the device connected to.   This name is taken from the prompt of the device, so these scripts will work whether you are directly connected, or connected via a jumpbox or other intermediate device.
+
 
 ## Settings:
 All settings files are stored in the `settings` directory in the root of the scripts directory.
@@ -39,22 +56,18 @@ Global settings that are used by all scripts are saved in the `global_settings.j
 * 'debug mode': True or False.  Currently not implemented (on the list of TODOs)
 
 ### Script-Specific Settings
-Some scripts have local settings files that only apply to that script.  If such a file is needed, the script will create a `.json` file in the `settings` directory with the same name as the script.  Notes about the settings can be found in the script, or possibly as comment entries inside the settings file itself.
+Some scripts have local settings files that only apply to that script.  If such a file is needed, the script will create a `.json` file in the `settings` directory with the same name as the script.
 
-## Scripts:
+* **cdp_to_csv.json:**
+    - **strip_domains**: _List of Strings_ : A list of domains to strip from the CDP device IDs.  This may be useful for older IOS gear that does not supply a "System Name" in the CDP information, only the longer Device ID.  If the Device ID contains any domains in this list (case senstive), they will be removed from the output.
+* **create_sessions_from_cdp.json:**
+    - **strip_domains**: _List of Strings_ : A list of domains to strip from the CDP device IDs.  This may be useful for older IOS gear that does not supply a "System Name" in the CDP information, only the longer Device ID.  If the Device ID contains any domains in this list (case senstive), they will be removed from the output.
+    - **session_path**: _String_ : The path to where the new SecureCRT sessiosn should be written.  The path starts in the Sessions folder that SecureCRT uses.
+* **document_device.json:**
+    - **IOS**: _List of Strings_ : A list of commands to capture from devices that are running IOS.
+    - **NX-OS**: _List of Strings_ : A list of commands to capture from devices that are running NX-OS.
+    - **ASA**: _List of Strings_ : A list of commands to capture from devices that are ASA appliances.
 
-* **cdp_to_csv.py** - Captures detailed CDP information and saves it to a CSV file.  A local settings file is used to specify strings (such as domain suffixes) to be stripped off hostnames.
-* **create_intf_desc.py** - Outputs a config script to label interfaces based on CDP info.
-* **create_sessions_from_cdp.py** - A script that pulls the CDP information from the connected device and creates a SecureCRT session for each device in the CDP table.  Save location (rooted in the SecureCRT sessions directory) is specified in the local settings file for this script.
-* **document_device.py** - Saves multiple command outputs at once.  The list of commands that will be captured is saved in the local settings file for this script.
-* **interface_stats.py** - Outputs a CSV file for a quick and easy view of some high level details about all interfaces that are "up", such as total packets in/out, packet rate in/out and errors in/out.
-* **mac_to_csv.py** - Outputs the mac address table into a CSV file.
-* **nexthop_summary.py** - Outputs a CSV file with all the next hops and a detailed breakdown of each type of route pointing at that next hop.
-* **save_running.py** - Captures the running config to a file, using a name based on the device's name and current date.
-* **save_output.py** - Generic script that prompts for a command and saves that output to a file.
-* **securecrt_python_version.py** - A script that returns a pop-up window with the python version being used by SecureCRT (mostly for troubleshooting)
-
-**Note:** The file **empty_script_template.py** can be used as a starting point for writing new scripts.  This code skeleton contains all the required function calls for the majority of the provided functions to work properly.
 
 ## Included Modules:
 
