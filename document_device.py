@@ -56,23 +56,39 @@ def main():
     """
     Captures the output from "show running-config" and saves it to a file.
     """
+    supported_os = ["IOS", "NX-OS", "ASA"]
     local_settings_file = "document_device.json"
     local_settings_default = {"__version": "1.0",
-                              "command_list": ["show ver",
-                                               "show int status",
-                                               "show run"]
+                              "IOS": ["show ver",
+                                      "show int status",
+                                      "show run",
+                                      "show standby brief"],
+                              "NX-OS": ["show ver",
+                                        "show int status",
+                                        "show run",
+                                        "show hsrp brief"],
+                              "ASA": ["show ver",
+                                      "show run"]
                               }
-    # Define the directory to save the settings file in.
-    settings_dir = os.path.normpath(os.path.join(script_dir, "settings"))
+    # Extract the script name from the full script path.
+    script_name = crt.ScriptFullName.split(os.path.sep)[-1]
+
+    # Create settings filename by replacing .py in script name with .json
+    local_settings_file = script_name.replace(".py", ".json")
 
     # Import JSON file containing list of commands that need to be run.  If it does not exist, create one and use it.
     local_settings = load_settings(crt, settings_dir, local_settings_file, local_settings_default)
 
     if local_settings:
-        command_list = local_settings["command_list"]
-
         # Run session start commands and save session information into a dictionary
         session = start_session(crt, script_dir)
+
+        device_os = session['OS']
+        if device_os in supported_os:
+            command_list = local_settings[device_os]
+        else:
+            crt.Dialog.MessageBox("This device OS isn't supported by this script.  Exiting.")
+            return
 
         # Make sure we completed session start.  If not, we'll receive None from start_session.
         if session:
