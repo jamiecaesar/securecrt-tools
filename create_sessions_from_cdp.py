@@ -108,7 +108,11 @@ def main():
     # Import JSON file containing list of commands that need to be run.  If it does not exist, create one and use it.
     local_settings = load_settings(crt, settings_dir, local_settings_file, local_settings_default)
 
+
     if local_settings:
+        # Strip and leading or trailing slashes from the path in local settings.
+        local_settings['session_path'].strip("/\\")
+
         send_cmd = "show cdp neighbors detail"
 
         # Run session start commands and save session information into a dictionary
