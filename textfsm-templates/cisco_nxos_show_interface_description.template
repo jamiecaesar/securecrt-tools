@@ -1,8 +1,8 @@
-Value Required ADDRESS (\d+\.\d+\.\d+\.\d+)
-Value Required AGE (\d+:\d+:\d+|-)
-Value Required MAC (\S+)
-Value INTERFACE (\S+)
-Value PHYSICAL_INTERFACE (\S+)
+Value Required INTERFACE (\S+)
+Value DESCRIPTION (\S+)
+Value TYPE (\S+)
+Value SPEED (\S+)
 
 Start
-  ^${ADDRESS}\s+${AGE}\s+${MAC}\s+${INTERFACE}\s+${PHYSICAL_INTERFACE} -> Record
+  ^${INTERFACE}\s+${TYPE}\s+${SPEED}\s+(--|${DESCRIPTION}) -> Record
+  ^${INTERFACE}\s+(--|${DESCRIPTION}) -> Record
