@@ -56,7 +56,13 @@ def main():
     """
     Captures the output from "show running-config" and saves it to a file.
     """
-    local_settings_file = "wellstar_post_staging.json"
+    # Extract the script name from the full script path.
+    script_name = crt.ScriptFullName.split(os.path.sep)[-1]
+
+    # Create settings filename by replacing .py in script name with .json
+    local_settings_file = script_name.replace(".py", ".json")
+
+    # Define what local settings should be by default - REQUIRES __version
     local_settings_default = {"__version": "1.0",
                               "command_list": ["show ver",
                                                "show inventory",
@@ -92,11 +98,11 @@ def main():
             end_session(session)
     else:
         new_settings = generate_settings(local_settings_default)
-        write_settings(crt, script_dir, local_settings_file, new_settings)
+        write_settings(crt, settings_dir, local_settings_file, new_settings)
         setting_msg = ("Script specific settings file, {0}, created in directory:\n'{1}'\n\n"
                        "Please edit this file to make any settings changes.\n\n"
                        "After editing the settings, please run the script again."
-                       ).format(local_settings_file, script_dir)
+                       ).format(local_settings_file, settings_dir)
         crt.Dialog.MessageBox(setting_msg, "Script-Specific Settings Created", ICON_INFO)
         return
 

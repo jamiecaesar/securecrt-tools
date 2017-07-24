@@ -307,11 +307,11 @@ def start_session(crt, script_dir):
     # If settings file exists
     if not settings:
         new_settings = generate_settings(global_defaults)
-        write_settings(crt, script_dir, global_settings_name, new_settings)
+        write_settings(crt, settings_dir, global_settings_name, new_settings)
         setting_msg = ("Personal settings file, {0}, created in directory:\n'{1}'\n\n"
                        "Please edit this file to make any settings changes.\n\n"
                        "After editing the settings, please run the script again."
-                       ).format(global_settings_name, script_dir)
+                       ).format(global_settings_name, settings_dir)
         crt.Dialog.MessageBox(setting_msg, "Settings Created", ICON_INFO)
         return None
 
