@@ -1,7 +1,12 @@
 Value Required INTERFACE (\S+)
-Value DESCRIPTION (\S+)
-Value STATUS (\S+)
+Value DESCRIPTION (.*)
+# Must account for 2 word status, such as "admin down"
+Value STATUS (\S+(\s\S+)?)
 Value PROTOCOL (\S+)
 
 Start
+  ^Interface\s+Status\s+Protocol\s+Description -> Process
+
+Process
   ^${INTERFACE}\s+${STATUS}\s+${PROTOCOL}\s+(${DESCRIPTION})? -> Record
+
