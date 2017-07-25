@@ -1,0 +1,8 @@
+Value Required INTERFACE (\S+)
+Value DESCRIPTION (\S+)
+Value TYPE (\S+)
+Value SPEED (\S+)
+
+Start
+  ^${INTERFACE}\s+${TYPE}\s+${SPEED}\s+(--|${DESCRIPTION}) -> Record
+  ^${INTERFACE}\s+(--|${DESCRIPTION}) -> Record

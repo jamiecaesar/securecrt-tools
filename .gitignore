@@ -3,3 +3,15 @@
 
 # OSX Files #
 .DS_Store
+
+# Ignore Pycharm data #
+.idea/
+
+# Ignore the settings directory -- All settings files are specific to each individual
+settings/
+
+# Ignore JSON files, which are used as the settings files.#
+*.json
+
+# Ignore directory to store working/testing versions of scripts.
+dev-test/

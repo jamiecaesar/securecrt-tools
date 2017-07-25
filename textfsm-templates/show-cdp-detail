@@ -1,0 +1,30 @@
+Value Required LocalIntf (\S+)
+Value Required DeviceID (\S+)
+Value SystemName (\S+)
+Value Required RemoteIntf (\S+)
+Value InterfaceIP (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})
+Value Platform (.+)
+Value Version (.+)
+Value MgmtIP (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})
+Value MTU (\d+)
+Value Capabilities (.+)
+
+Start
+  ^Device ID:\s?${DeviceID}
+  ^System Name:\s?${SystemName}
+  ^(Interface|Entry) address\(es\): -> Interface
+  ^Platform:\s+${Platform},\s+Capabilities:\s+${Capabilities}
+  ^Interface: ${LocalIntf},\s+Port ID \(outgoing port\): ${RemoteIntf}
+  ^Version\s?: -> Version
+  ^MTU: ${MTU}
+  ^(Mgmt|Management) [Aa]ddress\(es\): -> Mgmt
+  ^-------------* -> Record
+
+Interface
+  ^\s+IP\S* [Aa]ddress: ${InterfaceIP} -> Start
+
+Version
+  ^${Version} -> Start
+
+Mgmt
+  ^\s+IP\S* [Aa]ddress: ${MgmtIP} -> Start

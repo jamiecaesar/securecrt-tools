@@ -1,0 +1,23 @@
+# From: https://github.com/networktocode/ntc-templates
+Value VLAN (\w+)
+Value MAC (\w+.\w+.\w+)
+Value INTERFACE (\S+)
+Value TYPE (\w+)
+
+Start
+  ^Destination\s+Address\s+Address\s+Type\s+VLAN\s+Destination\s+Port -> TYPE1
+  ^\s+vlan\s+mac address\s+type\s+learn\s+age\s+ports -> TYPE2
+  ^\s+vlan\s+mac address\s+type\s+protocols\s+port -> TYPE3
+  ^Vlan\s+Mac Address\s+Type\s+Ports -> TYPE4
+
+TYPE1
+  ^${MAC}\s+${TYPE}\s+${VLAN}\s+${INTERFACE} -> Record
+
+TYPE2
+  ^[\*|\s]\s+${VLAN}\s+${MAC}\s+${TYPE}\s+\S+\s+\S+\s+${INTERFACE} -> Record
+
+TYPE3
+  ^\s+${VLAN}\s+${MAC}\s+${TYPE}\s+\S+\s+${INTERFACE} -> Record
+
+TYPE4
+  ^\s+${VLAN}\s+${MAC}\s+${TYPE}\s+${INTERFACE} -> Record
