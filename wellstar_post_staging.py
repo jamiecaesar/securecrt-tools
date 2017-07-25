@@ -1,16 +1,13 @@
-# $language = "python"
+﻿# $language = "python"
 # $interface = "1.0"
 
 # ###############################  SCRIPT INFO  ################################
 # Author: Jamie Caesar
 # Email: jcaesar@presidio.com
 # 
-# This script will grab the detailed CDP information from a Cisco IOS or NX-OS device and export it to a CSV file
-# containing the important information, such as Remote Device hostname, model and IP information, in addition to the
-# local and remote interfaces that connect the devices.
-# 
+# This script will grab the output for the list of commands in the document_device.json file that should exist in the
+# same directory where this script is located.
 #
-
 
 # ##############################  SCRIPT SETTING  ###############################
 #
@@ -34,6 +31,7 @@
 # path (for loading modules), and manipulating paths for saving files.
 import os
 import sys
+import json
 
 # Add the script directory to the python path (if not there) so we can import custom modules.
 script_dir = os.path.dirname(crt.ScriptFullName)
@@ -47,19 +45,16 @@ from imports.cisco_securecrt import load_settings
 from imports.cisco_securecrt import generate_settings
 from imports.cisco_securecrt import write_settings
 from imports.cisco_securecrt import create_output_filename
-from imports.cisco_securecrt import get_output
-from imports.cisco_securecrt import list_of_lists_to_csv
-
-from imports.cisco_tools import textfsm_parse_to_list
-from imports.cisco_tools import extract_system_name
+from imports.cisco_securecrt import write_output_to_file
+from imports.cisco_securecrt import ICON_INFO
 
 
-##################################  SCRIPT  ###################################
+# #################################  SCRIPT  ###################################
 
 
 def main():
     """
-    Capture the CDP information from the connected device and ouptut it into a CSV file. 
+    Captures the output from "show running-config" and saves it to a file.
     """
     # Extract the script name from the full script path.
     script_name = crt.ScriptFullName.split(os.path.sep)[-1]
@@ -68,11 +63,14 @@ def main():
     local_settings_file = script_name.replace(".py", ".json")
 
     # Define what local settings should be by default - REQUIRES __version
-    local_settings_default = {'__version': "1.0",
-                              '_strip_domains_comment': "A list of strings to remove if found in the device ID of CDP "
-                                                        "output.  Configurable due to '.' being a valid hostname "
-                                                        "character and doesn't always signify a component of FQDN.",
-                              'strip_domains': [".cisco.com"]
+    local_settings_default = {"__version": "1.0",
+                              "command_list": ["show ver",
+                                               "show inventory",
+                                               "show run",
+                                               "show switch",
+                                               "show switch stack-ports summary",
+                                               "show environment power",
+                                               "show stack-power detail"]
                               }
     # Define the directory to save the settings file in.
     settings_dir = os.path.normpath(os.path.join(script_dir, "settings"))
@@ -81,36 +79,22 @@ def main():
     local_settings = load_settings(crt, settings_dir, local_settings_file, local_settings_default)
 
     if local_settings:
-        send_cmd = "show cdp neighbors detail"
+        command_list = local_settings["command_list"]
 
         # Run session start commands and save session information into a dictionary
         session = start_session(crt, script_dir)
 
         # Make sure we completed session start.  If not, we'll receive None from start_session.
         if session:
-            # Capture output from show cdp neighbor detail
-            raw_cdp_list = get_output(session, send_cmd)
+            for command in command_list:
 
-            # Parse CDP information into a list of lists.
-            # TextFSM template for parsing "show cdp neighbor detail" output
-            cdp_template = "textfsm-templates/show-cdp-detail"
-            # Build path to template, process output and export to CSV
-            template_path = os.path.join(script_dir, cdp_template)
+                # Generate filename used for output files.
+                full_file_name = create_output_filename(session, "STAGED-{0}".format(command))
 
-            # Use TextFSM to parse our output
-            cdp_table = textfsm_parse_to_list(raw_cdp_list, template_path, add_header=True)
+                # Get the output of our command and save it to the filename specified
+                write_output_to_file(session, command, full_file_name)
 
-            # Since "System Name" is a newer N9K feature -- try to extract it from the device ID when its empty.
-            for entry in cdp_table:
-                # entry[2] is system name, entry[1] is device ID
-                if entry[2] == "":
-                    entry[2] = extract_system_name(entry[1], strip_list=local_settings['strip_domains'])
-
-            # Write TextFSM output to a .csv file.
-            output_filename = create_output_filename(session, "cdp", ext=".csv")
-            list_of_lists_to_csv(session, cdp_table, output_filename)
-
-            # Clean up before exiting
+            # Clean up before closing session
             end_session(session)
     else:
         new_settings = generate_settings(local_settings_default)
@@ -121,7 +105,6 @@ def main():
                        ).format(local_settings_file, settings_dir)
         crt.Dialog.MessageBox(setting_msg, "Script-Specific Settings Created", ICON_INFO)
         return
-
 
 if __name__ == "__builtin__":
     main()
