@@ -12,6 +12,7 @@ These scripts should work on any version of SecureCRT that supports python.  If 
 * **cdp_to_csv.py** - Captures detailed CDP information and saves it to a CSV file.  A local settings file is used to specify strings (such as domain suffixes) to be stripped off hostnames.
 * **create_intf_desc.py** - Outputs a config script to label interfaces based on CDP info.
 * **create_sessions_from_cdp.py** - A script that pulls the CDP information from the connected device and creates a SecureCRT session for each device in the CDP table.  Save location (rooted in the SecureCRT sessions directory) is specified in the local settings file for this script.
+* **create_sessions_from_csv.py** - A script to create SecureCRT sessions from a CSV file.  The Session Name, Hostname / IP, Protocol and Save Location are read from the CSV.  If no input file is selected when script is run, an example CSV will be created in the scripts folder.
 * **document_device.py** - Saves multiple command outputs at once.  The list of commands that will be captured is saved in the local settings file for this script.
 * **interface_stats.py** - Outputs a CSV file for a quick and easy view of some high level details about all interfaces that are "up", such as total packets in/out, packet rate in/out and errors in/out.
 * **mac_to_csv.py** - Outputs the mac address table into a CSV file.
