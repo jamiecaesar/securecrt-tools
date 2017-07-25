@@ -1,8 +1,10 @@
-Value Required INTERFACE (\S+)
-Value DESCRIPTION (\S+)
-Value TYPE (\S+)
-Value SPEED (\S+)
+Value Required INTERFACE ([A-Za-z]+\d([\w\.-/]+)?)
+Value DESCRIPTION (.+)
+Value TYPE (\w+)
+Value SPEED (\w+)
 
 Start
   ^${INTERFACE}\s+${TYPE}\s+${SPEED}\s+(--|${DESCRIPTION}) -> Record
   ^${INTERFACE}\s+(--|${DESCRIPTION}) -> Record
+
+EOF

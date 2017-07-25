@@ -68,12 +68,16 @@ def get_mac_table(session):
 
     mac_table = textfsm_parse_to_list(raw_mac_list, template_path, add_header=False)
 
+    # Convert TextFSM output to a dictionary for lookups
     output = {}
     for entry in mac_table:
         vlan = entry[0]
         mac = entry[1]
         intf = entry[2]
-        output[intf] = (mac, vlan)
+        if intf in output:
+            output[intf].append((mac, vlan))
+        else:
+            output[intf] = [(mac, vlan)]
 
     return output
 
@@ -159,19 +163,22 @@ def main():
                     if intf.lower().startswith("v"):
                         continue
                     desc = desc_entry[1]
-                    mac = None
-                    vlan = None
-                    if intf in mac_table.keys():
-                        mac, vlan = mac_table[intf]
-                    ip = None
-                    if mac and mac in arp_lookup.keys():
-                        ip = arp_lookup[mac][0]
-                        if not vlan:
-                            vlan = arp_lookup[mac][1]
 
-                    output_line = [intf, mac, ip, vlan, desc]
-                    output.append(output_line)
-                    output.sort(key=lambda x: human_sort_key(x[0]))
+                    if intf in mac_table.keys():
+                        for mac_entry in mac_table[intf]:
+                            mac, vlan = mac_entry
+                            ip = None
+                            if mac and mac in arp_lookup.keys():
+                                ip, arp_vlan = arp_lookup[mac]
+                                if not vlan:
+                                    vlan = arp_vlan
+                            output_line = [intf, mac, ip, vlan, desc]
+                            output.append(output_line)
+                    else:
+                        output_line = [intf, None, None, None, desc]
+                        output.append(output_line)
+
+                output.sort(key=lambda x: human_sort_key(x[0]))
                 output.insert(0, ["Interface", "MAC", "IP Address", "VLAN", "Description"])
                 output_filename = create_output_filename(session, "PortMap", ext=".csv")
                 list_of_lists_to_csv(session, output, output_filename,)
