@@ -111,7 +111,7 @@ def get_arp_info(session):
         "CSV Files (*.csv)|*.csv||")
 
     if arp_filename == "":
-        return None
+        return {}
 
     with open(arp_filename, 'r') as arp_file:
         arp_csv = csv.reader(arp_file)
@@ -155,33 +155,32 @@ def main():
 
             arp_lookup = get_arp_info(session)
 
-            if arp_lookup:
-                output = []
-                for desc_entry in desc_table:
-                    intf = desc_entry[0]
-                    # Exclude VLAN interfaces
-                    if intf.lower().startswith("v"):
-                        continue
-                    desc = desc_entry[1]
+            output = []
+            for desc_entry in desc_table:
+                intf = desc_entry[0]
+                # Exclude VLAN interfaces
+                if intf.lower().startswith("v"):
+                    continue
+                desc = desc_entry[1]
 
-                    if intf in mac_table.keys():
-                        for mac_entry in mac_table[intf]:
-                            mac, vlan = mac_entry
-                            ip = None
-                            if mac and mac in arp_lookup.keys():
-                                ip, arp_vlan = arp_lookup[mac]
-                                if not vlan:
-                                    vlan = arp_vlan
-                            output_line = [intf, mac, ip, vlan, desc]
-                            output.append(output_line)
-                    else:
-                        output_line = [intf, None, None, None, desc]
+                if intf in mac_table.keys():
+                    for mac_entry in mac_table[intf]:
+                        mac, vlan = mac_entry
+                        ip = None
+                        if mac and mac in arp_lookup.keys():
+                            ip, arp_vlan = arp_lookup[mac]
+                            if not vlan:
+                                vlan = arp_vlan
+                        output_line = [intf, mac, ip, vlan, desc]
                         output.append(output_line)
+                else:
+                    output_line = [intf, None, None, None, desc]
+                    output.append(output_line)
 
-                output.sort(key=lambda x: human_sort_key(x[0]))
-                output.insert(0, ["Interface", "MAC", "IP Address", "VLAN", "Description"])
-                output_filename = create_output_filename(session, "PortMap", ext=".csv")
-                list_of_lists_to_csv(session, output, output_filename,)
+            output.sort(key=lambda x: human_sort_key(x[0]))
+            output.insert(0, ["Interface", "MAC", "IP Address", "VLAN", "Description"])
+            output_filename = create_output_filename(session, "PortMap", ext=".csv")
+            list_of_lists_to_csv(session, output, output_filename,)
 
             # Clean up before closing session
             end_session(session)
