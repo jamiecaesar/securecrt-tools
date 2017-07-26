@@ -83,7 +83,7 @@ def main():
         # Build full path to template
         template_path = os.path.join(script_dir, arp_template)
 
-        # Use TextFSM to parse our output
+        # Use TextFSM to parse our output from the temporary file, and delete it.
         with open(temp_filename, 'r') as arp_file:
             raw_arp_list=arp_file.read()
             arp_table = textfsm_parse_to_list(raw_arp_list, template_path, add_header=True)
