@@ -42,6 +42,7 @@ if script_dir not in sys.path:
 from imports.cisco_securecrt import start_session
 from imports.cisco_securecrt import end_session
 from imports.cisco_securecrt import get_output
+from imports.cisco_securecrt import write_output_to_file
 from imports.cisco_securecrt import create_output_filename
 from imports.cisco_securecrt import list_of_lists_to_csv
 
@@ -75,13 +76,18 @@ def main():
             arp_template = "textfsm-templates/cisco_nxos_show_ip_arp_detail.template"
 
         # Capture output from show cdp neighbor detail
-        raw_arp_list = get_output(session, send_cmd)
+        temp_filename = create_output_filename(session, "arp")
+        write_output_to_file(session, send_cmd, temp_filename)
+        # raw_arp_list = get_output(session, send_cmd)
 
         # Build full path to template
         template_path = os.path.join(script_dir, arp_template)
 
         # Use TextFSM to parse our output
-        arp_table = textfsm_parse_to_list(raw_arp_list, template_path, add_header=True)
+        with open(temp_filename, 'r') as arp_file:
+            raw_arp_list=arp_file.read()
+            arp_table = textfsm_parse_to_list(raw_arp_list, template_path, add_header=True)
+        os.remove(temp_filename)
 
         # Write TextFSM output to a .csv file.
         output_filename = create_output_filename(session, "arp", ext=".csv")
