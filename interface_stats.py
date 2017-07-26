@@ -44,7 +44,7 @@ from imports.cisco_securecrt import ICON_STOP
 from imports.cisco_securecrt import start_session
 from imports.cisco_securecrt import end_session
 from imports.cisco_securecrt import create_output_filename
-from imports.cisco_securecrt import get_output
+from imports.cisco_securecrt import write_output_to_file
 from imports.cisco_securecrt import list_of_lists_to_csv
 
 from imports.cisco_tools import textfsm_parse_to_list
@@ -62,8 +62,6 @@ def main():
 
     # Make sure we completed session start.  If not, we'll receive None from start_session.
     if session:
-        raw_intf_output = get_output(session, send_cmd)
-
         if session['OS'] in SupportedOS:
             if session['OS'] == "NX-OS":
                 interface_template = "textfsm-templates/show-interfaces-nxos"
@@ -76,11 +74,20 @@ def main():
             crt.Dialog.MessageBox(error_str, "Unsupported Network OS", ICON_STOP)
 
         if interface_template:
-            # Generate filename used for output files.
-            output_filename = create_output_filename(session, "show-interfaces", ext=".csv")
-            # Build path to template, process output and export to CSV
+            temp_filename = create_output_filename(session, "show-interfaces")
+            write_output_to_file(session, send_cmd, temp_filename)
+
+            # Build full path to template
             template_path = os.path.join(script_dir, interface_template)
+
+            # Open temp file, process text and delete temp file.
+            with open(temp_filename, 'r') as intf_file:
+                raw_intf_output = intf_file.read()
             interface_stats = textfsm_parse_to_list(raw_intf_output, template_path, add_header=True)
+            os.remove(temp_filename)
+
+            # Generate filename used for output files and write results to file.
+            output_filename = create_output_filename(session, "show-interfaces", ext=".csv")
             list_of_lists_to_csv(session, interface_stats, output_filename)
 
         end_session(session)
