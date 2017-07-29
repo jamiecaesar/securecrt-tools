@@ -43,9 +43,11 @@ if script_dir not in sys.path:
 from imports.cisco_securecrt import start_session
 from imports.cisco_securecrt import end_session
 from imports.cisco_securecrt import get_output
+from imports.cisco_securecrt import write_output_to_file
 from imports.cisco_securecrt import create_output_filename
 from imports.cisco_securecrt import list_of_lists_to_csv
 
+from imports.cisco_tools import get_template_full_path
 from imports.cisco_tools import textfsm_parse_to_list
 
 from imports.py_utils import human_sort_key
@@ -57,16 +59,19 @@ def get_mac_table(session):
     # TextFSM template for parsing "show mac address-table" output
     if session['OS'] == "NX-OS":
         send_cmd = "show mac address-table"
-        mac_template = "textfsm-templates/show-mac-addr-table-nxos"
+        mac_template = "cisco_nxos_show_mac_addr_table.template"
     else:
         send_cmd = "show mac address-table"
-        mac_template = "textfsm-templates/show-mac-addr-table-ios"
+        mac_template = "cisco_ios_show_mac_addr_table.template"
 
-    raw_mac_list = get_output(session, send_cmd)
+    temp_filename = create_output_filename(session, "mac-addr")
+    write_output_to_file(session, send_cmd, temp_filename)
 
-    template_path = os.path.join(script_dir, mac_template)
+    template_path = get_template_full_path(session, mac_template)
 
-    mac_table = textfsm_parse_to_list(raw_mac_list, template_path, add_header=False)
+    with open(temp_filename, 'r') as mac_data:
+        mac_table = textfsm_parse_to_list(mac_data, template_path, add_header=False)
+    os.remove(temp_filename)
 
     # Convert TextFSM output to a dictionary for lookups
     output = {}
@@ -86,14 +91,14 @@ def get_desc_table(session):
     # TextFSM template for parsing "show mac address-table" output
     if session['OS'] == "NX-OS":
         send_cmd = "show interface description"
-        desc_template = "textfsm-templates/cisco_nxos_show_interface_description.template"
+        desc_template = "cisco_nxos_show_interface_description.template"
     else:
         send_cmd = "show interface description"
-        desc_template = "textfsm-templates/cisco_ios_show_interfaces_description.template"
+        desc_template = "cisco_ios_show_interfaces_description.template"
 
     raw_desc_list = get_output(session, send_cmd)
 
-    template_path = os.path.join(script_dir, desc_template)
+    template_path = get_template_full_path(session, desc_template)
 
     desc_table = textfsm_parse_to_list(raw_desc_list, template_path, add_header=False)
 

@@ -42,9 +42,10 @@ if script_dir not in sys.path:
 from imports.cisco_securecrt import start_session
 from imports.cisco_securecrt import end_session
 from imports.cisco_securecrt import create_output_filename
-from imports.cisco_securecrt import get_output
+from imports.cisco_securecrt import write_output_to_file
 from imports.cisco_securecrt import list_of_lists_to_csv
 
+from imports.cisco_tools import get_template_full_path
 from imports.cisco_tools import textfsm_parse_to_list
 
 
@@ -68,19 +69,22 @@ def main():
             return
 
         # Capture output from show cdp neighbor detail
-        raw_mac_list = get_output(session, send_cmd)
+        temp_filename = create_output_filename(session, "mac-addr")
+        write_output_to_file(session, send_cmd, temp_filename)
 
         # TextFSM template for parsing "show mac address-table" output
         if session['OS'] == "NX-OS":
-            mac_template = "textfsm-templates/show-mac-addr-table-nxos"
+            mac_template = "cisco_nxos_show_mac_addr_table.template"
         else:
-            mac_template = "textfsm-templates/show-mac-addr-table-ios"
+            mac_template = "cisco_ios_show_mac_addr_table.template"
 
         # Build path to template, process output and export to CSV
-        template_path = os.path.join(script_dir, mac_template)
+        template_path = get_template_full_path(session, mac_template)
 
         # Parse MAC information into a list of lists.
-        mac_table = textfsm_parse_to_list(raw_mac_list, template_path, add_header=True)
+        with open(temp_filename, 'r') as mac_data:
+            mac_table = textfsm_parse_to_list(mac_data, template_path, add_header=True)
+        os.remove(temp_filename)
 
         # Write TextFSM output to a .csv file.
         output_filename = create_output_filename(session, "mac-addr", ext=".csv")

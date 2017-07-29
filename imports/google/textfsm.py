@@ -1,5 +1,12 @@
 #!/usr/bin/python
 #
+#  THIS FILE HAS BEEN MODIFIED FROM THE ORIGINAL IN THE FOLLOWING WAYS:
+#  1) Accepts file handle objects in addition to strings -- This allows files to
+#     read line-by-line instead of reading the entire file into one huge string.
+#     Better for large outputs ("show interfaces" on a chassis, or "show ip arp"
+#     on a core with 10,000+ entries.
+#
+#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -852,7 +859,10 @@ class TextFSM(object):
 
     lines = []
     if text:
-      lines = text.splitlines()
+      if isinstance(text, file):
+        lines = text
+      else:
+        lines = text.splitlines()
 
     for line in lines:
       self._CheckLine(line)

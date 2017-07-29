@@ -47,6 +47,7 @@ from imports.cisco_securecrt import write_output_to_file
 from imports.cisco_securecrt import list_of_lists_to_csv
 
 from imports.cisco_tools import normalize_protocol
+from imports.cisco_tools import get_template_full_path
 from imports.cisco_tools import textfsm_parse_to_dict
 from imports.cisco_tools import update_empty_interfaces
 
@@ -66,17 +67,16 @@ def parse_routes(session, routes):
     :param routes: raw 'show ip route' output
     :return: A list of dictionaries, with each dict representing a route.
     """
-    script_dir = session['settings']['script_dir']
     if session['OS'] == "IOS":
-        template_file = os.path.join(script_dir, "textfsm-templates/show-ip-route-ios")
+        route_template = "cisco_ios_show_ip_route.template"
     elif session['OS'] == "NX-OS":
-        template_file = os.path.join(script_dir, "textfsm-templates/show-ip-route-nxos")
+        route_template = "cisco_nxos_show_ip_route.template"
     else:
         # If not a supported OS, return an empty list
         return []
 
     # Normalize path before attempting to access (e.g. change slash to backslash for windows.)
-    template_file = os.path.normpath(template_file)
+    template_file = get_template_full_path(session, route_template)
     route_table = textfsm_parse_to_dict(routes, template_file)
 
     complete_table = []
@@ -200,7 +200,6 @@ def nexthop_summary(textfsm_dict):
     return output
 
 
-
 def main():
     supported_os = ["IOS", "NX-OS"]
     send_cmd = "show ip route"
@@ -224,10 +223,8 @@ def main():
             # Save raw "show ip route" output to a file, read it back in as a list of strings and delete temp file.
             write_output_to_file(session, send_cmd, temp_routes_filename)
             with open(temp_routes_filename, 'r') as route_file:
-                routes = route_file.read()
+                route_list = parse_routes(session, route_file)
             os.remove(temp_routes_filename)
-
-            route_list = parse_routes(session, routes)
 
             output_filename = create_output_filename(session, "NextHopSummary", ext='.csv')
 

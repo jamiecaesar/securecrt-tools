@@ -125,7 +125,7 @@ def main():
 
             # Parse CDP information into a list of lists.
             # TextFSM template for parsing "show cdp neighbor detail" output
-            cdp_template = "textfsm-templates/show-cdp-detail"
+            cdp_template = "textfsm-templates/cisco_os_show_cdp_neigh_det.template"
             # Build path to template, process output and export to CSV
             template_path = os.path.join(script_dir, cdp_template)
 

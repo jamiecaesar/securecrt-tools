@@ -11,29 +11,42 @@
 
 # #################################  IMPORTS   ##################################
 import re
-import csv
+import os
 
 from imports.google import textfsm
 
 
-def textfsm_parse_to_list(raw_output, template_path, add_header=False):
+def get_template_full_path(session, filename):
+    """
+    This function generates the full filename to a TextFSM filename, which should exist in the
+    "textfsm_templates" directory, which is in the same directory the script is run from.
+
+    :param session:
+    :param filename:
+    :return:
+    """
+    script_dir = session["settings"]["script_dir"]
+    return os.path.join(script_dir, "textfsm-templates", filename)
+
+
+def textfsm_parse_to_list(input_data, template_filename, add_header=False):
     """
     Use TextFSM to parse the input text (from a command output) against the specified TextFSM template.   Use the
     default TextFSM output which is a list, with each entry of the list being a list with the values parsed.  Use
     add_header=True if the header row with value names should be prepended to the start of the list.
     
-    :param raw_output:  String which contains the output from a CLI command 
-    :param template_path:  Path to the template file that will be used to parse the above data.
+    :param input_data:  Path to the input file that TextFSM will parse.
+    :param template_filename:  Path to the template file that will be used to parse the above data.
     :param add_header:  When True, will return a header row in the list.  This is useful for directly outputting to CSV. 
     :return: The TextFSM output (A list with each entry being a list of values parsed from the input)
     """
 
     # Create file object to the TextFSM template and create TextFSM object.
-    with open(template_path, 'r') as template:
+    with open(template_filename, 'r') as template:
         fsm_table = textfsm.TextFSM(template)
 
     # Process our raw data vs the template with TextFSM
-    output = fsm_table.ParseText(raw_output)
+    output = fsm_table.ParseText(input_data)
 
     # Insert a header row into the list, so that when output to a CSV there is a header row.
     if add_header:
@@ -42,22 +55,22 @@ def textfsm_parse_to_list(raw_output, template_path, add_header=False):
     return output
 
 
-def textfsm_parse_to_dict(raw_output, template_path):
+def textfsm_parse_to_dict(input_data, template_filename):
     """
     Use TextFSM to parse the input text (from a command output) against the specified TextFSM template.   Convert each
     list from the output to a dictionary, where each key in the TextFSM Value name from the template file.
     
-    :param raw_output:  String which contains the output from a CLI command 
-    :param template_path:  Path to the template file that will be used to parse the above data. 
+    :param input_data:  Path to the input file that TextFSM will parse.
+    :param template_filename:  Path to the template file that will be used to parse the above data.
     :return: A list, with each entry being a dictionary that maps TextFSM variable name to corresponding value.
     """
 
     # Create file object to the TextFSM template and create TextFSM object.
-    with open(template_path, 'r') as template:
+    with open(template_filename, 'r') as template:
         fsm_table = textfsm.TextFSM(template)
 
     # Process our raw data vs the template with TextFSM
-    fsm_list = fsm_table.ParseText(raw_output)
+    fsm_list = fsm_table.ParseText(input_data)
 
     # Insert a header row into the list, so that when output to a CSV there is a header row.
     header_list = fsm_table.header
@@ -134,9 +147,8 @@ def short_int_name(str):
         ('fortygigabitethernet', 'Fo'),
         ('tengigabitethernet', 'Te'),
         ('gigabitethernet', 'Gi'),
-        ('fastethernet', 'F'),
-        ('ethernet', 'e'),
-        ('eth', 'e'),
+        ('fastethernet', 'Fa'),
+        ('ethernet', 'Eth'),
         ('port-channel', 'Po'),
         ('loopback', "Lo")
     ]

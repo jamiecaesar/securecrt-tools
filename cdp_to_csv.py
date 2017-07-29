@@ -47,9 +47,10 @@ from imports.cisco_securecrt import load_settings
 from imports.cisco_securecrt import generate_settings
 from imports.cisco_securecrt import write_settings
 from imports.cisco_securecrt import create_output_filename
-from imports.cisco_securecrt import get_output
+from imports.cisco_securecrt import write_output_to_file
 from imports.cisco_securecrt import list_of_lists_to_csv
 
+from imports.cisco_tools import get_template_full_path
 from imports.cisco_tools import textfsm_parse_to_list
 from imports.cisco_tools import extract_system_name
 
@@ -88,19 +89,21 @@ def main():
 
         # Make sure we completed session start.  If not, we'll receive None from start_session.
         if session:
-            # Capture output from show cdp neighbor detail
-            raw_cdp_list = get_output(session, send_cmd)
-
-            # Parse CDP information into a list of lists.
-            # TextFSM template for parsing "show cdp neighbor detail" output
-            cdp_template = "textfsm-templates/show-cdp-detail"
+            # Build full path to template file for TextFSM
+            cdp_template = "cisco_os_show_cdp_neigh_det.template"
             # Build path to template, process output and export to CSV
-            template_path = os.path.join(script_dir, cdp_template)
+            template_path = get_template_full_path(session, cdp_template)
 
-            # Use TextFSM to parse our output
-            cdp_table = textfsm_parse_to_list(raw_cdp_list, template_path, add_header=True)
+            # Capture output from our command and write to a temporary file
+            temp_filename = create_output_filename(session, "cdp")
+            write_output_to_file(session, send_cmd, temp_filename)
 
-            # Since "System Name" is a newer N9K feature -- try to extract it from the device ID when its empty.
+            # Use TextFSM to parse our output from the temporary file, and delete it.
+            with open(temp_filename, 'r') as cdp_data:
+                cdp_table = textfsm_parse_to_list(cdp_data, template_path, add_header=True)
+            os.remove(temp_filename)
+
+            # Since "System Name" is a newer NXOS feature -- try to extract it from the device ID when its empty.
             for entry in cdp_table:
                 # entry[2] is system name, entry[1] is device ID
                 if entry[2] == "":

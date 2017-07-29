@@ -44,10 +44,14 @@ from imports.cisco_securecrt import start_session
 from imports.cisco_securecrt import end_session
 from imports.cisco_securecrt import create_output_filename
 from imports.cisco_securecrt import get_output
+from imports.cisco_securecrt import write_output_to_file
+
+from imports.cisco_tools import get_template_full_path
 from imports.cisco_tools import textfsm_parse_to_list
 from imports.cisco_tools import extract_system_name
 from imports.cisco_tools import short_int_name
 from imports.cisco_tools import long_int_name
+
 from imports.py_utils import human_sort_key
 
 
@@ -108,26 +112,35 @@ def main():
 
     # Make sure we completed session start.  If not, we'll receive None from start_session.
     if session:
-        # Capture output from show cdp neighbor detail
-        raw_cdp_output = get_output(session, "show cdp neighbors detail")
-        # TextFSM template for parsing "show cdp neighbor detail" output.  Must supply TextFSM template and output string.
-        cdp_template = "textfsm-templates/show-cdp-detail"
-        # Build path to template, process output and export to CSV
-        cdp_template_path = os.path.join(script_dir, cdp_template)
-        cdp_table = textfsm_parse_to_list(raw_cdp_output, cdp_template_path, add_header=True)
+        send_cmd = "show cdp neighbors detail"
+
+        # Build full path to TextFSM template for parsing "show cdp neighbor detail" output.
+        cdp_template = "cisco_os_show_cdp_neigh_det.template"
+        template_path = get_template_full_path(session, cdp_template)
+
+        # Capture output from our command and write to a temporary file
+        temp_filename = create_output_filename(session, "cdp")
+        write_output_to_file(session, send_cmd, temp_filename)
+
+        # Use TextFSM to parse our output from the temporary file, and delete it.
+        with open(temp_filename) as cdp_data:
+            cdp_table = textfsm_parse_to_list(cdp_data, template_path, add_header=True)
+        os.remove(temp_filename)
+
+        # Get information required to build descriptions from CDP data
         description_data = extract_cdp_data(cdp_table)
 
         # Capture port-channel output
         if session['OS'] == "NX-OS":
             raw_pc_output = get_output(session, "show port-channel summary")
-            pc_template = "textfsm-templates/show-pc-summary-nxos"
-            pc_template_path = os.path.join(script_dir, pc_template)
+            pc_template = "cisco_nxos_show_portchannel_summary.template"
+            pc_template_path = get_template_full_path(session, pc_template)
             pc_table = textfsm_parse_to_list(raw_pc_output, pc_template_path, add_header=True)
             add_port_channels(description_data, pc_table)
         elif "IOS" in session['OS']:
             raw_pc_output = get_output(session, "show etherchannel summary")
-            pc_template = "textfsm-templates/show-ec-summary-ios"
-            pc_template_path = os.path.join(script_dir, pc_template)
+            pc_template = "cisco_ios_show_etherchannel_summary.template"
+            pc_template_path = get_template_full_path(session, pc_template)
             pc_table = textfsm_parse_to_list(raw_pc_output, pc_template_path, add_header=True)
             add_port_channels(description_data, pc_table)
         else:

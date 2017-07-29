@@ -43,8 +43,6 @@ if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
 
 # Imports from custom SecureCRT modules
-from imports.cisco_securecrt import start_session
-from imports.cisco_securecrt import end_session
 from imports.cisco_securecrt import create_session
 
 # Module specific Imports

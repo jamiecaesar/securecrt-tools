@@ -3,11 +3,11 @@ Value Required DeviceID (\S+)
 Value SystemName (\S+)
 Value Required RemoteIntf (\S+)
 Value InterfaceIP (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})
-Value Platform (.+)
-Value Version (.+)
+Value Platform ([\S ]+)
+Value Version ([\S ]+)
 Value MgmtIP (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})
 Value MTU (\d+)
-Value Capabilities (.+)
+Value Capabilities ([\S ]+)
 
 Start
   ^Device ID:\s?${DeviceID}
