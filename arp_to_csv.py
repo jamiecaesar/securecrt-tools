@@ -68,12 +68,20 @@ def main():
             crt.Dialog.Messagebox("This device OS is not supported by this script.  Exiting.")
             return
 
+        selected_vrf = crt.Dialog.Prompt("Enter the VRF name.\n(Leave blank for default VRF)")
+        if selected_vrf == "":
+            selected_vrf = None
+
         if session['OS'] == "IOS":
             send_cmd = "show ip arp"
             arp_template = "cisco_ios_show_ip_arp.template"
-        else:
+        elif session['OS'] == "NX-OS":
             send_cmd = "show ip arp detail"
             arp_template = "cisco_nxos_show_ip_arp_detail.template"
+
+        if selected_vrf:
+            send_cmd = send_cmd + " vrf {0}".format(selected_vrf)
+            session['hostname'] = session['hostname'] + "-VRF-{0}".format(selected_vrf)
 
         # Build full path to template
         template_path = get_template_full_path(session, arp_template)
