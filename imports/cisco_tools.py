@@ -168,20 +168,20 @@ def long_int_name(int_name):
     :return:  The shortened interface name
     """
     replace_pairs = [
-        ('Fo', 'FortyGigabitEthernet'),
-        ('Te', 'TenGigabitEthernet'),
-        ('Gi', 'GigabitEthernet'),
-        ('F', 'FastEthernet'),
-        ('Eth', 'Ethernet'),
-        ('e', 'Ethernet'),
-        ('Po', 'port-channel'),
-        ('Lo', 'Loopback')
+        (r'Fo', 'FortyGigabitEthernet'),
+        (r'Te', 'TenGigabitEthernet'),
+        (r'Gi', 'GigabitEthernet'),
+        (r'F', 'FastEthernet'),
+        (r'Eth', 'Ethernet'),
+        (r'e', 'Ethernet'),
+        (r'Po', 'port-channel'),
+        (r'Lo', 'Loopback')
     ]
     for pair in replace_pairs:
-        if pair[0] in int_name:
+        if re.match("{0}\d".format(pair[0]), int_name, re.IGNORECASE):
             return int_name.replace(pair[0], pair[1])
     else:
-        return str
+        return int_name
 
 
 def extract_system_name(device_id, strip_list=[]):

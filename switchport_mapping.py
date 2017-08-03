@@ -49,11 +49,35 @@ from imports.cisco_securecrt import list_of_lists_to_csv
 
 from imports.cisco_tools import get_template_full_path
 from imports.cisco_tools import textfsm_parse_to_list
+from imports.cisco_tools import long_int_name
 
 from imports.py_utils import human_sort_key
 
 
 # #################################  SCRIPT  ###################################
+
+def get_int_status(session):
+    send_cmd = "show interface status"
+
+    if session['OS'] == "NX-OS":
+        int_template = "cisco_nxos_show_interface_status.template"
+    else:
+        int_template = "cisco_ios_show_interfaces_status.template"
+
+    temp_filename = create_output_filename(session, "int-status")
+    write_output_to_file(session, send_cmd, temp_filename)
+
+    template_path = get_template_full_path(session, int_template)
+
+    with open(temp_filename, 'r') as mac_data:
+        int_table = textfsm_parse_to_list(mac_data, template_path, add_header=False)
+    os.remove(temp_filename)
+
+    for entry in int_table:
+        entry[0] = long_int_name(entry[0])
+
+    return int_table
+
 
 def get_mac_table(session):
     # TextFSM template for parsing "show mac address-table" output
@@ -73,12 +97,26 @@ def get_mac_table(session):
         mac_table = textfsm_parse_to_list(mac_data, template_path, add_header=False)
     os.remove(temp_filename)
 
+    # Check if IOS mac_table is empty -- if so, it is probably because the switch has an older IOS
+    # that expects "show mac-address-table" instead of "show mac address-table".
+    if session['OS'] == "IOS" and len(mac_table) == 0:
+        send_cmd = "show mac-address-table"
+
+        temp_filename = create_output_filename(session, "mac-addr")
+        write_output_to_file(session, send_cmd, temp_filename)
+
+        template_path = get_template_full_path(session, mac_template)
+
+        with open(temp_filename, 'r') as mac_data:
+            mac_table = textfsm_parse_to_list(mac_data, template_path, add_header=False)
+        os.remove(temp_filename)
+
     # Convert TextFSM output to a dictionary for lookups
     output = {}
     for entry in mac_table:
         vlan = entry[0]
         mac = entry[1]
-        intf = entry[2]
+        intf = long_int_name(entry[2])
         if intf in output:
             output[intf].append((mac, vlan))
         else:
@@ -100,7 +138,13 @@ def get_desc_table(session):
 
     template_path = get_template_full_path(session, desc_template)
 
-    desc_table = textfsm_parse_to_list(raw_desc_list, template_path, add_header=False)
+    desc_list = textfsm_parse_to_list(raw_desc_list, template_path, add_header=False)
+
+    desc_table = {}
+    # Change interface names to long versions for better matching with other outputs
+    for entry in desc_list:
+        intf = long_int_name(entry[0])
+        desc_table[intf] = entry[1]
 
     return desc_table
 
@@ -132,13 +176,21 @@ def get_arp_info(session):
         if mac.lower() == 'incomplete':
             continue
         # Get the VLAN, if SVI is specified.
-        intf = entry[4]
-        if intf.startswith('Vlan'):
+        intf = long_int_name(entry[3])
+        if intf.lower().startswith('vlan'):
             vlan = intf[4:]
         else:
             vlan = None
 
-        arp_lookup[mac] = (ip, vlan)
+        if intf in arp_lookup.keys():
+            arp_lookup[intf].append((mac, ip))
+        else:
+            arp_lookup[intf] = [(mac, ip)]
+
+        if mac in arp_lookup.keys():
+            arp_lookup[mac].append((ip, vlan))
+        else:
+            arp_lookup[mac] = [(ip, vlan)]
 
     return arp_lookup
 
@@ -154,6 +206,8 @@ def main():
                 crt.Dialog.Messagebox("This device OS is not supported by this script.  Exiting.")
                 return
 
+            int_table = get_int_status(session)
+
             mac_table = get_mac_table(session)
 
             desc_table = get_desc_table(session)
@@ -161,29 +215,54 @@ def main():
             arp_lookup = get_arp_info(session)
 
             output = []
-            for desc_entry in desc_table:
-                intf = desc_entry[0]
+            for intf_entry in int_table:
+                intf = intf_entry[0]
                 # Exclude VLAN interfaces
                 if intf.lower().startswith("v"):
                     continue
-                desc = desc_entry[1]
 
-                if intf in mac_table.keys():
+                state = intf_entry[2]
+                # Get interface description, if one exists
+                desc = None
+                if intf in desc_table.keys():
+                    desc = desc_table[intf]
+
+                # Record upsteam information for routed ports
+                if intf_entry[3] == 'routed':
+                    vlan = intf_entry[3]
+                    mac = None
+                    ip = None
+                    if intf in arp_lookup.keys():
+                        arp_list = arp_lookup[intf]
+                        for entry in arp_list:
+                            mac, ip = entry
+                            output_line = [intf, state, mac, ip, vlan, desc]
+                            output.append(output_line)
+                    else:
+                        output_line = [intf, state, mac, ip, vlan, desc]
+                        output.append(output_line)
+
+                # Record all information for L2 ports
+                elif intf in mac_table.keys():
                     for mac_entry in mac_table[intf]:
                         mac, vlan = mac_entry
                         ip = None
                         if mac and mac in arp_lookup.keys():
-                            ip, arp_vlan = arp_lookup[mac]
-                            if not vlan:
-                                vlan = arp_vlan
-                        output_line = [intf, mac, ip, vlan, desc]
-                        output.append(output_line)
+                            for entry in arp_lookup[mac]:
+                                ip, arp_vlan = entry
+                                if vlan == arp_vlan:
+                                    output_line = [intf, state, mac, ip, vlan, desc]
+                                    output.append(output_line)
+                        else:
+                            output_line = [intf, state, mac, ip, vlan, desc]
+                            output.append(output_line)
+
                 else:
-                    output_line = [intf, None, None, None, desc]
+                    output_line = [intf, state, None, None, None, desc]
                     output.append(output_line)
 
             output.sort(key=lambda x: human_sort_key(x[0]))
-            output.insert(0, ["Interface", "MAC", "IP Address", "VLAN", "Description"])
+            output.insert(0, ["Interface", "Status", "MAC", "IP Address", "VLAN", "Description"])
             output_filename = create_output_filename(session, "PortMap", ext=".csv")
             list_of_lists_to_csv(session, output, output_filename,)
 
