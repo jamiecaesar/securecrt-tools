@@ -111,12 +111,39 @@ def get_mac_table(session):
             mac_table = textfsm_parse_to_list(mac_data, template_path, add_header=False)
         os.remove(temp_filename)
 
+    # Check for vPCs on NXOS to account for "vPC Peer-Link" entries in MAC table of N9Ks
+    elif session['OS'] == "NX-OS":
+        send_cmd = "show vpc"
+        vpc_template = "cisco_nxos_show_vpc.template"
+
+        temp_filename = create_output_filename(session, "vpc")
+        write_output_to_file(session, send_cmd, temp_filename)
+
+        template_path = get_template_full_path(session, vpc_template)
+
+        with open(temp_filename, 'r') as vpc_data:
+            vpc_table = textfsm_parse_to_list(vpc_data, template_path, add_header=False)
+        os.remove(temp_filename)
+
+        if len(vpc_table) > 0:
+            peer_link_record = vpc_table[0]
+            peer_link = long_int_name(peer_link_record[1])
+        else:
+            peer_link = None
+
     # Convert TextFSM output to a dictionary for lookups
     output = {}
     for entry in mac_table:
         vlan = entry[0]
         mac = entry[1]
-        intf = long_int_name(entry[2])
+
+        raw_intf = entry[2]
+        crt.Dialog.MessageBox(raw_intf)
+        if "vpc" in raw_intf.lower():
+            intf = peer_link
+        else:
+            intf = long_int_name(raw_intf)
+
         if intf in output:
             output[intf].append((mac, vlan))
         else:

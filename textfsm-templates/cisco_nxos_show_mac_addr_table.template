@@ -1,6 +1,6 @@
 Value VLAN (\S+)
 Value MAC (\S+)
-Value INTERFACE (\S+)
+Value INTERFACE ([\S ]+)
 Value TYPE (\S+)
 Value AGE (\S+)
 Value SECURE ([TF])
