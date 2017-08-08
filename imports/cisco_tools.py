@@ -171,7 +171,7 @@ def long_int_name(int_name):
         (r'Fo', 'FortyGigabitEthernet'),
         (r'Te', 'TenGigabitEthernet'),
         (r'Gi', 'GigabitEthernet'),
-        (r'F', 'FastEthernet'),
+        (r'Fa', 'FastEthernet'),
         (r'Eth', 'Ethernet'),
         (r'e', 'Ethernet'),
         (r'Po', 'port-channel'),
