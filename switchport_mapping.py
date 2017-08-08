@@ -138,7 +138,6 @@ def get_mac_table(session):
         mac = entry[1]
 
         raw_intf = entry[2]
-        crt.Dialog.MessageBox(raw_intf)
         if "vpc" in raw_intf.lower():
             intf = peer_link
         else:
