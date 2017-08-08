@@ -21,6 +21,7 @@ These scripts should work on any version of SecureCRT that supports python.  If 
 * **save_output.py** - Generic script that prompts for a command and saves that output to a file.
 * **securecrt_python_version.py** - A script that returns a pop-up window with the python version being used by SecureCRT (mostly for troubleshooting)
 * **switchport_mapping.py** - This script will output a CSV file that lists each port on the switch and the associated MAC address, IP address and description (if available).  This script will launch a file open dialog window and the ARP CSV (from `arp_to_csv.py`) to use should be selected.
+* **vlan_to_csv.py** - Exports a list of VLANs (minus the ports) to a CSV file.
 
 **Note:** The file **empty_script_template.py** can be used as a starting point for writing new scripts.  This code skeleton contains all the required function calls for the majority of the provided functions to work properly.
 
