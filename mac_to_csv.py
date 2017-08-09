@@ -86,6 +86,20 @@ def main():
             mac_table = textfsm_parse_to_list(mac_data, template_path, add_header=True)
         os.remove(temp_filename)
 
+        # Check if IOS mac_table is empty -- if so, it is probably because the switch has an older IOS
+        # that expects "show mac-address-table" instead of "show mac address-table".
+        if session['OS'] == "IOS" and len(mac_table) == 1:
+            send_cmd = "show mac-address-table dynamic"
+
+            temp_filename = create_output_filename(session, "mac-addr")
+            write_output_to_file(session, send_cmd, temp_filename)
+
+            template_path = get_template_full_path(session, mac_template)
+
+            with open(temp_filename, 'r') as mac_data:
+                mac_table = textfsm_parse_to_list(mac_data, template_path, add_header=False)
+            os.remove(temp_filename)
+
         # Write TextFSM output to a .csv file.
         output_filename = create_output_filename(session, "mac-addr", ext=".csv")
         list_of_lists_to_csv(session, mac_table, output_filename)
