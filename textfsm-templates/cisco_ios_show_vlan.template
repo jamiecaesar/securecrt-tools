@@ -1,9 +1,24 @@
 Value VLAN_ID (\d+)
 Value NAME (\S+)
 Value STATUS (\S+)
+# PORTS is a list because of multi-line outputs in "show vlan".
+# Each line of member ports will be an entry in the list.
+Value List PORTS ([\S ]+)
 
 Start
-  ^VLAN\s+Type -> Done
+  # Forward Match Style:  When we detect the start of a VLAN line, write what has been saved already (if anything)
+  ^\d+ -> Continue.Record
+  #
+  # Match VLAN line with ports listed, add ports to a list
+  ^${VLAN_ID}\s+${NAME}\s+${STATUS}\s+${PORTS}
+  #
+  # Match overflow line that only contains ports, add ports to ports list for previous VLAN line
+  ^\s{10}\s+${PORTS}
+  #
+  # Match VLAN line without any ports listed.  At the end so it doesn't match before entry with ports in it.
   ^${VLAN_ID}\s+${NAME}\s+${STATUS} -> Record
+  #
+  # When we get to the "VLAN Type" section, end processing
+  ^VLAN Type -> Done
 
 Done

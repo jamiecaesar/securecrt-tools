@@ -51,14 +51,35 @@ from imports.cisco_securecrt import list_of_lists_to_csv
 from imports.cisco_tools import get_template_full_path
 from imports.cisco_tools import textfsm_parse_to_list
 
-
-
 # #################################  SCRIPT  ###################################
+
+
+def normalize_port_list(vlan_data):
+    # VLANs with multiple lines of Ports will have multiple list entries.  Combine all into a single string of ports.
+    # Skip first (header) row
+    for entry in vlan_data[1:]:
+        port_list = entry[3]
+        if len(port_list) > 0:
+            port_string = ""
+            for line in port_list:
+                # Empty list entries contain a single entry.  Skip them.
+                if line == " ":
+                    continue
+                # If port_string is still empty, add our line to this string.
+                if port_string == "":
+                    port_string = port_string + line
+                # If there is something in port-string, concatenate strings with a ", " in between.
+                else:
+                    port_string = "{0}, {1}".format(port_string, line)
+            entry[3] = port_string
+        else:
+            entry[3] = ""
 
 
 def main():
         """
-        Put a description of what the script will do here
+        Capture the "show vlan" information and output it to a CSV.  Multi-line port lists will be
+        printed as a single text string with all ports in the VLAN.
         """
         supported_os = ["IOS", "NX-OS"]
 
@@ -92,6 +113,8 @@ def main():
             with open(temp_filename, 'r') as vlan_file:
                 vlan_table = textfsm_parse_to_list(vlan_file, template_path, add_header=True)
             os.remove(temp_filename)
+
+            normalize_port_list(vlan_table)
 
             # Write TextFSM output to a .csv file.
             output_filename = create_output_filename(session, "vlan", ext=".csv")
