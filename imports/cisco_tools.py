@@ -102,7 +102,8 @@ def update_empty_interfaces(route_table):
         if route['protocol'] == 'connected':
             connected[route['network']] = route['interface']
         if route['protocol'] == 'static':
-            statics[route['network']] = route['nexthop']
+            if route['nexthop']:
+                statics[route['network']] = route['nexthop']
         if route['nexthop'] and not route['interface']:
             unknowns[route['nexthop']] = None
 
