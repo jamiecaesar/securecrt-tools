@@ -28,6 +28,7 @@
 # ################################################     IMPORTS      ###################################################
 import os
 import sys
+import logging
 
 # If the "crt" object exists, this is being run from SecureCRT.  Get script directory so we can add it to the
 # PYTHONPATH, which is needed to import our custom modules.
@@ -50,6 +51,8 @@ import securecrt_tools.utilities as utils
 session_set_filename = os.path.join(script_dir, "settings", settings.global_settings_filename)
 session_settings = settings.SettingsImporter(session_set_filename, settings.global_defs)
 
+# Set logger variable -- this won't be used unless debug setting is True
+logger = logging.getLogger("securecrt")
 
 # ################################################     SCRIPT       ###################################################
 
@@ -69,16 +72,10 @@ def script_main(session):
 if __name__ == "__builtin__":
     # Create a session object for this execution of the script and pass it to our main() function
     crt_session = sessions.CRTSession(crt, session_settings)
-    if session_settings.get_setting('debug'):
-        import logging
-        logger = logging.getLogger("securecrt")
     script_main(crt_session)
 
 # Else, if this script is run directly then create a session object without the SecureCRT API (crt object)  This would
 # be done for debugging purposes (running the script outside of SecureCRT and feeding it the output it failed on)
 elif __name__ == "__main__":
     direct_session = sessions.DirectSession(os.path.realpath(__file__), session_settings)
-    if session_settings.get_setting('debug'):
-        import logging
-        logger = logging.getLogger("securecrt")
     script_main(direct_session)
