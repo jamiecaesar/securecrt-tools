@@ -176,7 +176,7 @@ class Session:
         pass
 
     @abstractmethod
-    def prompt_window(self, message):
+    def prompt_window(self, message, title="", hide_input=False):
         pass
 
     @abstractmethod
@@ -206,7 +206,13 @@ class CRTSession(Session):
         # Set up SecureCRT tab for interaction with the scripts
         self.tab = self.crt.GetScriptTab().Screen
 
+        if self.crt.Session.Connected == 0:
+            self.logger.debug("Session not connected prior to creating object.")
+        else:
+            self.logger.debug("Session already connected.  Setting up.")
+            self.__start()
 
+    def __start(self):
         # Set Tab parameters to allow correct sending/receiving of data via SecureCRT
         self.tab.Synchronous = True
         self.tab.IgnoreEscape = True
@@ -359,6 +365,51 @@ class CRTSession(Session):
         else:
             return None, None
 
+    def __get_output(self, command):
+        """
+        A function that issues a command to the current session and returns the output as a string variable.
+        *** NOTE *** This is private because it should only be used when it is guaranteeds that the output will be
+        small (less than 1000 lines), or else SecureCRT can crash.
+
+        :param command: Command string that should be sent to the device
+        :return result: Variable holding the result of issuing the above command.
+        """
+        # Send command
+        self.tab.Send(command + '\n')
+
+        # Ignore the echo of the command we typed
+        self.tab.WaitForString(command.strip())
+
+        # Capture the output until we get our prompt back and write it to the file
+        result = self.tab.ReadString(self.prompt)
+
+        return result.strip('\r\n')
+
+    def login(self, host, username, password=None):
+        if not password:
+            password = self.prompt_window("Enter the password for this device.", "Password", hide_input=True)
+
+        login_string = "/SSH2 /ACCEPTHOSTKEYS /L {} /PASSWORD {} {}".format(username, password, host)
+        if self.crt.Session.Connected == 0:
+            connected = False
+            try:
+                self.logger.debug("Attempting Connection to: {}@{}".format(username, host))
+                self.crt.Session.Connect(login_string)
+                connected = True
+            except:
+                error = self.crt.GetLastErrorMessage()
+                self.logger.debug("Error connecting: {}".format(error))
+                self.message_box(error, "Connect Failed", ICON_STOP)
+
+            if connected:
+                self.__start()
+        else:
+            self.message_box("Session already connected.  Please disconnect before trying again.")
+
+    def disconnect(self):
+        self.logger.debug("Disconnecting Session")
+        self.crt.Session.Disconnect()
+
     def end(self):
         """
                 End the session by returning the device's terminal parameters back to normal.
@@ -404,9 +455,9 @@ class CRTSession(Session):
                                                                                                  options))
         return self.crt.Dialog.MessageBox(message, title, options)
 
-    def prompt_window(self, message):
+    def prompt_window(self, message, title="", hide_input=False):
         self.logger.debug("Creating Prompt with message: '{0}'".format(message))
-        result = self.crt.Dialog.Prompt(message)
+        result = self.crt.Dialog.Prompt(message, title, "", hide_input)
         self.logger.debug("Captures prompt results: '{0}'".format(result))
         return result
 
@@ -484,26 +535,6 @@ class CRTSession(Session):
         except IOError, err:
             error_str = "IO Error for:\n{0}\n\n{1}".format(filename, err)
             self.message_box(error_str, "IO Error", ICON_STOP)
-
-    def __get_output(self, command):
-        """
-        A function that issues a command to the current session and returns the output as a string variable.
-        *** NOTE *** This is private because it should only be used when it is guaranteeds that the output will be
-        small (less than 1000 lines), or else SecureCRT can crash.
-
-        :param command: Command string that should be sent to the device
-        :return result: Variable holding the result of issuing the above command.
-        """
-        # Send command
-        self.tab.Send(command + '\n')
-
-        # Ignore the echo of the command we typed
-        self.tab.WaitForString(command.strip())
-
-        # Capture the output until we get our prompt back and write it to the file
-        result = self.tab.ReadString(self.prompt)
-
-        return result.strip('\r\n')
 
     def get_command_output(self, command):
         """
