@@ -195,6 +195,10 @@ class Session:
     def create_new_saved_session(self, session_name, ip, protocol="SSH2", folder="_imports"):
         pass
 
+    @abstractmethod
+    def send_config_commands(self, command_list):
+        pass
+
 
 class CRTSession(Session):
 
@@ -583,6 +587,36 @@ class CRTSession(Session):
         self.logger.debug("Creating new session '{0}'".format(session_path))
         new_session.Save(session_path)
 
+    def send_config_commands(self, command_list):
+        """
+        This method accepts a list of strings, where each string is a command to be sent to the device.  This method
+        will send "conf t", plus all the commands and finally and "end" to the device and write the results to a file.
+
+        NOTE: This method is new and does not have any error checking for how the remote device handles the commands
+        you are trying to send.  USE IT AT YOUR OWN RISK.
+
+        :param command_list: A list of strings, where each string is a command to be sent.  This should NOT include
+                            'config t' or 'end'.  This is added automatically.
+        :return:
+        """
+        self.logger.debug("Preparing to write commands to device.")
+        self.logger.debug("Received: {}".format(str(command_list)))
+
+        command_string = ""
+        command_string += "configure terminal\n"
+        for command in command_list:
+            command_string += "{}\n".format(command.strip())
+        command_string += "end\n"
+
+        self.logger.debug("Final command list:\n {}".format(command_string))
+
+        output_filename = self.create_output_filename("CONFIG_RESULT")
+        self.tab.Send(command_string)
+        config_results = self.tab.ReadString(self.prompt)
+        with open(output_filename, 'w') as output_file:
+            self.logger.debug("Writing output to: {}".format(output_filename))
+            output_file.write("{}{}".format(self.prompt, config_results))
+
 
 class DirectSession(Session):
 
@@ -649,7 +683,7 @@ class DirectSession(Session):
         self.logger.debug("Returning Response Code: {0}".format(code))
         return code
 
-    def prompt_window(self, message):
+    def prompt_window(self, message, title="", hide_input=False):
         self.logger.debug("Creating Prompt with message: '{0}'".format(message))
         result = raw_input("{0}: ".format(message))
         self.logger.debug("Captures prompt results: '{0}'".format(result))
@@ -728,3 +762,21 @@ class DirectSession(Session):
         desc = ["Created on {0} by script:".format(creation_date), os.path.join(self.script_dir, self.script_name)]
         print "Simulated saving session '{0}'\n  IP: {1}, protocol: {2}\n Description: {3}".format(session_path, ip,
                                                                                                   protocol, str(desc))
+
+    def send_config_commands(self, command_list):
+        self.logger.debug("Preparing to write commands to device.")
+        self.logger.debug("Received: {}".format(str(command_list)))
+
+        command_string = ""
+        command_string += "configure terminal\n"
+        for command in command_list:
+            command_string += "{}\n".format(command.strip())
+        command_string += "end\n"
+
+        self.logger.debug("Final command list:\n {}".format(command_string))
+
+        output_filename = self.create_output_filename("CONFIG_RESULT")
+        config_results = command_string
+        with open(output_filename, 'w') as output_file:
+            self.logger.debug("Writing output to: {}".format(output_filename))
+            output_file.write("{}{}".format(self.prompt, config_results))
