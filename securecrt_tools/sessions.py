@@ -199,6 +199,10 @@ class Session:
     def send_config_commands(self, command_list):
         pass
 
+    @abstractmethod
+    def save(self):
+        pass
+
 
 class CRTSession(Session):
 
@@ -389,7 +393,7 @@ class CRTSession(Session):
 
         return result.strip('\r\n')
 
-    def login(self, host, username, password=None):
+    def connect(self, host, username, password=None):
         if not password:
             password = self.prompt_window("Enter the password for this device.", "Password", hide_input=True)
 
@@ -617,6 +621,13 @@ class CRTSession(Session):
             self.logger.debug("Writing output to: {}".format(output_filename))
             output_file.write("{}{}".format(self.prompt, config_results))
 
+    def save(self):
+        save_string = "copy running-config startup-config\n\n"
+        self.logger.debug("Saving configuration on remote device.")
+        self.tab.Send(save_string)
+        save_results = self.tab.ReadString(self.prompt)
+        self.logger.debug("Save results: {}".format(save_results))
+
 
 class DirectSession(Session):
 
@@ -780,3 +791,9 @@ class DirectSession(Session):
         with open(output_filename, 'w') as output_file:
             self.logger.debug("Writing output to: {}".format(output_filename))
             output_file.write("{}{}".format(self.prompt, config_results))
+
+    def save(self):
+        save_string = "copy running-config startup-config"
+        self.logger.debug("Simulating Saving configuration on remote device.")
+        print "Saved config."
+
