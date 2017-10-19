@@ -49,6 +49,19 @@ import securecrt_tools.sessions as sessions
 import securecrt_tools.settings as settings
 import securecrt_tools.utilities as utils
 
+# Try importing the socket module for DNS lookups
+try:
+    import socket
+except ImportError:
+    pass
+
+if socket:
+    dns_lookup = True
+else:
+    dns_lookup = False
+
+# Import the manuf module for MAC to Vendor lookups
+import securecrt_tools.manuf as manuf
 
 # ################################################  LOAD SETTINGS   ###################################################
 
@@ -195,6 +208,21 @@ def get_arp_info(session):
     return arp_lookup
 
 
+def mac_to_vendor(mac):
+    """Lookup MAC Vendor Info
+
+    :param mac: MAC address to Lookup Vendor Info on
+    :return: MAC Vendor
+    """
+
+    p = manuf.MacParser(script_dir + "/securecrt_tools/manuf")
+    mac_manuf, mac_comment = p.get_all(mac)
+    if mac_comment:
+        return mac_comment
+    else:
+        return mac_manuf
+
+
 def script_main(session):
     supported_os = ["IOS", "NXOS"]
     if session.os not in supported_os:
@@ -229,14 +257,23 @@ def script_main(session):
             vlan = intf_entry[3]
             mac = None
             ip = None
+            fqdn = None
+            mac_vendor = None
             if intf in arp_lookup.keys():
                 arp_list = arp_lookup[intf]
                 for entry in arp_list:
                     mac, ip = entry
-                    output_line = [intf, state, mac, ip, vlan, desc]
+                    if mac:
+                        mac_vendor = mac_to_vendor(mac)
+                    if dns_lookup and ip:
+                        try:
+                            fqdn, _, _, = socket.gethostbyaddr(ip)
+                        except socket.herror:
+                            pass
+                    output_line = [intf, state, mac, mac_vendor, fqdn, ip, vlan, desc]
                     output.append(output_line)
             else:
-                output_line = [intf, state, mac, ip, vlan, desc]
+                output_line = [intf, state, mac, mac_vendor, fqdn, ip, vlan, desc]
                 output.append(output_line)
 
         # Record all information for L2 ports
@@ -244,22 +281,31 @@ def script_main(session):
             for mac_entry in mac_table[intf]:
                 mac, vlan = mac_entry
                 ip = None
+                fqdn = None
+                mac_vendor = None
                 if mac and mac in arp_lookup.keys():
                     for entry in arp_lookup[mac]:
                         ip, arp_vlan = entry
                         if vlan == arp_vlan:
-                            output_line = [intf, state, mac, ip, vlan, desc]
+                            if mac:
+                                mac_vendor = mac_to_vendor(mac)
+                            if dns_lookup and ip:
+                                try:
+                                    fqdn, _, _, = socket.gethostbyaddr(ip)
+                                except socket.herror:
+                                    pass
+                            output_line = [intf, state, mac, mac_vendor, fqdn, ip, vlan, desc]
                             output.append(output_line)
                 else:
-                    output_line = [intf, state, mac, ip, vlan, desc]
+                    output_line = [intf, state, mac, mac_vendor, fqdn, ip, vlan, desc]
                     output.append(output_line)
 
         else:
-            output_line = [intf, state, None, None, None, desc]
+            output_line = [intf, state, None, None, None, None, None, desc]
             output.append(output_line)
 
     output.sort(key=lambda x: utils.human_sort_key(x[0]))
-    output.insert(0, ["Interface", "Status", "MAC", "IP Address", "VLAN", "Description"])
+    output.insert(0, ["Interface", "Status", "MAC", "MAC Vendor", "DNS Name", "IP Address", "VLAN", "Description"])
     output_filename = session.create_output_filename("PortMap", ext=".csv")
     utils.list_of_lists_to_csv(output, output_filename)
 
