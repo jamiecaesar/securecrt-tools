@@ -66,6 +66,8 @@ local_settings_default = {'__version': "1.0",
 local_importer = settings.SettingsImporter(local_set_filename, local_settings_default)
 local_settings = local_importer.get_settings_dict()
 
+# Set logger variable -- this won't be used unless debug setting is True
+logger = logging.getLogger("securecrt")
 
 # ################################################     SCRIPT       ###################################################
 
