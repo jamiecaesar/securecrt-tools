@@ -57,12 +57,13 @@ IDNO = 7              # No button clicked
 # ################################################     CLASSES      ###################################################
 
 class ConnectError(Exception):
-    pass
-
-
-class PromptError(Exception):
     def __init__(self, message):
-        super(PromptError, self).__init__(message)
+        super(ConnectError, self).__init__(message)
+
+
+class DeviceInteractionError(Exception):
+    def __init__(self, message):
+        super(DeviceInteractionError, self).__init__(message)
 
 
 class OSDetectError(Exception):
@@ -316,18 +317,15 @@ class CRTSession(Session):
 
             # Check for non-enable mode (prompt ends with ">" instead of "#")
             if prompt[-1] == ">":
-                self.message_box("Not in enable mode.  Enter enable and try again.", "Not in Enable Mode", ICON_STOP)
                 self.end()
-                sys.exit()
+                raise DeviceInteractionError("Not in enable mode.  Cannot continue.")
             # If our prompt shows in a config mode -- there is a ) before # -- e.g. Router(config)#
             if prompt[-2] == ")":
-                self.message_box("In config mode.  Exit config mode and try again.", "In Config Mode", ICON_STOP)
                 self.end()
-                sys.exit()
+                raise DeviceInteractionError("Device already in config mode.")
             elif prompt[-1] != "#":
-                self.message_box("Unable to capture prompt.  Stopping script.", "Prompt Error", ICON_STOP)
                 self.end()
-                sys.exit()
+                raise DeviceInteractionError("Unable to capture prompt.")
             else:
                 return prompt
         else:
@@ -425,55 +423,75 @@ class CRTSession(Session):
         return result.strip('\r\n')
 
     def connect(self, host, username, password=None):
+        #TODO: Handle manual telnet login process
         self.logger.debug("<CONNECT> Attempting Connection to: {}@{}".format(username, host))
-        if not password:
-            password = self.prompt_window("Enter the password for this device.", "Password", hide_input=True)
 
-        login_string = "/SSH2 /ACCEPTHOSTKEYS /L {} /PASSWORD {} {}".format(username, password, host)
+        if not password:
+            password = self.prompt_window("Enter the password for {}@{}.".format(username, host), "Password",
+                                          hide_input=True)
+
+        ssh2_string = "/SSH2 /ACCEPTHOSTKEYS /L {} /PASSWORD {} {}".format(username, password, host)
         if not self.is_connected():
             try:
                 self.logger.debug("<CONNECT> Sending '/SSH2 /ACCEPTHOSTKEYS /L {} /PASSWORD <removed> {}' to SecureCRT."
                                   .format(username, host))
-                self.crt.Session.Connect(login_string)
-                connected = True
+                self.crt.Session.Connect(ssh2_string)
             except:
                 error = self.crt.GetLastErrorMessage()
-                self.logger.debug("<CONNECT> Error connecting: {}".format(error))
-                raise ConnectError
+                self.logger.debug("<CONNECT> Error connecting SSH2 to {}: {}".format(host, error))
+                try:
+                    ssh1_string = "/SSH1 /ACCEPTHOSTKEYS /L {} /PASSWORD {} {}".format(username, password, host)
+                    self.logger.debug("<CONNECT> Sending '/SSH1 /ACCEPTHOSTKEYS /L {} /PASSWORD <removed> {}' to SecureCRT."
+                                      .format(username, host))
+                    self.crt.Session.Connect(ssh1_string)
+                except:
+                    error = self.crt.GetLastErrorMessage()
+                    self.logger.debug("<CONNECT> Error connecting SSH1 to {}: {}".format(host, error))
+                    raise ConnectError(error)
 
-            if connected:
-                # Once connected, we want to make sure the banner message has finished printing before trying to do
-                # anything else.  We'll do this by sending a small string (followed by backspaces to erase it), which
-                # will be printed after the final CLI prompt prints.  We will wait until we see the end of the prompt
-                # (# or >) followed by our unique string
+            # Once connected, we want to make sure the banner message has finished printing before trying to do
+            # anything else.  We'll do this by sending a small string (followed by backspaces to erase it), which
+            # will be printed after the final CLI prompt prints.  We will wait until we see the end of the prompt
+            # (# or >) followed by our unique string
 
-                # Assume test string is sent before banner and prompt finishing printing.  We should wait for our
-                # string to be echoed after a # or > symbol.   Timout if it takes too long (timeout_seconds).
+            # Assume test string is sent before banner and prompt finishing printing.  We should wait for our
+            # string to be echoed after a # or > symbol.   Timout if it takes too long (timeout_seconds).
+            test_string = "!\b"
+            timeout_seconds = 2
+            self.tab.Send(test_string)
+            result = self.tab.WaitForStrings(["# {}".format(test_string),
+                                              "#{}".format(test_string),
+                                              ">{}".format(test_string)], timeout_seconds)
+            self.logger.debug("<CONNECT> Prompt result = {}".format(result))
+            # If the above check timed out, either everything printed before we sent our string, or it hasn't been
+            # long enough.  A few times a second, send our string (and backspace) until we finally capture it before
+            # proceeding.
+            while result == 0:
                 test_string = "!\b"
-                timeout_seconds = 2
+                timeout_seconds = .2
                 self.tab.Send(test_string)
-                result = self.tab.WaitForStrings(["# {}".format(test_string),
-                                                  "#{}".format(test_string),
-                                                  ">{}".format(test_string)], timeout_seconds)
+                result = self.tab.WaitForString(test_string, timeout_seconds)
                 self.logger.debug("<CONNECT> Prompt result = {}".format(result))
-                # If the above check timed out, either everything printed before we sent our string, or it hasn't been
-                # long enough.  A few times a second, send our string (and backspace) until we finally capture it before
-                # proceeding.
-                while result == 0:
-                    test_string = "!\b"
-                    timeout_seconds = .2
-                    self.tab.Send(test_string)
-                    result = self.tab.WaitForString(test_string, timeout_seconds)
-                    self.logger.debug("<CONNECT> Prompt result = {}".format(result))
 
-                # Continue with setting up the session with the device
-                self.__start()
+            # Continue with setting up the session with the device
+            self.__start()
         else:
-            self.message_box("<CONNECT> Session already connected.  Please disconnect before trying again.")
+            self.logger.debug("<CONNECT> Session already connected.  Please disconnect before trying again.")
+            raise ConnectError("SecureCRT is already connected.")
 
     def disconnect(self):
-        self.logger.debug("<DISCONNECT> Disconnecting Session")
-        self.crt.Session.Disconnect()
+        self.logger.debug("<DISCONNECT> Sending 'exit' command.")
+        self.tab.Send("exit\n")
+        self.tab.WaitForString("exit")
+        time.sleep(0.25)
+        attempts = 0
+        while self.is_connected() and attempts < 10:
+            self.logger.debug("<DISCONNECT> Not disconnected.  Attempting ungraceful disconnect.")
+            self.crt.Session.Disconnect()
+            time.sleep(0.1)
+            attempts += 1
+        if attempts >= 10:
+            raise ConnectError("Unable to disconnect from session.")
 
     def is_connected(self):
         session_connected = self.crt.Session.Connected
@@ -588,13 +606,13 @@ class CRTSession(Session):
                 self.tab.Send(command + "\n")
 
                 # Ignore the echo of the command we typed (including linefeed)
-                self.tab.WaitForString(command.strip())
+                self.tab.WaitForString(command.strip(), 30)
 
                 # Loop to capture every line of the command.  If we get CRLF (first entry in our "endings" list), then
                 # write that line to the file.  If we get our prompt back (which won't have CRLF), break the loop b/c we
                 # found the end of the output.
                 while True:
-                    nextline = self.tab.ReadString(matches)
+                    nextline = self.tab.ReadString(matches, 30)
                     # If the match was the 1st index in the endings list -> \r\n
                     if self.tab.MatchIndex == 1:
                         # Strip newlines from front and back of line.
@@ -617,6 +635,8 @@ class CRTSession(Session):
                     elif self.tab.MatchIndex == 3:
                         # We got our prompt, so break the loop
                         break
+                    else:
+                        raise DeviceInteractionError("Timeout trying to capture output")
 
         except IOError, err:
             error_str = "IO Error for:\n{0}\n\n{1}".format(filename, err)
