@@ -726,7 +726,7 @@ class CRTSession(Session):
 
         with open(output_filename, 'w') as output_file:
             self.logger.debug("<SEND_CMDS> Writing config session output to: {}".format(output_filename))
-            output_file.write(config_results)
+            output_file.write(config_results.replace("\r", ""))
 
     def save(self):
         save_string = "copy running-config startup-config\n\n"
