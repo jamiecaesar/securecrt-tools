@@ -76,6 +76,7 @@ class Session:
 
     def __init__(self, script_path, settings_importer):
         self.script_dir, self.script_name = os.path.split(script_path)
+        self.settings_importer = settings_importer
         self.os = None
         self.prompt = None
         self.hostname = None
@@ -705,22 +706,27 @@ class CRTSession(Session):
         self.logger.debug("<SEND_CMDS> Received: {}".format(str(command_list)))
 
         # Build text commands to send to device, and book-end with "conf t" and "end"
-        command_string = ""
-        command_string += "configure terminal\n"
-        for command in command_list:
-            command_string += "{}\n".format(command.strip())
-        command_string += "end\n"
-        self.logger.debug("<SEND_CMDS> Final command list:\n {}".format(command_string))
+        config_results = ""
+        command_list.insert(0,"configure terminal")
 
-        # Send commands to device
-        self.tab.Send(command_string)
-        config_results = self.tab.ReadString(self.prompt)
-        if output_filename:
-            with open(output_filename, 'w') as output_file:
-                self.logger.debug("<SEND_CMDS> Writing config session output to: {}".format(output_filename))
-                output_file.write("{}{}".format(self.prompt, config_results))
-        else:
-            self.logger.debug("<SEND_CMDS> Sending config commands WITHOUT writing output")
+        success = True
+        for command in command_list:
+            self.tab.Send("{}\n".format(command))
+            output = self.tab.ReadString(")#", 3)
+            if output:
+                config_results += "{})#".format(output)
+            else:
+                error = "Did not receive expected prompt after issuing command: {}".format(command)
+                self.logger.debug("<SEND_CMDS> {}".format(error))
+                raise DeviceInteractionError("{}".format(error))
+
+        self.tab.Send("end\n")
+        output = self.tab.ReadString(self.prompt, 2)
+        config_results += "{}{}".format(output, self.prompt)
+
+        with open(output_filename, 'w') as output_file:
+            self.logger.debug("<SEND_CMDS> Writing config session output to: {}".format(output_filename))
+            output_file.write(config_results)
 
     def save(self):
         save_string = "copy running-config startup-config\n\n"
@@ -759,9 +765,17 @@ class DirectSession(Session):
 
     def connect(self, host, username, password=None):
         print "Pretending to log into device {} with username {}.".format(host, username)
+        valid_os = ["IOS", "NXOS", "ASA"]
+        response = ""
+        while response not in valid_os:
+            response = raw_input("Select OS ({0}): ".format(str(valid_os)))
+        self.logger.debug("<INIT> Setting OS to {0}".format(response))
+        self.os = response
+        self._connected = True
 
     def disconnect(self):
         print "Prentending to disconnect from device {}.".format(self.hostname)
+        self._connected = False
 
     def is_connected(self):
         return self._connected
