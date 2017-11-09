@@ -145,7 +145,11 @@ class Session:
         self.logger.debug("<CREATE_FILENAME> Starting creation of filename with desc: {0}, ext: {1}, include_date: {2}"
                           .format(desc, ext, include_date))
         self.logger.debug("<CREATE_FILENAME> Original Save Path: {0}".format(self.settings['save path']))
-        save_path = os.path.realpath(self.settings['save path'])
+        if not os.path.isabs(self.settings['save path']):
+            save_path = os.path.join(self.script_dir, self.settings['save path'])
+            save_path = os.path.realpath(save_path)
+        else:
+            save_path = os.path.realpath(self.settings['save path'])
         self.logger.debug("<CREATE_FILENAME> Real Save Path: {0}".format(save_path))
 
         # If environment vars were used, expand them
