@@ -17,10 +17,6 @@ else:
 from securecrt_tools import sessions
 from securecrt_tools import utilities
 
-# Create global logger so we can write debug messages from any function (if debug mode setting is enabled in settings).
-logger = logging.getLogger("securecrt")
-logger.debug("Starting execution of {}".format(script_name))
-
 
 # ################################################   SCRIPT LOGIC   ###################################################
 

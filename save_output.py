@@ -16,6 +16,10 @@ else:
 # Now we can import our custom modules
 from securecrt_tools import sessions
 
+# Create global logger so we can write debug messages from any function (if debug mode setting is enabled in settings).
+logger = logging.getLogger("securecrt")
+logger.debug("Starting execution of {}".format(script_name))
+
 
 # ################################################   SCRIPT LOGIC   ###################################################
 
@@ -30,10 +34,6 @@ def script_main(session):
     :type session: sessions.Session
 
     """
-    # Create logger instance so we can write debug messages (if debug mode setting is enabled).
-    logger = logging.getLogger("securecrt")
-    logger.debug("Starting execution of {}".format(script_name))
-
     # Start session with device
     session.start_cisco_session()
 
