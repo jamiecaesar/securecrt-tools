@@ -24,7 +24,7 @@ logger.debug("Starting execution of {}".format(script_name))
 
 # ################################################   SCRIPT LOGIC   ###################################################
 
-def script_main(session):
+def script_main(script):
     """
     Author: Jamie Caesar
     Email: jcaesar@presidio.com
@@ -37,29 +37,29 @@ def script_main(session):
     "folder" - The path starting from the <SecureCRT Config>/Sessions/ directory where the sessions will be created.
     "strip_domains" -  A list of domain names that will be stripped away if found in the CDP remote device name.
 
-    :param session: A subclass of the sessions.Session object that represents this particular script session (either
+    :param script: A subclass of the sessions.Session object that represents this particular script session (either
                     SecureCRTSession or DirectSession)
-    :type session: script_types.Script
+    :type script: script_types.Script
     """
     # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
-    session.start_cisco_session()
+    script.start_cisco_session()
 
     # Validate device is running a supported OS
     supported_os = ["IOS", "NXOS"]
-    if session.os not in supported_os:
-        logger.debug("Unsupported OS: {0}.  Raising exception.".format(session.os))
-        raise script_types.UnsupportedOSError("Remote device running unsupported OS: {0}.".format(session.os))
+    if script.os not in supported_os:
+        logger.debug("Unsupported OS: {0}.  Raising exception.".format(script.os))
+        raise script_types.UnsupportedOSError("Remote device running unsupported OS: {0}.".format(script.os))
 
     send_cmd = "show cdp neighbors detail"
 
-    raw_cdp = session.get_command_output(send_cmd)
+    raw_cdp = script.get_command_output(send_cmd)
 
-    template_file = session.get_template("cisco_os_show_cdp_neigh_det.template")
+    template_file = script.get_template("cisco_os_show_cdp_neigh_det.template")
 
     cdp_table = utilities.textfsm_parse_to_list(raw_cdp, template_file)
 
     # Since "System Name" is a newer NXOS feature -- try to extract it from the device ID when its empty.
-    strip_list = session.settings.getlist(script_name, "strip_domains")
+    strip_list = script.settings.getlist(script_name, "strip_domains")
     for entry in cdp_table:
         # entry[2] is system name, entry[1] is device ID
         if entry[2] == "":
@@ -68,12 +68,12 @@ def script_main(session):
     session_list = create_session_list(cdp_table)
 
     # Get the destination directory from settings
-    dest_folder = session.settings.get(script_name, "folder")
+    dest_folder = script.settings.get(script_name, "folder")
 
     for device in session_list:
         system_name = device[0]
         mgmt_ip = device[1]
-        session.create_new_saved_session(system_name, mgmt_ip, folder=dest_folder)
+        script.create_new_saved_session(system_name, mgmt_ip, folder=dest_folder)
         # Track the names of the hosts we've made already
         logger.debug("Created session for {}.".format(system_name))
 
@@ -84,10 +84,10 @@ def script_main(session):
     setting_msg = "{} sessions created in the Sessions sub-directory '{}'\n" \
                   "\n" \
                   "{} sessions skipped (no IP or duplicate)".format(num_created, dest_folder, num_skipped)
-    session.message_box(setting_msg, "Sessions Created", script_types.ICON_INFO)
+    script.message_box(setting_msg, "Sessions Created", script_types.ICON_INFO)
 
     # Return terminal parameters back to the original state.
-    session.end_cisco_session()
+    script.end_cisco_session()
 
 
 def create_session_list(cdp_list):
@@ -141,10 +141,10 @@ def create_session_list(cdp_list):
 
 # If this script is run from SecureCRT directly, use the SecureCRT specific class
 if __name__ == "__builtin__":
-    crt_session = script_types.CRTScript(crt)
-    script_main(crt_session)
+    crt_script = script_types.CRTScript(crt)
+    script_main(crt_script)
 
 # If the script is being run directly, use the simulation class
 elif __name__ == "__main__":
-    direct_session = script_types.DirectScript(os.path.realpath(__file__))
-    script_main(direct_session)
+    direct_script = script_types.DirectScript(os.path.realpath(__file__))
+    script_main(direct_script)

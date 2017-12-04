@@ -24,7 +24,7 @@ logger.debug("Starting execution of {}".format(script_name))
 
 # ################################################   SCRIPT LOGIC   ###################################################
 
-def script_main(session):
+def script_main(script):
     """
     Author: Jamie Caesar
     Email: jcaesar@presidio.com
@@ -34,18 +34,18 @@ def script_main(session):
     write the configuration changes to a file (for verification or later manual application).  If not, then the script
     will push the configuration commands to the device and save the configuration.
 
-    :param session: A subclass of the sessions.Session object that represents this particular script session (either
+    :param script: A subclass of the sessions.Session object that represents this particular script session (either
                     SecureCRTSession or DirectSession)
-    :type session: script_types.Script
+    :type script: script_types.Script
     """
     # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
-    session.start_cisco_session()
+    script.start_cisco_session()
 
     # Validate device is running a supported OS
     supported_os = ["IOS", "NXOS"]
-    if session.os not in supported_os:
-        logger.debug("Unsupported OS: {0}.  Raising exception.".format(session.os))
-        raise script_types.UnsupportedOSError("Remote device running unsupported OS: {0}.".format(session.os))
+    if script.os not in supported_os:
+        logger.debug("Unsupported OS: {0}.  Raising exception.".format(script.os))
+        raise script_types.UnsupportedOSError("Remote device running unsupported OS: {0}.".format(script.os))
 
     # Ask if this should be a test run (generate configs only) or full run (push updates to devices)
     check_mode_message = "Do you want to run this script in check mode? (Only generate configs)\n" \
@@ -54,7 +54,7 @@ def script_main(session):
                          "No = Connect to device and PUSH configuration changes"
     message_box_design = script_types.ICON_QUESTION | script_types.BUTTON_YESNOCANCEL
     logger.debug("Prompting the user to run in check mode.")
-    result = session.message_box(check_mode_message, "Run in Check Mode?", message_box_design)
+    result = script.message_box(check_mode_message, "Run in Check Mode?", message_box_design)
     if result == script_types.IDYES:
         check_mode = True
     elif result == script_types.IDNO:
@@ -63,14 +63,14 @@ def script_main(session):
         return
 
     # Get CDP Data
-    raw_cdp = session.get_command_output("show cdp neighbors detail")
+    raw_cdp = script.get_command_output("show cdp neighbors detail")
 
     # Process CDP Data with TextFSM
-    template_file = session.get_template("cisco_os_show_cdp_neigh_det.template")
+    template_file = script.get_template("cisco_os_show_cdp_neigh_det.template")
     fsm_results = utilities.textfsm_parse_to_list(raw_cdp, template_file, add_header=True)
 
     # Get domain names to strip from device IDs from settings file
-    strip_list = session.settings.getlist(script_name, "strip_domains")
+    strip_list = script.settings.getlist(script_name, "strip_domains")
 
     # Since "System Name" is a newer NXOS feature -- try to extract it from the device ID when its empty.
     for entry in fsm_results:
@@ -82,14 +82,14 @@ def script_main(session):
     description_data = extract_cdp_data(fsm_results)
 
     # Capture port-channel output and add details to our description information
-    if session.os == "NXOS":
-        raw_pc_output = session.get_command_output("show port-channel summary")
-        pc_template = session.get_template("cisco_nxos_show_portchannel_summary.template")
+    if script.os == "NXOS":
+        raw_pc_output = script.get_command_output("show port-channel summary")
+        pc_template = script.get_template("cisco_nxos_show_portchannel_summary.template")
         pc_table = utilities.textfsm_parse_to_list(raw_pc_output, pc_template, add_header=True)
         add_port_channels(description_data, pc_table)
     else:
-        raw_pc_output = session.get_command_output("show etherchannel summary")
-        pc_template = session.get_template("cisco_ios_show_etherchannel_summary.template")
+        raw_pc_output = script.get_command_output("show etherchannel summary")
+        pc_template = script.get_template("cisco_ios_show_etherchannel_summary.template")
         pc_table = utilities.textfsm_parse_to_list(raw_pc_output, pc_template, add_header=True)
         add_port_channels(description_data, pc_table)
 
@@ -112,33 +112,33 @@ def script_main(session):
 
     # If in check-mode, generate configuration and write it to a file, otherwise push the config to the device.
     if check_mode:
-        output_filename = session.create_output_filename("intf-desc", include_date=False)
+        output_filename = script.create_output_filename("intf-desc", include_date=False)
         with open(output_filename, 'wb') as output_file:
             for command in config_commands:
                 output_file.write("{}\n".format(command))
     else:
         # Check settings to see if we prefer to save backups before/after applying changes
-        take_backups = session.settings.getboolean(script_name, "take_backups")
+        take_backups = script.settings.getboolean(script_name, "take_backups")
         if take_backups:
             # Back up running config prior to changes
-            before_filename = session.create_output_filename("1-show-run-BEFORE")
-            session.write_output_to_file("show run", before_filename)
+            before_filename = script.create_output_filename("1-show-run-BEFORE")
+            script.write_output_to_file("show run", before_filename)
             # Push configuration, capturing the configure terminal log
             output_filename = before_filename.replace("1-show-run-BEFORE", "2-CONFIG-RESULTS")
-            session.send_config_commands(config_commands, output_filename)
+            script.send_config_commands(config_commands, output_filename)
             # Back up configuration after changes are applied
             after_filename = before_filename.replace("1-show-run-BEFORE", "3-show-run-AFTER")
-            session.write_output_to_file("show run", after_filename)
+            script.write_output_to_file("show run", after_filename)
         else:
             # Push configuration, capturing the configure terminal log
-            output_filename = session.create_output_filename("CONFIG-RESULTS")
-            session.send_config_commands(config_commands, output_filename)
+            output_filename = script.create_output_filename("CONFIG-RESULTS")
+            script.send_config_commands(config_commands, output_filename)
 
         # Save configuration
-        session.save()
+        script.save()
 
     # Return terminal parameters back to the original state.
-    session.end_cisco_session()
+    script.end_cisco_session()
 
 
 def extract_cdp_data(cdp_table):
@@ -205,10 +205,10 @@ def add_port_channels(desc_data, pc_data):
 
 # If this script is run from SecureCRT directly, use the SecureCRT specific class
 if __name__ == "__builtin__":
-    crt_session = script_types.CRTScript(crt)
-    script_main(crt_session)
+    crt_script = script_types.CRTScript(crt)
+    script_main(crt_script)
 
 # If the script is being run directly, use the simulation class
 elif __name__ == "__main__":
-    direct_session = script_types.DirectScript(os.path.realpath(__file__))
-    script_main(direct_session)
+    direct_script = script_types.DirectScript(os.path.realpath(__file__))
+    script_main(direct_script)

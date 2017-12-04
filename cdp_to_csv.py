@@ -24,7 +24,7 @@ logger.debug("Starting execution of {}".format(script_name))
 
 # ################################################   SCRIPT LOGIC   ###################################################
 
-def script_main(session):
+def script_main(script):
     """
     Author: Jamie Caesar
     Email: jcaesar@presidio.com
@@ -33,31 +33,31 @@ def script_main(session):
     containing the important information, such as Remote Device hostname, model and IP information, in addition to the
     local and remote interfaces that connect the devices.
 
-    :param session: A subclass of the sessions.Session object that represents this particular script session (either
+    :param script: A subclass of the sessions.Session object that represents this particular script session (either
                     SecureCRTSession or DirectSession)
-    :type session: script_types.Script
+    :type script: script_types.Script
     """
     # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
-    session.start_cisco_session()
+    script.start_cisco_session()
 
     # Validate device is running a supported OS
     supported_os = ["IOS", "NXOS"]
-    if session.os not in supported_os:
-        logger.debug("Unsupported OS: {0}.  Raising exception.".format(session.os))
-        raise script_types.UnsupportedOSError("Remote device running unsupported OS: {0}.".format(session.os))
+    if script.os not in supported_os:
+        logger.debug("Unsupported OS: {0}.  Raising exception.".format(script.os))
+        raise script_types.UnsupportedOSError("Remote device running unsupported OS: {0}.".format(script.os))
 
     # Define the command to send to the remote device
     send_cmd = "show cdp neighbors detail"
     logger.debug("Command set to '{0}'".format(send_cmd))
 
     # Get domain names to strip from device IDs from settings file
-    strip_list = session.settings.getlist(script_name, "strip_domains")
+    strip_list = script.settings.getlist(script_name, "strip_domains")
 
     # Get the output from our above command
-    raw_cdp = session.get_command_output(send_cmd)
+    raw_cdp = script.get_command_output(send_cmd)
 
     # Choose the TextFSM template and process the data
-    template_file = session.get_template("cisco_os_show_cdp_neigh_det.template")
+    template_file = script.get_template("cisco_os_show_cdp_neigh_det.template")
     fsm_results = utilities.textfsm_parse_to_list(raw_cdp, template_file, add_header=True)
 
     # Since "System Name" is a newer NXOS feature -- try to extract it from the device ID when its empty.
@@ -66,21 +66,21 @@ def script_main(session):
         if entry[2] == "":
             entry[2] = utilities.extract_system_name(entry[1], strip_list=strip_list)
 
-    output_filename = session.create_output_filename("cdp", ext=".csv")
+    output_filename = script.create_output_filename("cdp", ext=".csv")
     utilities.list_of_lists_to_csv(fsm_results, output_filename)
 
     # Return terminal parameters back to the original state.
-    session.end_cisco_session()
+    script.end_cisco_session()
 
 
 # ################################################  SCRIPT LAUNCH   ###################################################
 
 # If this script is run from SecureCRT directly, use the SecureCRT specific class
 if __name__ == "__builtin__":
-    crt_session = script_types.CRTScript(crt)
-    script_main(crt_session)
+    crt_script = script_types.CRTScript(crt)
+    script_main(crt_script)
 
 # If the script is being run directly, use the simulation class
 elif __name__ == "__main__":
-    direct_session = script_types.DirectScript(os.path.realpath(__file__))
-    script_main(direct_session)
+    direct_script = script_types.DirectScript(os.path.realpath(__file__))
+    script_main(direct_script)

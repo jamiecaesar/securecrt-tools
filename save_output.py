@@ -23,44 +23,44 @@ logger.debug("Starting execution of {}".format(script_name))
 
 # ################################################   SCRIPT LOGIC   ###################################################
 
-def script_main(session):
+def script_main(script):
     """
     This script will prompt the user for a command for a Cisco device and save the output into a file.
     The path where the file is saved is specified in settings.ini file.
     This script assumes that you are already connected to the device before running it.
 
-    :param session: A subclass of the sessions.Session object that represents this particular script session (either
+    :param script: A subclass of the sessions.Session object that represents this particular script session (either
                     SecureCRTSession or DirectSession)
-    :type session: script_types.Script
+    :type script: script_types.Script
 
     """
     # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
-    session.start_cisco_session()
+    script.start_cisco_session()
 
-    send_cmd = session.prompt_window("Enter the command to capture")
+    send_cmd = script.prompt_window("Enter the command to capture")
     logger.debug("Received command: '{0}'".format(send_cmd))
 
     if send_cmd == "":
         return
 
     # Generate filename used for output files.
-    full_file_name = session.create_output_filename(send_cmd)
+    full_file_name = script.create_output_filename(send_cmd)
 
     # Get the output of our command and save it to the filename specified
-    session.write_output_to_file(send_cmd, full_file_name)
+    script.write_output_to_file(send_cmd, full_file_name)
 
     # Return terminal parameters back to the original state.
-    session.end_cisco_session()
+    script.end_cisco_session()
 
 
 # ################################################  SCRIPT LAUNCH   ###################################################
 
 # If this script is run from SecureCRT directly, use the SecureCRT specific class
 if __name__ == "__builtin__":
-    crt_session = script_types.CRTScript(crt)
-    script_main(crt_session)
+    crt_script = script_types.CRTScript(crt)
+    script_main(crt_script)
 
 # If the script is being run directly, use the simulation class
 elif __name__ == "__main__":
-    direct_session = script_types.DirectScript(os.path.realpath(__file__))
-    script_main(direct_session)
+    direct_script = script_types.DirectScript(os.path.realpath(__file__))
+    script_main(direct_script)
