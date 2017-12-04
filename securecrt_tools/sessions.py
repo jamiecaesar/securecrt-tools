@@ -186,7 +186,7 @@ class Session:
                 raise IOError(error_str)
         self.logger.debug("<VALIDATE_PATH> Path is Valid.")
 
-    def create_output_filename(self, desc, base_dir=None, ext=".txt", include_date=True):
+    def create_output_filename(self, desc, ext=".txt", include_hostname=True, include_date=True, base_dir=None):
         """
         Generates a filename (including absoluate path) based on details from the session.
 
@@ -223,21 +223,33 @@ class Session:
         # Just in case the trailing space from the above replacement was missing.
         clean_desc = clean_desc.replace("|", "")
 
+        if include_hostname:
+            self.logger.debug("<CREATE_FILENAME> Using hostname.")
+            hostname = self.hostname
+        else:
+            self.logger.debug("<CREATE_FILENAME> NOT using hostname.")
+            hostname = ""
+
         if include_date:
             # Get the current date in the format supplied in date_format
             now = datetime.datetime.now()
             date_format = self.settings.get("Global", "date_format")
             my_date = now.strftime(date_format)
             self.logger.debug("<CREATE_FILENAME> Created Date String: {}".format(my_date))
-            file_bits = [self.hostname, clean_desc, my_date]
         else:
-            file_bits = [self.hostname, desc]
+            self.logger.debug("<CREATE_FILENAME> Not including date.")
+            my_date = ""
 
+        file_bits = [hostname, clean_desc, my_date]
         self.logger.debug("<CREATE_FILENAME> Using {} to create filename".format(file_bits))
-        # Create Filename based on hostname and date format string.
-        filename = '-'.join(file_bits)
-        filename = filename + ext
-        file_path = os.path.normpath(os.path.join(save_path, filename))
+        # Create filename, stripping off leading or trailing "-" if some fields are not used.
+        filename = '-'.join(file_bits).strip("-")
+        # If ext starts with a '.', add it, otherwise put the '.' in there ourselves.
+        if ext[0] == '.':
+            filename = filename + ext
+        else:
+            filename = "{}.{}".format(filename, ext)
+        file_path = os.path.join(save_path, filename)
         self.logger.debug("<CREATE_FILENAME> Final Filename: {}".format(file_path))
 
         return file_path
