@@ -14,7 +14,7 @@ else:
     script_dir, script_name = os.path.split(os.path.realpath(__file__))
 
 # Now we can import our custom modules
-from securecrt_tools import sessions
+from securecrt_tools import script_types
 
 # Create global logger so we can write debug messages from any function (if debug mode setting is enabled in settings).
 logger = logging.getLogger("securecrt")
@@ -31,7 +31,7 @@ def script_main(session):
 
     :param session: A subclass of the sessions.Session object that represents this particular script session (either
                     SecureCRTSession or DirectSession)
-    :type session: sessions.Session
+    :type session: script_types.Script
 
     """
     # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
@@ -57,10 +57,10 @@ def script_main(session):
 
 # If this script is run from SecureCRT directly, use the SecureCRT specific class
 if __name__ == "__builtin__":
-    crt_session = sessions.CRTSession(crt)
+    crt_session = script_types.CRTScript(crt)
     script_main(crt_session)
 
 # If the script is being run directly, use the simulation class
 elif __name__ == "__main__":
-    direct_session = sessions.DirectSession(os.path.realpath(__file__))
+    direct_session = script_types.DirectScript(os.path.realpath(__file__))
     script_main(direct_session)

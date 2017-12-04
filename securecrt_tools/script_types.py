@@ -98,10 +98,10 @@ class UnsupportedOSError(Exception):
     pass
 
 
-# ##############################################    SESSION TYPES     ##################################################
+# ################################################    SCRIPT TYPES    ##################################################
 
 
-class Session:
+class Script:
     """
     This is a base class for the other Session types.  This class simply exists to enforce the required methods any
     sub-classes have to implement.  There are also a couple methods that are common to all sessions so they are defined
@@ -345,7 +345,7 @@ class Session:
         pass
 
     @abstractmethod
-    def connect_ssh(self, host, username, password, allowed=("SSH2", "SSH1"), prompt_endings=("#", "# ", ">")):
+    def connect_ssh(self, host, username, password, version=None, prompt_endings=("#", ">")):
         """
         Connects to a device via the SSH protocol. By default, SSH2 will be tried first, but if it fails it will attempt
         to fall back to SSH1.
@@ -355,11 +355,30 @@ class Session:
         :param username: The username to login to the device with
         :type username: str
         :param password: The password that goes with the provided username.  If a password is not specified, the
+            user will be prompted for one.
+        :type password: str
+        :param version: The SSH version to connect with (1 or 2).  Default is None, which will try 2 first and fallback
+            to 1 if that fails.
+        :type version: int
+        :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
+                               Cisco devices (">" and "#"), but may need to be changed if connecting to another
+                               type of device (for example "$" for some linux hosts).
+        :type prompt_endings: list
+        """
+        pass
+
+    @abstractmethod
+    def connect_telnet(self, host, username, password, prompt_endings=("#", ">")):
+        """
+        Connects to a device via the Telnet protocol.
+
+        :param host: The IP address of DNS name for the device to connect
+        :type host: str
+        :param username: The username to login to the device with
+        :type username: str
+        :param password: The password that goes with the provided username.  If a password is not specified, the
                          user will be prompted for one.
         :type password: str
-        :param allowed: A tuple of SSH protocols that are acceptable for connection.  The tuple can contain  "SSH2",
-                        "SSH1" or both.  SSH2 protocol will be attempted before SSH1.
-        :type allowed: tuple
         :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
                                Cisco devices (">" and "#"), but may need to be changed if connecting to another
                                type of device (for example "$" for some linux hosts).
@@ -539,7 +558,7 @@ class Session:
         pass
 
 
-class CRTSession(Session):
+class CRTScript(Script):
     """
     This sub-class of the Session class is used to wrap the SecureCRT API to simplify writing new scripts.  This class
     includes some private methods thare are used to support the interaction with SecureCRT (these start with '__').
@@ -547,10 +566,9 @@ class CRTSession(Session):
 
     def __init__(self, crt):
         self.crt = crt
-        super(CRTSession, self).__init__(crt.ScriptFullName)
+        super(CRTScript, self).__init__(crt.ScriptFullName)
         self.logger.debug("<INIT> Starting creation of CRTSession object")
         self.response_timeout = 10
-        self.jump_endings = None
         self.session_set_sync = False
 
         # Set up SecureCRT tab for interaction with the scripts
@@ -693,7 +711,67 @@ class CRTSession(Session):
                     self.logger.debug("<CONN_CHECK> At prompt.  Continuing".format(result))
                     at_prompt = True
 
-    def connect_ssh(self, host, username, password, allowed=("SSH2", "SSH1"), prompt_endings=("#", ">")):
+    def __connect_ssh_2(self, host, username, password, prompt_endings=("#", "# ", ">")):
+        if not prompt_endings:
+            raise ConnectError("Cannot connect without knowing what character ends the CLI prompt.")
+
+        expanded_endings = []
+        for ending in prompt_endings:
+            expanded_endings.append("{}".format(ending))
+            expanded_endings.append("{} ".format(ending))
+
+        ssh2_string = "/SSH2 /ACCEPTHOSTKEYS /L {} /PASSWORD {} {}".format(username, password, host)
+        # If the tab is already connected, then give an exception that we cannot connect.
+        if self.is_connected():
+            self.logger.debug("<CONNECT_SSH2> Session already connected.  Raising exception")
+            raise ConnectError("Tab is already connected to another device.")
+        else:
+            try:
+                self.logger.debug("<CONNECT_SSH2> Attempting Connection to: {}@{} via SSH2".format(username, host))
+                self.crt.Session.Connect(ssh2_string)
+            except:
+                error = self.crt.GetLastErrorMessage()
+                raise ConnectError(error)
+
+        # Set Tab parameters to allow correct sending/receiving of data via SecureCRT
+        self.tab.Synchronous = True
+        self.tab.IgnoreEscape = True
+        self.logger.debug("<CONNECT_SSH2> Set Synchronous and IgnoreEscape")
+
+        # Make sure banners have printed and we've reached our expected prompt.
+        self.__post_connect_check(expanded_endings)
+
+    def __connect_ssh_1(self, host, username, password, prompt_endings=("#", "# ", ">")):
+        if not prompt_endings:
+            raise ConnectError("Cannot connect without knowing what character ends the CLI prompt.")
+
+        expanded_endings = []
+        for ending in prompt_endings:
+            expanded_endings.append("{}".format(ending))
+            expanded_endings.append("{} ".format(ending))
+
+        ssh1_string = "/SSH1 /ACCEPTHOSTKEYS /L {} /PASSWORD {} {}".format(username, password, host)
+        # If the tab is already connected, then give an exception that we cannot connect.
+        if self.is_connected():
+            self.logger.debug("<CONNECT_SSH1> Session already connected.  Raising exception")
+            raise ConnectError("Tab is already connected to another device.")
+        else:
+            try:
+                self.logger.debug("<CONNECT_SSH1> Attempting Connection to: {}@{} via SSH1".format(username, host))
+                self.crt.Session.Connect(ssh1_string)
+            except:
+                error = self.crt.GetLastErrorMessage()
+                raise ConnectError(error)
+
+        # Set Tab parameters to allow correct sending/receiving of data via SecureCRT
+        self.tab.Synchronous = True
+        self.tab.IgnoreEscape = True
+        self.logger.debug("<CONNECT_SSH1> Set Synchronous and IgnoreEscape")
+
+        # Make sure banners have printed and we've reached our expected prompt.
+        self.__post_connect_check(expanded_endings)
+
+    def connect_ssh(self, host, username, password, version=None, prompt_endings=("#", ">")):
         """
         Connects to a device via the SSH protocol. By default, SSH2 will be tried first, but if it fails it will attempt
         to fall back to SSH1.
@@ -703,11 +781,11 @@ class CRTSession(Session):
         :param username: The username to login to the device with
         :type username: str
         :param password: The password that goes with the provided username.  If a password is not specified, the
-                         user will be prompted for one.
+            user will be prompted for one.
         :type password: str
-        :param allowed: A tuple of SSH protocols that are acceptable for connection.  The tuple can contain  "SSH2",
-                        "SSH1" or both.  SSH2 protocol will be attempted before SSH1.
-        :type allowed: tuple
+        :param version: The SSH version to connect with (1 or 2).  Default is None, which will try 2 first and fallback
+            to 1 if that fails.
+        :type version: int
         :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
                                Cisco devices (">" and "#"), but may need to be changed if connecting to another
                                type of device (for example "$" for some linux hosts).
@@ -715,48 +793,72 @@ class CRTSession(Session):
         """
         self.logger.debug("<CONNECT_SSH> Attempting Connection to: {}@{}".format(username, host))
 
-        if not allowed:
-            raise ConnectError("Cannot connect because allowed SSH protocols were specified for host {}".format(host))
         if not prompt_endings:
             raise ConnectError("Cannot connect without knowing what character ends the CLI prompt.")
 
-        expanded_endings = []
-        for ending in prompt_endings:
-            expanded_endings.append("{}".format(ending))
-            expanded_endings.append("{} ".format(ending))
-
-        try:
-            ssh2_string = "/SSH2 /ACCEPTHOSTKEYS /L {} /PASSWORD {} {}".format(username, password, host)
-            # If the tab is already connected, then give an exception that we cannot connect.
-            if self.is_connected():
-                self.logger.debug("<CONNECT_SSH> Session already connected.  Raising exception")
-                raise ConnectError("Tab is already connected to another device.")
-            else:
-                self.logger.debug("<CONNECT_SSH> Not connected, using existing tab.")
-                self.crt.Session.Connect(ssh2_string)
-            self.logger.debug("<CONNECT_SSH> Sending '/SSH2 /ACCEPTHOSTKEYS /L {} /PASSWORD <removed> {}'."
-                              .format(username, host))
-        except:
-            error = self.crt.GetLastErrorMessage()
-            self.logger.debug("<CONNECT_SSH> Error connecting SSH2 to {}: {}".format(host, error))
+        if version == 2:
+            self.__connect_ssh_2(host, username, password, prompt_endings)
+        elif version == 1:
+            self.__connect_ssh_1(host, username, password, prompt_endings)
+        else:
             try:
-                ssh1_string = "/SSH1 /ACCEPTHOSTKEYS /L {} /PASSWORD {} {}".format(username, password, host)
-                self.logger.debug("<CONNECT_SSH> Sending '/SSH1 /ACCEPTHOSTKEYS /L {} /PASSWORD <removed> {}' to SecureCRT."
-                                  .format(username, host))
-                self.crt.Session.Connect(ssh1_string)
+                self.__connect_ssh_2(host, username, password, prompt_endings)
+            except ConnectError as e:
+                self.logger.debug("<CONNECT_SSH> Failure trying SSH2: {}".format(e.message))
+                ssh2_error = e.message
+                try:
+                    self.__connect_ssh_1(host, username, password, prompt_endings)
+                except ConnectError as e:
+                    ssh1_error = e.message
+                    self.logger.debug("<CONNECT_SSH> Failure trying SSH1: {}".format(e.message))
+                    error = "SSH2 and SSH1 failed.\nSSH2 Failure:{}\nSSH1 Failure:{}".format(ssh2_error, ssh1_error)
+                    raise ConnectError(error)
+
+    def connect_telnet(self, host, username, password, prompt_endings=("#", ">")):
+        """
+        Connects to a device via the Telent protocol.
+
+        :param host: The IP address of DNS name for the device to connect
+        :type host: str
+        :param username: The username to login to the device with
+        :type username: str
+        :param password: The password that goes with the provided username.  If a password is not specified, the
+                         user will be prompted for one.
+        :type password: str
+        :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
+                               Cisco devices (">" and "#"), but may need to be changed if connecting to another
+                               type of device (for example "$" for some linux hosts).
+        :type prompt_endings: list
+        """
+        if not prompt_endings:
+            raise ConnectError("Cannot connect without knowing what character ends the CLI prompt.")
+
+        telnet_string = "/TELNET {}".format(host)
+        # If the tab is already connected, then give an exception that we cannot connect.
+        if self.is_connected():
+            self.logger.debug("<CONNECT_TELNET> Session already connected.  Raising exception")
+            raise ConnectError("Tab is already connected to another device.")
+        else:
+            try:
+                self.logger.debug("<CONNECT_TELNET> Attempting Connection to: {} via TELNET".format(host))
+                self.crt.Session.Connect(telnet_string)
             except:
                 error = self.crt.GetLastErrorMessage()
-                self.logger.debug("<CONNECT_SSH> Error connecting SSH1 to {}: {}".format(host, error))
                 raise ConnectError(error)
 
         # Set Tab parameters to allow correct sending/receiving of data via SecureCRT
         self.tab.Synchronous = True
         self.tab.IgnoreEscape = True
-        self.logger.debug("<CONNECT_SSH> Set Synchronous and IgnoreEscape")
+        self.logger.debug("<CONNECT_TELNET> Set Synchronous and IgnoreEscape")
+
+        # Handle Login
+        self.__wait_for_strings("sername")
+        self.__send("{}\n".format(username))
+        self.__wait_for_string("assword")
+        self.tab.Send("{}\n".format(password))
 
         # Make sure banners have printed and we've reached our expected prompt.
-        self.__post_connect_check(expanded_endings)
-        self.jump_endings = expanded_endings
+        self.__post_connect_check(prompt_endings)
 
     def disconnect(self, command="exit"):
         """
@@ -784,7 +886,7 @@ class CRTSession(Session):
         if attempts >= 10:
             raise ConnectError("Unable to disconnect from session.")
 
-    def ssh_via_jump(self, host, username, password, options="-o StrictHostKeyChecking=no"):
+    def ssh_via_jump(self, host, username, password, options="-o StrictHostKeyChecking=no", prompt_endings=("#", ">")):
         """
         From the connected session, this method issues the SSH command to connect to another box, using the main
         connected sessions as a jump point to reach the target.  In other words, connect_ssh() would be used to connect
@@ -809,12 +911,12 @@ class CRTSession(Session):
         result = self.__wait_for_strings(["assword", "refused", "denied"])
         if result == 1:
             self.tab.Send("{}\n".format(password))
-            self.__post_connect_check([">", "> ", "#", "# "])
+            self.__post_connect_check(prompt_endings)
             self.prompt_stack.insert(0, self.prompt)
         else:
             raise ConnectError("SSH connection refused.")
 
-    def telnet_via_jump(self, host, username, password):
+    def telnet_via_jump(self, host, username, password, prompt_endings=("#", ">")):
         """
         From the connected session, this method issues the telnet command to connect to another box, using the main
         connected sessions as a jump point to reach the target.  In other words, connect_ssh() would be used to connect
@@ -833,12 +935,15 @@ class CRTSession(Session):
         if not self.prompt:
             self.prompt = self.__get_prompt()
         self.__send("telnet {}\n".format(host))
-        self.__wait_for_strings("sername")
-        self.__send("{}\n".format(username))
-        self.__wait_for_string("assword")
-        self.tab.Send("{}\n".format(password))
-        self.__post_connect_check([">", "> ", "#", "# "])
-        self.prompt_stack.insert(0, self.prompt)
+        result = self.__wait_for_strings(["sername", "refused", "denied"])
+        if result == 1:
+            self.__send("{}\n".format(username))
+            self.__wait_for_string("assword")
+            self.tab.Send("{}\n".format(password))
+            self.__post_connect_check(prompt_endings)
+            self.prompt_stack.insert(0, self.prompt)
+        else:
+            raise ConnectError("Telnet connection refused.")
 
     def disconnect_via_jump(self, command="exit"):
         """
@@ -854,7 +959,7 @@ class CRTSession(Session):
         except IndexError:
             prev_prompt = None
         self.__send("{}\n".format(command))
-        result = self.__wait_for_string(prev_prompt)
+        self.__wait_for_string(prev_prompt)
 
     def start_cisco_session(self, enable_pass=None):
         """
@@ -1314,7 +1419,7 @@ class CRTSession(Session):
         new_session.Save(session_path)
 
 
-class DirectSession(Session):
+class DirectScript(Script):
     """
     This class is used when the scripts are executed directly from a local Python installation instead of from
     SecureCRT.  This class is intended to simulate connectivity to remote devices by prompting the user for what would
@@ -1325,7 +1430,7 @@ class DirectSession(Session):
     """
 
     def __init__(self, full_script_path):
-        super(DirectSession, self).__init__(full_script_path)
+        super(DirectScript, self).__init__(full_script_path)
         self.logger.debug("<INIT> Building Direct Session Object")
 
         valid_response = ["yes", "no"]
@@ -1450,7 +1555,7 @@ class DirectSession(Session):
         """
         return self._connected
 
-    def connect_ssh(self, host, username, password, allowed=("SSH2", "SSH1"), prompt_endings=("#", "# ", ">")):
+    def connect_ssh(self, host, username, password, version=None, prompt_endings=("#", ">")):
         """
         Connects to a device via the SSH protocol. By default, SSH2 will be tried first, but if it fails it will attempt
         to fall back to SSH1.
@@ -1460,31 +1565,39 @@ class DirectSession(Session):
         :param username: The username to login to the device with
         :type username: str
         :param password: The password that goes with the provided username.  If a password is not specified, the
-                         user will be prompted for one.
+            user will be prompted for one.
         :type password: str
-        :param allowed: A tuple of SSH protocols that are acceptable for connection.  The tuple can contain  "SSH2",
-                        "SSH1" or both.  SSH2 protocol will be attempted before SSH1.
-        :type allowed: tuple
+        :param version: The SSH version to connect with (1 or 2).  Default is None, which will try 2 first and fallback
+            to 1 if that fails.
+        :type version: int
         :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
                                Cisco devices (">" and "#"), but may need to be changed if connecting to another
                                type of device (for example "$" for some linux hosts).
         :type prompt_endings: list
         """
-        print "Pretending to log into device {} with username {}.".format(host, username)
+        if version == 2 or version == 1:
+            print "Pretending to log into device {} with username {} using SSH{}.".format(host, username, version)
+        else:
+            print "Pretending to log into device {} with username {} using SSH2.".format(host, username)
+        self._connected = True
 
-        if not host:
-            raise ConnectError("Cannot connect because a hostname wasn't specified.")
-        if not username:
-            raise ConnectError("Cannot connect because no username was specified for host {}.".format(host))
-        if not password:
-            raise ConnectError("Cannot connect because no password was specified for {}@{}".format(host, username))
-        if not allowed:
-            raise ConnectError("Cannot connect because allowed SSH protocols were specified for host {}".format(host))
+    def connect_telnet(self, host, username, password, prompt_endings=("#", ">")):
+        """
+        Connects to a device via the Telnet protocol.
 
-        response = ""
-        while response not in allowed:
-            response = raw_input("Select Connection ({}): ".format(str(allowed)))
-
+        :param host: The IP address of DNS name for the device to connect
+        :type host: str
+        :param username: The username to login to the device with
+        :type username: str
+        :param password: The password that goes with the provided username.  If a password is not specified, the
+                         user will be prompted for one.
+        :type password: str
+        :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
+                               Cisco devices (">" and "#"), but may need to be changed if connecting to another
+                               type of device (for example "$" for some linux hosts).
+        :type prompt_endings: list
+        """
+        print "Pretending to log into device {} with username {} using TELNET.".format(host, username)
         self._connected = True
 
     def disconnect(self, command="exit"):

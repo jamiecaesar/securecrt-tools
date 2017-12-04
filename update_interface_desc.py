@@ -14,7 +14,7 @@ else:
     script_dir, script_name = os.path.split(os.path.realpath(__file__))
 
 # Now we can import our custom modules
-from securecrt_tools import sessions
+from securecrt_tools import script_types
 from securecrt_tools import utilities
 
 # Create global logger so we can write debug messages from any function (if debug mode setting is enabled in settings).
@@ -36,7 +36,7 @@ def script_main(session):
 
     :param session: A subclass of the sessions.Session object that represents this particular script session (either
                     SecureCRTSession or DirectSession)
-    :type session: sessions.Session
+    :type session: script_types.Script
     """
     # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
     session.start_cisco_session()
@@ -45,19 +45,19 @@ def script_main(session):
     supported_os = ["IOS", "NXOS"]
     if session.os not in supported_os:
         logger.debug("Unsupported OS: {0}.  Raising exception.".format(session.os))
-        raise sessions.UnsupportedOSError("Remote device running unsupported OS: {0}.".format(session.os))
+        raise script_types.UnsupportedOSError("Remote device running unsupported OS: {0}.".format(session.os))
 
     # Ask if this should be a test run (generate configs only) or full run (push updates to devices)
     check_mode_message = "Do you want to run this script in check mode? (Only generate configs)\n" \
                          "\n" \
                          "Yes = Connect to device and write change scripts to a file ONLY\n" \
                          "No = Connect to device and PUSH configuration changes"
-    message_box_design = sessions.ICON_QUESTION | sessions.BUTTON_YESNOCANCEL
+    message_box_design = script_types.ICON_QUESTION | script_types.BUTTON_YESNOCANCEL
     logger.debug("Prompting the user to run in check mode.")
     result = session.message_box(check_mode_message, "Run in Check Mode?", message_box_design)
-    if result == sessions.IDYES:
+    if result == script_types.IDYES:
         check_mode = True
-    elif result == sessions.IDNO:
+    elif result == script_types.IDNO:
         check_mode = False
     else:
         return
@@ -205,10 +205,10 @@ def add_port_channels(desc_data, pc_data):
 
 # If this script is run from SecureCRT directly, use the SecureCRT specific class
 if __name__ == "__builtin__":
-    crt_session = sessions.CRTSession(crt)
+    crt_session = script_types.CRTScript(crt)
     script_main(crt_session)
 
 # If the script is being run directly, use the simulation class
 elif __name__ == "__main__":
-    direct_session = sessions.DirectSession(os.path.realpath(__file__))
+    direct_session = script_types.DirectScript(os.path.realpath(__file__))
     script_main(direct_session)
