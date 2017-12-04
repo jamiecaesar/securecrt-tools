@@ -45,20 +45,12 @@ class SettingsImporter:
         :return: A boolean describing if the user's settings file is valid
         :rtype: bool
         """
-        default_version = self.defaults.getint("Version", "file_version")
-
-        try:
-            version = self.config.getint("Version", "file_version")
-        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
-            raise InvalidSettingsError("Settings file does not contain Version information.")
-
-        if version == default_version:
-            if set(self.defaults.sections()) == set(self.config.sections()):
-                for section in self.defaults.sections():
-                    if not set(self.defaults.options(section)) == set(self.config.options(section)):
-                        return False
-            else:
-                return False
+        # Compare all sections and options between defaults and settings.ini.  If anything from default is missing,
+        # return False
+        if set(self.defaults.sections()) == set(self.config.sections()):
+            for section in self.defaults.sections():
+                if not set(self.defaults.options(section)) == set(self.config.options(section)):
+                    return False
         else:
             return False
         return True
@@ -66,9 +58,9 @@ class SettingsImporter:
     def correct_settings(self):
         """
         A method to update the user's settings file to match the current correct version while carrying over current
-        values to the new file.
+        values to the new file.  Adds anything in defaults that isn't in the user's settings to the settings.ini file.
+        This does not remove any additions that may have been added to the user's configuration file.
         """
-        self.config.set("Version", "file_version", self.defaults.get("Version", "file_version"))
         for section in self.defaults.sections():
             if section not in self.config.sections():
                 self.config.add_section(section)
@@ -79,6 +71,13 @@ class SettingsImporter:
                     self.config.set(section, option, self.defaults.get(section, option))
         with open(self.settings_file, 'w') as settings_updates:
             self.config.write(settings_updates)
+
+    def reset_to_defaults(self):
+        """
+        A method to overwrite the user's configuration file with the default values.
+        """
+        with open(self.settings_file, 'w') as settings_updates:
+            self.defaults.write(settings_updates)
 
     def get(self, section, setting):
         """
@@ -96,7 +95,7 @@ class SettingsImporter:
 
     def getboolean(self, section, setting):
         """
-        A wrapper function to simplify the retrieval of an individual setting that is a boolean value.
+        A wrapper function to simplify the retrieval of an individual setting as a boolean value.
 
         :param section: The section of the settings file where the setting can be found.
         :type section: str
