@@ -40,11 +40,14 @@ def script_main(session):
     logger = logging.getLogger("securecrt")
     logger.debug("Starting execution of {}".format(script_name))
 
-    # Start session with device (This assumes we are already connected to a device)
+    # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
     session.start_cisco_session()
+
     #
     # PUT YOUR CODE HERE
     #
+
+    # Return terminal parameters back to the original state.
     session.end_cisco_session()
 
 

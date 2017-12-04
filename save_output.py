@@ -34,7 +34,7 @@ def script_main(session):
     :type session: sessions.Session
 
     """
-    # Start session with device
+    # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
     session.start_cisco_session()
 
     send_cmd = session.prompt_window("Enter the command to capture")
@@ -49,7 +49,7 @@ def script_main(session):
     # Get the output of our command and save it to the filename specified
     session.write_output_to_file(send_cmd, full_file_name)
 
-    # Clean up before closing session
+    # Return terminal parameters back to the original state.
     session.end_cisco_session()
 
 

@@ -38,7 +38,7 @@ def script_main(session):
                     SecureCRTSession or DirectSession)
     :type session: sessions.Session
     """
-    # Start session with device (This assumes we are already connected to a device)
+    # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
     session.start_cisco_session()
 
     # Validate device is running a supported OS
@@ -137,7 +137,7 @@ def script_main(session):
         # Save configuration
         session.save()
 
-    # Clean up before closing session
+    # Return terminal parameters back to the original state.
     session.end_cisco_session()
 
 

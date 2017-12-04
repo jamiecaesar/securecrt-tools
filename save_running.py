@@ -34,7 +34,7 @@ def script_main(session):
     :type session: sessions.Session
 
     """
-    # Start session with device
+    # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
     session.start_cisco_session()
 
     supported_os = ["IOS", "NXOS", "ASA"]
@@ -43,7 +43,7 @@ def script_main(session):
         filename = session.create_output_filename(send_cmd)
         session.write_output_to_file(send_cmd, filename)
 
-    # Clean up before closing session
+    # Return terminal parameters back to the original state.
     session.end_cisco_session()
 
 
