@@ -26,6 +26,7 @@ logger.debug("Starting execution of {}".format(script_name))
 
 def script_main(script):
     """
+    SINGLE device script
     Author: Jamie Caesar
     Email: jcaesar@presidio.com
 
@@ -33,7 +34,7 @@ def script_main(script):
     based on the information.  By default all sessions will be created as SSH2, so you may have
     to manually change some sessions to make them work, depending on the device capabilities/configuration.
 
-    Settings:
+    Local Settings:
     "folder" - The path starting from the <SecureCRT Config>/Sessions/ directory where the sessions will be created.
     "strip_domains" -  A list of domain names that will be stripped away if found in the CDP remote device name.
 

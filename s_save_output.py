@@ -25,6 +25,10 @@ logger.debug("Starting execution of {}".format(script_name))
 
 def script_main(script):
     """
+    SINGLE device script
+    Author: Jamie Caesar
+    Email: jcaesar@presidio.com
+
     This script will prompt the user for a command for a Cisco device and save the output into a file.
     The path where the file is saved is specified in settings.ini file.
     This script assumes that you are already connected to the device before running it.

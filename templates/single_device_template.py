@@ -26,6 +26,7 @@ logger.debug("Starting execution of {}".format(script_name))
 
 def script_main(script):
     """
+    SINGLE device script
     Author: XXXXXXXX
     Email: XXXXXXX@domain.com
 

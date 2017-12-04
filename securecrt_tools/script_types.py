@@ -133,17 +133,17 @@ class Script:
                 raise SecureCRTToolsError("Settings file not found")
 
         # Extract and store "save path" for future reference by scripts.
-        save_path = self.settings.get("Global", "save_path")
-        if os.path.isabs(save_path):
-            self.save_path = os.path.realpath(save_path)
+        output_dir = self.settings.get("Global", "output_dir")
+        if os.path.isabs(output_dir):
+            self.output_dir = os.path.realpath(output_dir)
         else:
-            full_path = os.path.join(self.script_dir, save_path)
-            self.save_path = os.path.realpath(full_path)
-        self.validate_dir(self.save_path)
+            full_path = os.path.join(self.script_dir, output_dir)
+            self.output_dir = os.path.realpath(full_path)
+        self.validate_dir(self.output_dir)
 
         # Check if Debug Mode is enabled.
         if self.settings.getboolean("Global", "debug_mode"):
-            self.debug_dir = os.path.join(self.save_path, "debugs")
+            self.debug_dir = os.path.join(self.output_dir, "debugs")
             self.validate_dir(self.debug_dir)
             log_file = os.path.join(self.debug_dir, self.script_name.replace(".py", "-debug.txt"))
             self.logger = logging.getLogger("securecrt")
@@ -210,7 +210,7 @@ class Script:
         if base_dir:
             save_path = os.path.realpath(base_dir)
         else:
-            save_path = self.save_path
+            save_path = self.output_dir
 
         self.logger.debug("<CREATE_FILENAME> Save Location: {0}".format(save_path))
 

@@ -26,6 +26,7 @@ logger.debug("Starting execution of {}".format(script_name))
 
 def script_main(script):
     """
+    SINGLE device script
     Author: Jamie Caesar
     Email: jcaesar@presidio.com
 
@@ -33,6 +34,10 @@ def script_main(script):
     generate the commands to update interface descriptions.  The user will be prompted to run in "Check Mode" which will
     write the configuration changes to a file (for verification or later manual application).  If not, then the script
     will push the configuration commands to the device and save the configuration.
+
+    Local Settings:
+    "strip_domains" -  A list of domain names that will be stripped away if found in the CDP remote device name.
+    "take_backups" - If set to True, the script will save a copy of the running config before and after making changes.
 
     :param script: A subclass of the sessions.Session object that represents this particular script session (either
                     SecureCRTSession or DirectSession)
