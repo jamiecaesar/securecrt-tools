@@ -141,6 +141,12 @@ class Script:
             self.output_dir = os.path.realpath(full_path)
         self.validate_dir(self.output_dir)
 
+        # Save date and time of launch to use in file names
+        now = datetime.datetime.now()
+        date_format = self.settings.get("Global", "date_format")
+        self.datetime = now.strftime(date_format)
+        self.logger.debug("<INIT> Saved script launch time as: {}".format(self.datetime))
+
         # Check if Debug Mode is enabled.
         if self.settings.getboolean("Global", "debug_mode"):
             self.debug_dir = os.path.join(self.output_dir, "debugs")
@@ -232,10 +238,7 @@ class Script:
 
         if include_date:
             # Get the current date in the format supplied in date_format
-            now = datetime.datetime.now()
-            date_format = self.settings.get("Global", "date_format")
-            my_date = now.strftime(date_format)
-            self.logger.debug("<CREATE_FILENAME> Created Date String: {}".format(my_date))
+            my_date = self.datetime
         else:
             self.logger.debug("<CREATE_FILENAME> Not including date.")
             my_date = ""
