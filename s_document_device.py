@@ -26,9 +26,9 @@ logger.debug("Starting execution of {}".format(script_name))
 
 def script_main(script):
     """
-    SINGLE device script
-    Author: Jamie Caesar
-    Email: jcaesar@presidio.com
+    | SINGLE device script
+    | Author: Jamie Caesar
+    | Email: jcaesar@presidio.com
 
     This script will grab the output for a list of commands from the connected device.  The list of commands is taken
     from the 'settings/settings.ini' file.  There is a separate list for each supported network operating system (IOS,
@@ -36,7 +36,7 @@ def script_main(script):
 
     Script Settings (found in settings/settings.ini):
     folder_per_device - If True, Creates a folder for each device, based on the hostname, and saves all files inside
-        that folder.  If False, it saves all the files directly into the output folder from the global settings.
+    that folder.  If False, it saves all the files directly into the output folder from the global settings.
     ios - The list of commands that will be run on IOS devices
     nxos - The list of commands that will be run on NXOS devices
     asa - The list of commands that will be run on ASA devices

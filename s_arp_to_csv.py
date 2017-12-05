@@ -26,9 +26,9 @@ logger.debug("Starting execution of {}".format(script_name))
 
 def script_main(script):
     """
-    SINGLE device script
-    Author: Jamie Caesar
-    Email: jcaesar@presidio.com
+    | SINGLE device script
+    | Author: Jamie Caesar
+    | Email: jcaesar@presidio.com
 
     This script will capture the ARP table of the attached device and output the results as a CSV file.  While this
     script can be used to capture the ARP table, the primary purpose is to create the ARP associations that the

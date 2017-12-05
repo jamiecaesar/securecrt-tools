@@ -26,9 +26,9 @@ logger.debug("Starting execution of {}".format(script_name))
 
 def script_main(script):
     """
-    SINGLE device script
-    Author: Jamie Caesar
-    Email: jcaesar@presidio.com
+    | INGLE device script
+    | Author: Jamie Caesar
+    | Email: jcaesar@presidio.com
 
     This script will scrape some stats (packets, rate, errors) from all the UP interfaces on the device and put it into
     a CSV file.

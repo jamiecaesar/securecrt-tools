@@ -26,9 +26,9 @@ logger.debug("Starting execution of {}".format(script_name))
 
 def script_main(script):
     """
-    SINGLE device script
-    Author: Jamie Caesar
-    Email: jcaesar@presidio.com
+    | SINGLE device script
+    | Author: Jamie Caesar
+    | Email: jcaesar@presidio.com
 
     This script will grab the detailed CDP information from a Cisco IOS or NX-OS device and export it to a CSV file
     containing the important information, such as Remote Device hostname, model and IP information, in addition to the

@@ -26,9 +26,9 @@ logger.debug("Starting execution of {}".format(script_name))
 
 def script_main(script):
     """
-    SINGLE device script
-    Author: Jamie Caesar
-    Email: jcaesar@presidio.com
+    | SINGLE device script
+    | Author: Jamie Caesar
+    | Email: jcaesar@presidio.com
 
     This script will grab the detailed CDP information from a Cisco IOS or NX-OS device and create SecureCRT sessions
     based on the information.  By default all sessions will be created as SSH2, so you may have

@@ -26,9 +26,9 @@ logger.debug("Starting execution of {}".format(script_name))
 
 def script_main(script):
     """
-    SINGLE device script
-    Author: XXXXXXXX
-    Email: XXXXXXX@domain.com
+    | SINGLE device script
+    | Author: XXXXXXXX
+    | Email: XXXXXXX@domain.com
 
     PUT A DESCRIPTION OF THIS SCRIPT HERE.  WHAT IT DOES, ETC.
     This script assumes it will be run against a connected device.

@@ -27,9 +27,9 @@ logger.debug("Starting execution of {}".format(script_name))
 
 def script_main(script, ask_vrf=True, vrf=None):
     """
-    SINGLE device script
-    Author: Jamie Caesar
-    Email: jcaesar@presidio.com
+    | SINGLE device script
+    | Author: Jamie Caesar
+    | Email: jcaesar@presidio.com
 
     This script will grab the route table information from a Cisco IOS or NXOS device and export details about each
     next-hop address (how many routes and from which protocol) into a CSV file.  It will also list all connected
