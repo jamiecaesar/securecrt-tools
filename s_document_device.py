@@ -15,7 +15,6 @@ else:
 
 # Now we can import our custom modules
 from securecrt_tools import script_types
-from securecrt_tools import utilities
 
 # Create global logger so we can write debug messages from any function (if debug mode setting is enabled in settings).
 logger = logging.getLogger("securecrt")

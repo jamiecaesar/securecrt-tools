@@ -16,6 +16,8 @@ else:
 # Now we can import our custom modules
 from securecrt_tools import script_types
 from securecrt_tools import utilities
+# Import message box constants as names
+from securecrt_tools.message_box_const import *
 
 # Create global logger so we can write debug messages from any function (if debug mode setting is enabled in settings).
 logger = logging.getLogger("securecrt")
@@ -85,7 +87,7 @@ def script_main(script):
     setting_msg = "{} sessions created in the Sessions sub-directory '{}'\n" \
                   "\n" \
                   "{} sessions skipped (no IP or duplicate)".format(num_created, dest_folder, num_skipped)
-    script.message_box(setting_msg, "Sessions Created", script_types.ICON_INFO)
+    script.message_box(setting_msg, "Sessions Created", ICON_INFO)
 
     # Return terminal parameters back to the original state.
     script.end_cisco_session()

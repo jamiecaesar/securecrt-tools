@@ -26,7 +26,7 @@ logger.debug("Starting execution of {}".format(script_name))
 
 def script_main(script):
     """
-    | INGLE device script
+    | SINGLE device script
     | Author: Jamie Caesar
     | Email: jcaesar@presidio.com
 

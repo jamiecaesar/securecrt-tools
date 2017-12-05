@@ -16,6 +16,8 @@ else:
 # Now we can import our custom modules
 from securecrt_tools import script_types
 from securecrt_tools import utilities
+# Import message box constants names for use specifying the design of message boxes
+from securecrt_tools.message_box_const import *
 
 # Create global logger so we can write debug messages from any function (if debug mode setting is enabled in settings).
 logger = logging.getLogger("securecrt")
