@@ -25,6 +25,7 @@ import os
 import sys
 import logging
 import time
+import csv
 import datetime
 import re
 from abc import ABCMeta, abstractmethod
@@ -237,6 +238,154 @@ class Script:
             return path
         else:
             raise IOError("The template name {} does not exist.")
+
+    def import_device_list(self):
+        """
+        This function will prompt for a device list CSV file to import, returns a dictionary containing all of the
+        devices that will be connected to and their associated credentials.  If there are missing items, it will prompt
+        he user for those values and fit them in.
+
+        :return: A list with each entry (dictionary) representing a device and the associated login information.
+        :rtype: list of dict
+        """
+        # Get the filename of the device list CSV file.
+        self.logger.debug("<IMPORT_DEVICES> Prompting for input CSV file.")
+        device_list_filename = ""
+        device_list_filename = self.file_open_dialog("Please select a device list CSV file.", "Open",
+                                                     device_list_filename, "CSV Files (*.csv)|*.csv||")
+        if device_list_filename == "":
+            self.logger.debug("<IMPORT_DEVICES> No filename received from dialog window.  Exiting.")
+            return
+
+        self.logger.debug("<IMPORT_DEVICES> Starting processing of device CSV file.")
+        # Track how many lines of the CSV are skipped.
+        skipped_lines = 0
+
+        # The username that will be used when one isn't given in the CSV.  This will be prompted for when an empty
+        # username field is found.
+        default_username = None
+        credentials = {}
+        no_password = set()
+        no_enable = False
+        temp_device_list = []
+
+        # Extract the list of devices into a data structure we can use (and fill in any gaps needed).
+        with open(device_list_filename, 'r') as device_file:
+            device_csv = csv.reader(device_file)
+
+            # Get header line and validate it is correct.
+            header = next(device_csv, None)
+            if header != ['Hostname', 'Protocol', 'Username', 'Password', 'Enable', 'Via-Jumpbox']:
+                raise SecureCRTToolsError("CSV file does not have a valid header row.")
+
+            # Loop through all lines of the CSV, and decide if any information is missing.
+            for line in device_csv:
+                hostname = line[0].strip()
+                protocol = line[1].strip()
+                username = line[2].strip()
+                password = line[3].strip()
+                enable = line[4].strip()
+                jumpbox = line[5].strip()
+
+                if not hostname:
+                    self.logger.debug("<IMPORT_DEVICES> Skipping CSV line {} because no hostname exists.".format(line))
+                    skipped_lines += 1
+                    continue
+
+                if protocol.lower() not in ['', 'ssh', 'ssh1', 'ssh2', 'telnet']:
+                    self.logger.debug("<IMPORT_DEVICES> Skipping CSV line {} because no valid protocol.".format(line))
+                    skipped_lines += 1
+                    continue
+
+                if not username:
+                    if default_username:
+                        username = default_username
+                        self.logger.debug("<IMPORT_DEVICES> Using default username '{}', for host {}."
+                                     .format(default_username, hostname))
+                    else:
+                        self.logger.debug("<IMPORT_DEVICES> Didn't find username for host '{}'.  Prompting for DEFAULT."
+                                     .format(hostname))
+                        default_username = self.prompt_window("Enter the DEFAULT USERNAME to use.")
+                        if default_username == '':
+                            self.logger.debug("<IMPORT_DEVICES> Default username not provided.  Stopping".format(line))
+                            error = "Found hosts without usernames and no default username provided."
+                            raise SecureCRTToolsError(error)
+                        else:
+                            self.logger.debug("<IMPORT_DEVICES> Using default username '{}', for host {}."
+                                              .format(default_username, hostname))
+                            username = default_username
+
+                if not password:
+                    no_password.add(username)
+
+                if not enable:
+                    no_enable = True
+
+                temp_device_list.append([hostname, protocol, username, password, enable, jumpbox])
+
+        # Prompt for missing information
+        for username in no_password:
+            self.logger.debug("<IMPORT_DEVICES> Prompting for password for username '{}'".format(username))
+            password = self.prompt_window("Enter the password for {}".format(username), hide_input=True)
+            credentials[username] = password
+
+        if no_enable:
+            self.logger.debug("<IMPORT_DEVICES> Devices without enable passwords found.  Prompting fopr password.")
+            enable_msg = "Devices were found without enable passwords listed.  Do you want to enter an enable password?"
+            result = self.message_box(enable_msg, "No Enable PW", BUTTON_YESNO | ICON_QUESTION)
+            if result == IDYES:
+                default_enable = self.prompt_window("Enter default ENABLE password", "Enter Enable", hide_input=True)
+
+        device_list = []
+        # Make second run through device_list filling in the missing values, and create dictionary
+        for line in temp_device_list:
+            # Create a dict with all the information for this host
+            dev_info = {'hostname': line[0], 'protocol': line[1]}
+
+            # Fill in user information
+            username = line[2]
+            if username:
+                dev_info['username'] = username
+            else:
+                dev_info['username'] = default_username
+
+            # Fill in password information
+            password = line[3]
+            if not password:
+                try:
+                    dev_info['password'] = credentials[username]
+                except KeyError:
+                    self.logger.debug("<IMPORT_DEVICES> Skipping {}.  No password for user.".format(line[0]))
+                    skipped_lines += 1
+                    continue
+
+            # Fill in enable information
+            enable = line[4]
+            if not enable and default_enable:
+                enable = default_enable
+            dev_info['enable'] = enable
+
+            # Fill in jumpbox information
+            dev_info['jumpbox'] = line[5]
+
+            # Add this device to our dictionary:
+            device_list.append(dev_info)
+
+        # Give stats on how many devices were found and prompt user before going forward with connections.
+        validate_message = "{} devices found in CSV.\n" \
+                           "{} lines in CSV skipped.\n" \
+                           "\n" \
+                           "Do you want to proceed?".format(len(temp_device_list), skipped_lines)
+        message_box_design = ICON_QUESTION | BUTTON_CANCEL | DEFBUTTON2
+        self.logger.debug("<IMPORT_DEVICES> Prompting the user to continue with updates.")
+        result = self.message_box(validate_message, "Ready to Start?", message_box_design)
+
+        # IF user cancels, end program.
+        if result == IDCANCEL:
+            self.logger.debug("<IMPORT_DEVICES> User chose to cancel the script.")
+            return
+
+        return device_list
 
     @abstractmethod
     def message_box(self, message, title="", options=0):
