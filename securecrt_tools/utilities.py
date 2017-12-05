@@ -122,6 +122,9 @@ def extract_system_name(device_id, strip_list=[]):
     re_serial = re.compile(cisco_serial_format)
     re_ip = re.compile(ip_format)
 
+    # Add a leading "." in front of all domains in the strip_list before processing
+    strip_list = [".{}".format(entry) for entry in strip_list if entry[0] != "."]
+
     # If we find an open paren, then we either have "SYSTEM_NAME(SERIAL)" or "SERIAL(SYSTEM-NAME)" format.  The latter
     # format is often seen in older devices.  Determine which is the system_name by matching regex for a Cisco serial.
     logger.debug("Analyzing '{0}".format(device_id))
