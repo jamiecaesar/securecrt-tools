@@ -61,16 +61,22 @@ class SettingsImporter:
         values to the new file.  Adds anything in defaults that isn't in the user's settings to the settings.ini file.
         This does not remove any additions that may have been added to the user's configuration file.
         """
-        for section in self.defaults.sections():
+        self.reset_to_defaults()
+        temp_settings = ConfigParser.RawConfigParser()
+        temp_settings.read(self.settings_file)
+        for section in temp_settings.sections():
             if section not in self.config.sections():
-                self.config.add_section(section)
-            for option in self.defaults.options(section):
+                continue
+            for option in temp_settings.options(section):
                 try:
-                    self.config.get(section, option)
+                    value = self.config.get(section, option)
+                    temp_settings.set(section, option, value)
                 except ConfigParser.NoOptionError:
-                    self.config.set(section, option, self.defaults.get(section, option))
+                    pass
         with open(self.settings_file, 'w') as settings_updates:
-            self.config.write(settings_updates)
+            temp_settings.write(settings_updates)
+        self.config = ConfigParser.RawConfigParser()
+        self.config.read(self.settings_file)
 
     def reset_to_defaults(self):
         """

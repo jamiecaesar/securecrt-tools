@@ -34,6 +34,13 @@ def script_main(script):
     from the 'settings/settings.ini' file.  There is a separate list for each supported network operating system (IOS,
     NXOS and ASA).
 
+    Script Settings (found in settings/settings.ini):
+    folder_per_device - If True, Creates a folder for each device, based on the hostname, and saves all files inside
+        that folder.  If False, it saves all the files directly into the output folder from the global settings.
+    ios - The list of commands that will be run on IOS devices
+    nxos - The list of commands that will be run on NXOS devices
+    asa - The list of commands that will be run on ASA devices
+
     The outputs will be saved in a folder named after the hostname of the device, with each output file being saved
     inside that directory.
 
@@ -55,12 +62,16 @@ def script_main(script):
         raise script_types.UnsupportedOSError("Remote device running unsupported OS: {0}.".format(script.os))
 
     command_list = script.settings.getlist(script_name, script.os)
+    folder_per_device = script.settings.getboolean(script_name, "folder_per_device")
 
-    output_dir = os.path.join(script.output_dir, script.hostname)
+    if folder_per_device:
+        output_dir = os.path.join(script.output_dir, script.hostname)
+    else:
+        output_dir = script.output_dir
 
     for command in command_list:
         # Generate filename used for output files.
-        full_file_name = script.create_output_filename(command, include_hostname=False, base_dir=output_dir)
+        full_file_name = script.create_output_filename(command, include_hostname=not folder_per_device, base_dir=output_dir)
         # Get the output of our command and save it to the filename specified
         script.write_output_to_file(command, full_file_name)
 

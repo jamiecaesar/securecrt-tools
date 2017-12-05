@@ -34,9 +34,9 @@ def script_main(script):
     based on the information.  By default all sessions will be created as SSH2, so you may have
     to manually change some sessions to make them work, depending on the device capabilities/configuration.
 
-    Local Settings:
-    "folder" - The path starting from the <SecureCRT Config>/Sessions/ directory where the sessions will be created.
-    "strip_domains" -  A list of domain names that will be stripped away if found in the CDP remote device name.
+    Script Settings (found in settings/settings.ini):
+    folder - The path starting from the <SecureCRT Config>/Sessions/ directory where the sessions will be created.
+    strip_domains -  A list of domain names that will be stripped away if found in the CDP remote device name.
 
     :param script: A subclass of the sessions.Session object that represents this particular script session (either
                     SecureCRTSession or DirectSession)
