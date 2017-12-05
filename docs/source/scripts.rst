@@ -6,16 +6,6 @@ Below is a list of scripts that are available in this repository.  Documentation
 .. toctree::
    :maxdepth: 4
 
-   import_sessions_from_csv
-   s_arp_to_csv
-   s_cdp_to_csv
-   s_create_sessions_from_cdp
-   s_document_device
-   s_interface_stats
-   s_mac_to_csv
-   s_nexthop_summary
-   s_save_output
-   s_save_running
-   s_switchport_mapping
-   s_update_interface_desc
-   s_vlan_to_csv
+   single_device_scripts
+   multi_device_scripts
+   no_device_scripts

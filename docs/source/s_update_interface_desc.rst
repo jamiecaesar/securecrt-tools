@@ -1,4 +1,4 @@
-s\_update\_interface\_desc module
+s\_update\_interface\_desc
 =================================
 
 .. automodule:: s_update_interface_desc

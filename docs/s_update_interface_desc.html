@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>s_update_interface_desc module &#8212; SecureCRT Tools 2.1.0 documentation</title>
+    <title>s_update_interface_desc &#8212; SecureCRT Tools 2.1.0 documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -23,8 +23,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="s_vlan_to_csv module" href="s_vlan_to_csv.html" />
-    <link rel="prev" title="s_switchport_mapping module" href="s_switchport_mapping.html" /> 
+    <link rel="next" title="s_vlan_to_csv" href="s_vlan_to_csv.html" />
+    <link rel="prev" title="s_switchport_mapping" href="s_switchport_mapping.html" /> 
   </head>
   <body>
     <div class="header-wrapper" role="banner">
@@ -32,9 +32,9 @@
         <div class="headertitle"><a
           href="index.html">SecureCRT Tools 2.1.0 documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
-          <a href="s_switchport_mapping.html" title="s_switchport_mapping module"
+          <a href="s_switchport_mapping.html" title="s_switchport_mapping"
              accesskey="P">previous</a> |
-          <a href="s_vlan_to_csv.html" title="s_vlan_to_csv module"
+          <a href="s_vlan_to_csv.html" title="s_vlan_to_csv"
              accesskey="N">next</a> |
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |
@@ -53,10 +53,10 @@
           <div class="body" role="main">
             
   <div class="section" id="module-s_update_interface_desc">
-<span id="s-update-interface-desc-module"></span><h1>s_update_interface_desc module<a class="headerlink" href="#module-s_update_interface_desc" title="Permalink to this headline">¶</a></h1>
+<span id="s-update-interface-desc"></span><h1>s_update_interface_desc<a class="headerlink" href="#module-s_update_interface_desc" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="s_update_interface_desc.script_main">
-<code class="descclassname">s_update_interface_desc.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#s_update_interface_desc.script_main" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">s_update_interface_desc.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>script</em>, <em>prompt_checkmode=True</em>, <em>check_mode=True</em><span class="sig-paren">)</span><a class="headerlink" href="#s_update_interface_desc.script_main" title="Permalink to this definition">¶</a></dt>
 <dd><div class="line-block">
 <div class="line">SINGLE device script</div>
 <div class="line">Author: Jamie Caesar</div>
@@ -73,8 +73,17 @@ will push the configuration commands to the device and save the configuration.</
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>script</strong> (<a class="reference internal" href="securecrt_tools.html#securecrt_tools.script_types.Script" title="securecrt_tools.script_types.Script"><em>script_types.Script</em></a>) – A subclass of the sessions.Session object that represents this particular script session (either
-SecureCRTSession or DirectSession)</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>script</strong> (<a class="reference internal" href="securecrt_tools.html#securecrt_tools.script_types.Script" title="securecrt_tools.script_types.Script"><em>script_types.Script</em></a>) – A subclass of the sessions.Session object that represents this particular script session (either
+SecureCRTSession or DirectSession)</li>
+<li><strong>prompt_checkmode</strong> (<em>bool</em>) – A boolean that specifies if we should prompt the user to find out if we should run in
+“check mode”.  We would make this False if we were using this function in a multi-device script, so that the
+process can run continually without prompting the user at each device.</li>
+<li><strong>check_mode</strong> (<em>bool</em>) – A boolean to specify whether we should run in “check mode” (Generate what the script would do
+only – does not push config), or not (Pushes the changes to the device).   The default is True for safety
+reasons, and this option will be overwritten unless prompt_checkmode is False.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -120,6 +129,24 @@ have members found in the CDP table.</p>
 </table>
 </dd></dl>
 
+<dl class="function">
+<dt id="s_update_interface_desc.get_desc_table">
+<code class="descclassname">s_update_interface_desc.</code><code class="descname">get_desc_table</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#s_update_interface_desc.get_desc_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>A function that creates a lookup dictionary that can be used to get the description of an interface.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>script</strong> (<a class="reference internal" href="securecrt_tools.html#securecrt_tools.script_types.Script" title="securecrt_tools.script_types.Script"><em>script_types.Script</em></a>) – The script object that represents this script being executed</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A dictionary that allows getting the description of an interface by using the interface as the key.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 
 
@@ -136,19 +163,23 @@ have members found in the CDP table.</p>
 <li class="toctree-l1"><a class="reference internal" href="README.html#running-the-scripts">Running The Scripts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="README.html#settings">Settings</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="scripts.html">Scripts</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="import_sessions_from_csv.html">import_sessions_from_csv module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_arp_to_csv.html">s_arp_to_csv module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_cdp_to_csv.html">s_cdp_to_csv module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_create_sessions_from_cdp.html">s_create_sessions_from_cdp module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_document_device.html">s_document_device module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_interface_stats.html">s_interface_stats module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_mac_to_csv.html">s_mac_to_csv module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_nexthop_summary.html">s_nexthop_summary module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_save_output.html">s_save_output module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_save_running.html">s_save_running module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_switchport_mapping.html">s_switchport_mapping module</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">s_update_interface_desc module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_vlan_to_csv.html">s_vlan_to_csv module</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="single_device_scripts.html">Single Device Scripts</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="s_arp_to_csv.html">s_arp_to_csv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s_cdp_to_csv.html">s_cdp_to_csv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s_create_sessions_from_cdp.html">s_create_sessions_from_cdp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s_document_device.html">s_document_device</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s_interface_stats.html">s_interface_stats</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s_mac_to_csv.html">s_mac_to_csv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s_nexthop_summary.html">s_nexthop_summary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s_save_output.html">s_save_output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s_save_running.html">s_save_running</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s_switchport_mapping.html">s_switchport_mapping</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">s_update_interface_desc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s_vlan_to_csv.html">s_vlan_to_csv</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="multi_device_scripts.html">Multiple Device Scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="no_device_scripts.html">No Device Scripts</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">Writing Your Own Scripts</a></li>
@@ -174,9 +205,9 @@ have members found in the CDP table.</p>
       <div class="footer">
         <div class="left">
           <div role="navigation" aria-label="related navigaton">
-            <a href="s_switchport_mapping.html" title="s_switchport_mapping module"
+            <a href="s_switchport_mapping.html" title="s_switchport_mapping"
               >previous</a> |
-            <a href="s_vlan_to_csv.html" title="s_vlan_to_csv module"
+            <a href="s_vlan_to_csv.html" title="s_vlan_to_csv"
               >next</a> |
             <a href="py-modindex.html" title="Python Module Index"
               >modules</a> |

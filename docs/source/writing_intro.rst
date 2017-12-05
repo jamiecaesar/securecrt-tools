@@ -1,0 +1,14 @@
+Introduction To Writing SecureCRT Scripts
+=========================================
+
+For those who have a need to either modify the existing scripts or write completely new ones for specific use cases (I expect that will be the majority), this section has documentation on the classes used to build the scripts in this repository.
+
+The purpose of building the below classes is to encapsulate many of the common tasks that will be performed on any device so that those methods can simply be called, instead of requiring each person to either copy and paste a lot of blocks of code, or understand the intricate details of interacting with a remote device through SecureCRT.  While that may be required for certain use cases, the goal is that a vast majority of the interaction can be handled using the existing methods documented below.
+
+Before creating a new script, look at the `templates/` directory, which contains boilerplate starting points for new scripts.  The sections where code is meant to be added has been marked with comments saying "ADD YOUR CODE HERE".
+
+There are 2 categories of modules shown below:
+1) The modules written to handle the interaction between these scripts and the remote devices (via SecureCRT), and
+2) 3rd Party modules that are used within some of the scripts to help process our device outputs better.
+
+The 3rd Party modules are included because someone has already done the work to create modules that perform specific funtions, so there is no reason we shouldn't take advantage of that instead of writing our own (and probably more buggy) implementations.  For better or worse, SecureCRT includes it's own Python environment within the application, which means we cannot install new modules like we can for a local installation of Python.  Instead we have to include the source code in this repository for the 3rd party modules so we can use them.

@@ -1,4 +1,4 @@
-s\_mac\_to\_csv module
+s\_mac\_to\_csv
 ======================
 
 .. automodule:: s_mac_to_csv

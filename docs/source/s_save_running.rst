@@ -1,4 +1,4 @@
-s\_save\_running module
+s\_save\_running
 =======================
 
 .. automodule:: s_save_running

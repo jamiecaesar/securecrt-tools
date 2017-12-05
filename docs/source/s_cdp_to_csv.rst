@@ -1,4 +1,4 @@
-s\_cdp\_to\_csv module
+s\_cdp\_to\_csv
 ======================
 
 .. automodule:: s_cdp_to_csv

@@ -1,4 +1,4 @@
-s\_save\_output module
+s\_save\_output
 ======================
 
 .. automodule:: s_save_output

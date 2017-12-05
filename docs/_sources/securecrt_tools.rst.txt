@@ -4,14 +4,14 @@ SecureCRT Tools Modules
 
 These are the main modules that are used to interact with the SecureCRT application.  
 
-securecrt\_tools\.script\_types module
+securecrt\_tools\.script\_types
 --------------------------------------
 
 .. automodule:: securecrt_tools.script_types
     :members:
     :show-inheritance:
 
-securecrt\_tools\.settings module
+securecrt\_tools\.settings
 ---------------------------------
 
 .. automodule:: securecrt_tools.settings
@@ -19,7 +19,7 @@ securecrt\_tools\.settings module
     :show-inheritance:
 
 
-securecrt\_tools\.utilities module
+securecrt\_tools\.utilities
 ----------------------------------
 
 .. automodule:: securecrt_tools.utilities

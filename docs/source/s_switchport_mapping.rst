@@ -1,4 +1,4 @@
-s\_switchport\_mapping module
+s\_switchport\_mapping
 =============================
 
 .. automodule:: s_switchport_mapping

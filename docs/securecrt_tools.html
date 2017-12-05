@@ -56,7 +56,7 @@
 <h1>SecureCRT Tools Modules<a class="headerlink" href="#securecrt-tools-modules" title="Permalink to this headline">¶</a></h1>
 <p>These are the main modules that are used to interact with the SecureCRT application.</p>
 <div class="section" id="module-securecrt_tools.script_types">
-<span id="securecrt-tools-script-types-module"></span><h2>securecrt_tools.script_types module<a class="headerlink" href="#module-securecrt_tools.script_types" title="Permalink to this headline">¶</a></h2>
+<span id="securecrt-tools-script-types"></span><h2>securecrt_tools.script_types<a class="headerlink" href="#module-securecrt_tools.script_types" title="Permalink to this headline">¶</a></h2>
 <p>This module includes a collection of “session” objects that represent a SecureCRT scripting session.  These classes are
 intended as a wrapper around the SecureCRT Python API to simplify common tasks that are performed against network
 devices such as routers and switches.</p>
@@ -1292,7 +1292,7 @@ This method can handle any length of output</p>
 
 </div>
 <div class="section" id="module-securecrt_tools.settings">
-<span id="securecrt-tools-settings-module"></span><h2>securecrt_tools.settings module<a class="headerlink" href="#module-securecrt_tools.settings" title="Permalink to this headline">¶</a></h2>
+<span id="securecrt-tools-settings"></span><h2>securecrt_tools.settings<a class="headerlink" href="#module-securecrt_tools.settings" title="Permalink to this headline">¶</a></h2>
 <dl class="exception">
 <dt id="securecrt_tools.settings.InvalidSettingsError">
 <em class="property">exception </em><code class="descclassname">securecrt_tools.settings.</code><code class="descname">InvalidSettingsError</code><a class="headerlink" href="#securecrt_tools.settings.InvalidSettingsError" title="Permalink to this definition">¶</a></dt>
@@ -1435,7 +1435,7 @@ a comma separated list, with no quotations.</p>
 
 </div>
 <div class="section" id="module-securecrt_tools.utilities">
-<span id="securecrt-tools-utilities-module"></span><h2>securecrt_tools.utilities module<a class="headerlink" href="#module-securecrt_tools.utilities" title="Permalink to this headline">¶</a></h2>
+<span id="securecrt-tools-utilities"></span><h2>securecrt_tools.utilities<a class="headerlink" href="#module-securecrt_tools.utilities" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="securecrt_tools.utilities.extract_system_name">
 <code class="descclassname">securecrt_tools.utilities.</code><code class="descname">extract_system_name</code><span class="sig-paren">(</span><em>device_id</em>, <em>strip_list=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.utilities.extract_system_name" title="Permalink to this definition">¶</a></dt>
@@ -1613,8 +1613,14 @@ add_header=True if the header row with value names should be prepended to the st
 <li class="toctree-l1"><a class="reference internal" href="README.html#settings">Settings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="scripts.html">Scripts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">Writing Your Own Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html#a-note-on-textfsm">A Note on TextFSM</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html#module-documentation">Module Documentation</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">SecureCRT Tools Modules</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">SecureCRT Tools Modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-securecrt_tools.script_types">securecrt_tools.script_types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-securecrt_tools.settings">securecrt_tools.settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-securecrt_tools.utilities">securecrt_tools.utilities</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="3rdparty.html">Third Party Modules</a></li>
 </ul>
 </li>

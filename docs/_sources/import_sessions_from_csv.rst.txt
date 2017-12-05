@@ -1,4 +1,4 @@
-import\_sessions\_from\_csv module
+import\_sessions\_from\_csv
 ==================================
 
 .. automodule:: import_sessions_from_csv

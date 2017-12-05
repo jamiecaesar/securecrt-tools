@@ -2,7 +2,7 @@
 Third Party Modules
 -------------------
 
-securecrt\_tools\.textfsm module
+securecrt\_tools\.textfsm
 --------------------------------
 
 .. automodule:: securecrt_tools.textfsm
@@ -10,7 +10,7 @@ securecrt\_tools\.textfsm module
     :undoc-members:
     :show-inheritance:
 
-securecrt\_tools\.ipaddress module
+securecrt\_tools\.ipaddress
 ----------------------------------
 
 .. automodule:: securecrt_tools.ipaddress
@@ -18,7 +18,7 @@ securecrt\_tools\.ipaddress module
     :undoc-members:
     :show-inheritance:
 
-securecrt\_tools\.manuf module
+securecrt\_tools\.manuf
 ------------------------------
 
 .. automodule:: securecrt_tools.manuf

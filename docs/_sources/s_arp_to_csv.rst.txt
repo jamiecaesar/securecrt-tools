@@ -1,4 +1,4 @@
-s\_arp\_to\_csv module
+s\_arp\_to\_csv
 ======================
 
 .. automodule:: s_arp_to_csv

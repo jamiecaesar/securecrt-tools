@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>import_sessions_from_csv module &#8212; SecureCRT Tools 2.1.0 documentation</title>
+    <title>import_sessions_from_csv &#8212; SecureCRT Tools 2.1.0 documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -23,8 +23,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="s_arp_to_csv module" href="s_arp_to_csv.html" />
-    <link rel="prev" title="Scripts" href="scripts.html" /> 
+    <link rel="next" title="Writing Your Own Scripts" href="modules.html" />
+    <link rel="prev" title="No Device Scripts" href="no_device_scripts.html" /> 
   </head>
   <body>
     <div class="header-wrapper" role="banner">
@@ -32,9 +32,9 @@
         <div class="headertitle"><a
           href="index.html">SecureCRT Tools 2.1.0 documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
-          <a href="scripts.html" title="Scripts"
+          <a href="no_device_scripts.html" title="No Device Scripts"
              accesskey="P">previous</a> |
-          <a href="s_arp_to_csv.html" title="s_arp_to_csv module"
+          <a href="modules.html" title="Writing Your Own Scripts"
              accesskey="N">next</a> |
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |
@@ -53,7 +53,7 @@
           <div class="body" role="main">
             
   <div class="section" id="module-import_sessions_from_csv">
-<span id="import-sessions-from-csv-module"></span><h1>import_sessions_from_csv module<a class="headerlink" href="#module-import_sessions_from_csv" title="Permalink to this headline">¶</a></h1>
+<span id="import-sessions-from-csv"></span><h1>import_sessions_from_csv<a class="headerlink" href="#module-import_sessions_from_csv" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="import_sessions_from_csv.script_main">
 <code class="descclassname">import_sessions_from_csv.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#import_sessions_from_csv.script_main" title="Permalink to this definition">¶</a></dt>
@@ -88,22 +88,17 @@ SecureCRTSession or DirectSession)</td>
 <li class="toctree-l1"><a class="reference internal" href="README.html#running-the-scripts">Running The Scripts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="README.html#settings">Settings</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="scripts.html">Scripts</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">import_sessions_from_csv module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_arp_to_csv.html">s_arp_to_csv module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_cdp_to_csv.html">s_cdp_to_csv module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_create_sessions_from_cdp.html">s_create_sessions_from_cdp module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_document_device.html">s_document_device module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_interface_stats.html">s_interface_stats module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_mac_to_csv.html">s_mac_to_csv module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_nexthop_summary.html">s_nexthop_summary module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_save_output.html">s_save_output module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_save_running.html">s_save_running module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_switchport_mapping.html">s_switchport_mapping module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_update_interface_desc.html">s_update_interface_desc module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_vlan_to_csv.html">s_vlan_to_csv module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="single_device_scripts.html">Single Device Scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="multi_device_scripts.html">Multiple Device Scripts</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="no_device_scripts.html">No Device Scripts</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">import_sessions_from_csv</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">Writing Your Own Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html#a-note-on-textfsm">A Note on TextFSM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html#module-documentation">Module Documentation</a></li>
 </ul>
 
           <div role="search">
@@ -124,9 +119,9 @@ SecureCRTSession or DirectSession)</td>
       <div class="footer">
         <div class="left">
           <div role="navigation" aria-label="related navigaton">
-            <a href="scripts.html" title="Scripts"
+            <a href="no_device_scripts.html" title="No Device Scripts"
               >previous</a> |
-            <a href="s_arp_to_csv.html" title="s_arp_to_csv module"
+            <a href="modules.html" title="Writing Your Own Scripts"
               >next</a> |
             <a href="py-modindex.html" title="Python Module Index"
               >modules</a> |

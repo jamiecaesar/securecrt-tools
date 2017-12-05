@@ -1,4 +1,4 @@
-s\_interface\_stats module
+s\_interface\_stats
 ==========================
 
 .. automodule:: s_interface_stats

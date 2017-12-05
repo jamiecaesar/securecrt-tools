@@ -1,4 +1,4 @@
-s\_nexthop\_summary module
+s\_nexthop\_summary
 ==========================
 
 .. automodule:: s_nexthop_summary

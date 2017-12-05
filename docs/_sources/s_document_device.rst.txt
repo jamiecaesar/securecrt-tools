@@ -1,4 +1,4 @@
-s\_document\_device module
+s\_document\_device
 ==========================
 
 .. automodule:: s_document_device
