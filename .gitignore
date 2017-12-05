@@ -16,6 +16,7 @@ settings/
 # Ignore directory to store working/testing versions of scripts.
 dev-test/
 private/
+doctrees/
 
 # Ignore CSV files
 *.csv

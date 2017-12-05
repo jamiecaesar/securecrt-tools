@@ -1,0 +1,1274 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Third Party Modules &#8212; SecureCRT Tools 2.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="SecureCRT Tools Modules" href="securecrt_tools.html" /> 
+  </head>
+  <body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="index.html">SecureCRT Tools 2.1.0 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="securecrt_tools.html" title="SecureCRT Tools Modules"
+             accesskey="P">previous</a> |
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="third-party-modules">
+<h1>Third Party Modules<a class="headerlink" href="#third-party-modules" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-securecrt_tools.textfsm">
+<span id="securecrt-tools-textfsm-module"></span><h2>securecrt_tools.textfsm module<a class="headerlink" href="#module-securecrt_tools.textfsm" title="Permalink to this headline">¶</a></h2>
+<p>Template based text parser.</p>
+<p>This module implements a parser, intended to be used for converting
+human readable text, such as command output from a router CLI, into
+a list of records, containing values extracted from the input text.</p>
+<p>A simple template language is used to describe a state machine to
+parse a specific type of text input, returning a record of values
+for each input entity.</p>
+<dl class="class">
+<dt id="securecrt_tools.textfsm.CopyableRegexObject">
+<em class="property">class </em><code class="descclassname">securecrt_tools.textfsm.</code><code class="descname">CopyableRegexObject</code><span class="sig-paren">(</span><em>pattern</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.CopyableRegexObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Like a re.RegexObject, but can be copied.</p>
+<dl class="method">
+<dt id="securecrt_tools.textfsm.CopyableRegexObject.match">
+<code class="descname">match</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.CopyableRegexObject.match" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.textfsm.CopyableRegexObject.sub">
+<code class="descname">sub</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.CopyableRegexObject.sub" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="securecrt_tools.textfsm.Error">
+<em class="property">exception </em><code class="descclassname">securecrt_tools.textfsm.</code><code class="descname">Error</code><a class="headerlink" href="#securecrt_tools.textfsm.Error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+<p>Base class for errors.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="securecrt_tools.textfsm.FSMAction">
+<em class="property">exception </em><code class="descclassname">securecrt_tools.textfsm.</code><code class="descname">FSMAction</code><a class="headerlink" href="#securecrt_tools.textfsm.FSMAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+<p>Base class for actions raised with the FSM.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="securecrt_tools.textfsm.SkipRecord">
+<em class="property">exception </em><code class="descclassname">securecrt_tools.textfsm.</code><code class="descname">SkipRecord</code><a class="headerlink" href="#securecrt_tools.textfsm.SkipRecord" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#securecrt_tools.textfsm.FSMAction" title="securecrt_tools.textfsm.FSMAction"><code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.textfsm.FSMAction</span></code></a></p>
+<p>Indicate a record is to be skipped.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="securecrt_tools.textfsm.SkipValue">
+<em class="property">exception </em><code class="descclassname">securecrt_tools.textfsm.</code><code class="descname">SkipValue</code><a class="headerlink" href="#securecrt_tools.textfsm.SkipValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#securecrt_tools.textfsm.FSMAction" title="securecrt_tools.textfsm.FSMAction"><code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.textfsm.FSMAction</span></code></a></p>
+<p>Indicate a value is to be skipped.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="securecrt_tools.textfsm.TextFSM">
+<em class="property">class </em><code class="descclassname">securecrt_tools.textfsm.</code><code class="descname">TextFSM</code><span class="sig-paren">(</span><em>template</em>, <em>options_class=&lt;class 'securecrt_tools.textfsm.TextFSMOptions'&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Parses template and creates Finite State Machine (FSM).</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>states: (str), Dictionary of FSMState objects.
+values: (str), List of FSMVariables.
+value_map: (map), For substituting values for names in the expressions.
+header: Ordered list of values.
+state_list: Ordered list of valid states.</dd>
+</dl>
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSM.GetValuesByAttrib">
+<code class="descname">GetValuesByAttrib</code><span class="sig-paren">(</span><em>attribute</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSM.GetValuesByAttrib" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the list of values that have a particular attribute.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.textfsm.TextFSM.MAX_NAME_LEN">
+<code class="descname">MAX_NAME_LEN</code><em class="property"> = 48</em><a class="headerlink" href="#securecrt_tools.textfsm.TextFSM.MAX_NAME_LEN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSM.ParseText">
+<code class="descname">ParseText</code><span class="sig-paren">(</span><em>text</em>, <em>eof=True</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSM.ParseText" title="Permalink to this definition">¶</a></dt>
+<dd><p>Passes CLI output through FSM and returns list of tuples.</p>
+<p>First tuple is the header, every subsequent tuple is a row.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">text: (str), Text to parse with embedded newlines.
+eof: (boolean), Set to False if we are parsing only part of the file.</p>
+<blockquote class="last">
+<div>Suppresses triggering EOF state.</div></blockquote>
+</dd>
+<dt>Raises:</dt>
+<dd>TextFSMError: An error occurred within the FSM.</dd>
+<dt>Returns:</dt>
+<dd>List of Lists.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSM.Reset">
+<code class="descname">Reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSM.Reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Preserves FSM but resets starting state and current record.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.textfsm.TextFSM.comment_regex">
+<code class="descname">comment_regex</code><em class="property"> = &lt;_sre.SRE_Pattern object&gt;</em><a class="headerlink" href="#securecrt_tools.textfsm.TextFSM.comment_regex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.textfsm.TextFSM.header">
+<code class="descname">header</code><a class="headerlink" href="#securecrt_tools.textfsm.TextFSM.header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns header.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.textfsm.TextFSM.state_name_re">
+<code class="descname">state_name_re</code><em class="property"> = &lt;_sre.SRE_Pattern object&gt;</em><a class="headerlink" href="#securecrt_tools.textfsm.TextFSM.state_name_re" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="securecrt_tools.textfsm.TextFSMError">
+<em class="property">exception </em><code class="descclassname">securecrt_tools.textfsm.</code><code class="descname">TextFSMError</code><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#securecrt_tools.textfsm.Error" title="securecrt_tools.textfsm.Error"><code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.textfsm.Error</span></code></a></p>
+<p>Error in the FSM state execution.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="securecrt_tools.textfsm.TextFSMOptions">
+<em class="property">class </em><code class="descclassname">securecrt_tools.textfsm.</code><code class="descname">TextFSMOptions</code><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class containing all valid TextFSMValue options.</p>
+<p>Each nested class here represents a TextFSM option. The format
+is “option&lt;name&gt;”.
+Each class may override any of the methods inside the OptionBase class.</p>
+<p>A user of this module can extend options by subclassing
+TextFSMOptionsBase, adding the new option class(es), then passing
+that new class to the TextFSM constructor with the ‘option_class’
+argument.</p>
+<dl class="class">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.Filldown">
+<em class="property">class </em><code class="descname">Filldown</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.Filldown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.textfsm.OptionBase</span></code></p>
+<p>Value defaults to the previous line’s value.</p>
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.Filldown.OnAssignVar">
+<code class="descname">OnAssignVar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.Filldown.OnAssignVar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.Filldown.OnClearAllVar">
+<code class="descname">OnClearAllVar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.Filldown.OnClearAllVar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.Filldown.OnClearVar">
+<code class="descname">OnClearVar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.Filldown.OnClearVar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.Filldown.OnCreateOptions">
+<code class="descname">OnCreateOptions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.Filldown.OnCreateOptions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.Fillup">
+<em class="property">class </em><code class="descname">Fillup</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.Fillup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.textfsm.OptionBase</span></code></p>
+<p>Like Filldown, but upwards until it finds a non-empty entry.</p>
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.Fillup.OnAssignVar">
+<code class="descname">OnAssignVar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.Fillup.OnAssignVar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.GetOption">
+<em class="property">classmethod </em><code class="descname">GetOption</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.GetOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the class of the requested option name.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.Key">
+<em class="property">class </em><code class="descname">Key</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.Key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.textfsm.OptionBase</span></code></p>
+<p>Value constitutes part of the Key of the record.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.List">
+<em class="property">class </em><code class="descname">List</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.List" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.textfsm.OptionBase</span></code></p>
+<p>Value takes the form of a list.</p>
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.List.OnAssignVar">
+<code class="descname">OnAssignVar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.List.OnAssignVar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.List.OnClearAllVar">
+<code class="descname">OnClearAllVar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.List.OnClearAllVar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.List.OnClearVar">
+<code class="descname">OnClearVar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.List.OnClearVar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.List.OnCreateOptions">
+<code class="descname">OnCreateOptions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.List.OnCreateOptions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.List.OnSaveRecord">
+<code class="descname">OnSaveRecord</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.List.OnSaveRecord" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.OptionBase">
+<em class="property">class </em><code class="descname">OptionBase</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.OptionBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Factory methods for option class.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>value: A TextFSMValue, the parent Value.</dd>
+</dl>
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.OptionBase.OnAssignVar">
+<code class="descname">OnAssignVar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.OptionBase.OnAssignVar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when a matched value is being assigned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.OptionBase.OnClearAllVar">
+<code class="descname">OnClearAllVar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.OptionBase.OnClearAllVar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when a value has clearalled.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.OptionBase.OnClearVar">
+<code class="descname">OnClearVar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.OptionBase.OnClearVar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when value has been cleared.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.OptionBase.OnCreateOptions">
+<code class="descname">OnCreateOptions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.OptionBase.OnCreateOptions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called after all options have been parsed for a Value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.OptionBase.OnGetValue">
+<code class="descname">OnGetValue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.OptionBase.OnGetValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when the value name is being requested.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.OptionBase.OnSaveRecord">
+<code class="descname">OnSaveRecord</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.OptionBase.OnSaveRecord" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called just prior to a record being committed.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.OptionBase.name">
+<code class="descname">name</code><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.OptionBase.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.Required">
+<em class="property">class </em><code class="descname">Required</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.Required" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.textfsm.OptionBase</span></code></p>
+<p>The Value must be non-empty for the row to be recorded.</p>
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.Required.OnSaveRecord">
+<code class="descname">OnSaveRecord</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.Required.OnSaveRecord" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="securecrt_tools.textfsm.TextFSMOptions.ValidOptions">
+<em class="property">classmethod </em><code class="descname">ValidOptions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMOptions.ValidOptions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of valid option names.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="securecrt_tools.textfsm.TextFSMRule">
+<em class="property">class </em><code class="descclassname">securecrt_tools.textfsm.</code><code class="descname">TextFSMRule</code><span class="sig-paren">(</span><em>line</em>, <em>line_num=-1</em>, <em>var_map=None</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMRule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A rule in each FSM state.</p>
+<p>A value has syntax like:</p>
+<blockquote>
+<div>^&lt;regexp&gt; -&gt; Next.Record State2</div></blockquote>
+<p>Where ‘&lt;regexp&gt;’ is a regular expression.
+‘Next’ is a Line operator.
+‘Record’ is a Record operator.
+‘State2’ is the next State.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>match: Regex to match this rule.
+regex: match after template substitution.
+line_op: Operator on input line on match.
+record_op: Operator on output record on match.
+new_state: Label to jump to on action
+regex_obj: Compiled regex for which the rule matches.
+line_num: Integer row number of Value.</dd>
+</dl>
+<dl class="attribute">
+<dt id="securecrt_tools.textfsm.TextFSMRule.ACTION2_RE">
+<code class="descname">ACTION2_RE</code><em class="property"> = &lt;_sre.SRE_Pattern object&gt;</em><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMRule.ACTION2_RE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.textfsm.TextFSMRule.ACTION3_RE">
+<code class="descname">ACTION3_RE</code><em class="property"> = &lt;_sre.SRE_Pattern object&gt;</em><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMRule.ACTION3_RE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.textfsm.TextFSMRule.ACTION_RE">
+<code class="descname">ACTION_RE</code><em class="property"> = &lt;_sre.SRE_Pattern object&gt;</em><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMRule.ACTION_RE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.textfsm.TextFSMRule.LINE_OP">
+<code class="descname">LINE_OP</code><em class="property"> = ('Continue', 'Next', 'Error')</em><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMRule.LINE_OP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.textfsm.TextFSMRule.LINE_OP_RE">
+<code class="descname">LINE_OP_RE</code><em class="property"> = '(?P&lt;ln_op&gt;Continue|Next|Error)'</em><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMRule.LINE_OP_RE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.textfsm.TextFSMRule.MATCH_ACTION">
+<code class="descname">MATCH_ACTION</code><em class="property"> = &lt;_sre.SRE_Pattern object&gt;</em><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMRule.MATCH_ACTION" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.textfsm.TextFSMRule.NEWSTATE_RE">
+<code class="descname">NEWSTATE_RE</code><em class="property"> = '(?P&lt;new_state&gt;\\w+|\\&quot;.*\\&quot;)'</em><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMRule.NEWSTATE_RE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.textfsm.TextFSMRule.OPERATOR_RE">
+<code class="descname">OPERATOR_RE</code><em class="property"> = '((?P&lt;ln_op&gt;Continue|Next|Error)(\\.(?P&lt;rec_op&gt;Clear|Clearall|Record|NoRecord))?)'</em><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMRule.OPERATOR_RE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.textfsm.TextFSMRule.RECORD_OP">
+<code class="descname">RECORD_OP</code><em class="property"> = ('Clear', 'Clearall', 'Record', 'NoRecord')</em><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMRule.RECORD_OP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.textfsm.TextFSMRule.RECORD_OP_RE">
+<code class="descname">RECORD_OP_RE</code><em class="property"> = '(?P&lt;rec_op&gt;Clear|Clearall|Record|NoRecord)'</em><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMRule.RECORD_OP_RE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="securecrt_tools.textfsm.TextFSMTemplateError">
+<em class="property">exception </em><code class="descclassname">securecrt_tools.textfsm.</code><code class="descname">TextFSMTemplateError</code><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMTemplateError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#securecrt_tools.textfsm.Error" title="securecrt_tools.textfsm.Error"><code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.textfsm.Error</span></code></a></p>
+<p>Errors while parsing templates.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="securecrt_tools.textfsm.TextFSMValue">
+<em class="property">class </em><code class="descclassname">securecrt_tools.textfsm.</code><code class="descname">TextFSMValue</code><span class="sig-paren">(</span><em>fsm=None</em>, <em>max_name_len=48</em>, <em>options_class=None</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A TextFSM value.</p>
+<p>A value has syntax like:</p>
+<p>‘Value Filldown,Required helloworld (.*)’</p>
+<p>Where ‘Value’ is a keyword.
+‘Filldown’ and ‘Required’ are options.
+‘helloworld’ is the value name.
+‘(.*) is the regular expression to match in the input data.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>max_name_len: (int), maximum character length os a variable name.
+name: (str), Name of the value.
+options: (list), A list of current Value Options.
+regex: (str), Regex which the value is matched on.
+template: (str), regexp with named groups added.
+fsm: A TextFSMBase(), the containing FSM.
+value: (str), the current value.</dd>
+</dl>
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMValue.AssignVar">
+<code class="descname">AssignVar</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMValue.AssignVar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign a value to this Value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMValue.ClearAllVar">
+<code class="descname">ClearAllVar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMValue.ClearAllVar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear this Value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMValue.ClearVar">
+<code class="descname">ClearVar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMValue.ClearVar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear this Value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMValue.Header">
+<code class="descname">Header</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMValue.Header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch the header name of this Value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMValue.OnSaveRecord">
+<code class="descname">OnSaveRecord</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMValue.OnSaveRecord" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called just prior to a record being committed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMValue.OptionNames">
+<code class="descname">OptionNames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMValue.OptionNames" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of option names for this Value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.textfsm.TextFSMValue.Parse">
+<code class="descname">Parse</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.TextFSMValue.Parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a ‘Value’ declaration.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>value: String line from a template file, must begin with ‘Value ‘.</dd>
+<dt>Raises:</dt>
+<dd>TextFSMTemplateError: Value declaration contains an error.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="securecrt_tools.textfsm.Usage">
+<em class="property">exception </em><code class="descclassname">securecrt_tools.textfsm.</code><code class="descname">Usage</code><a class="headerlink" href="#securecrt_tools.textfsm.Usage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+<p>Error in command line execution.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="securecrt_tools.textfsm.main">
+<code class="descclassname">securecrt_tools.textfsm.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv=None</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.textfsm.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate text parsed with FSM or validate an FSM via command line.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-securecrt_tools.ipaddress">
+<span id="securecrt-tools-ipaddress-module"></span><h2>securecrt_tools.ipaddress module<a class="headerlink" href="#module-securecrt_tools.ipaddress" title="Permalink to this headline">¶</a></h2>
+<p>A fast, lightweight IPv4/IPv6 manipulation library in Python.</p>
+<p>This library is used to create/poke/manipulate IPv4 and IPv6 addresses
+and networks.</p>
+<dl class="exception">
+<dt id="securecrt_tools.ipaddress.AddressValueError">
+<em class="property">exception </em><code class="descclassname">securecrt_tools.ipaddress.</code><code class="descname">AddressValueError</code><a class="headerlink" href="#securecrt_tools.ipaddress.AddressValueError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.ValueError</span></code></p>
+<p>A Value Error related to the address.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="securecrt_tools.ipaddress.IPv4Address">
+<em class="property">class </em><code class="descclassname">securecrt_tools.ipaddress.</code><code class="descname">IPv4Address</code><span class="sig-paren">(</span><em>address</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.ipaddress.IPv4Address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.ipaddress._BaseV4</span></code>, <code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.ipaddress._BaseAddress</span></code></p>
+<p>Represent and manipulate single IPv4 Addresses.</p>
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv4Address.is_global">
+<code class="descname">is_global</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv4Address.is_global" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv4Address.is_link_local">
+<code class="descname">is_link_local</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv4Address.is_link_local" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the address is reserved for link-local.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>A boolean, True if the address is link-local per RFC 3927.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv4Address.is_loopback">
+<code class="descname">is_loopback</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv4Address.is_loopback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the address is a loopback address.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>A boolean, True if the address is a loopback per RFC 3330.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv4Address.is_multicast">
+<code class="descname">is_multicast</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv4Address.is_multicast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the address is reserved for multicast use.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>A boolean, True if the address is multicast.
+See RFC 3171 for details.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv4Address.is_private">
+<code class="descname">is_private</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv4Address.is_private" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if this address is allocated for private networks.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>A boolean, True if the address is reserved per
+iana-ipv4-special-registry.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv4Address.is_reserved">
+<code class="descname">is_reserved</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv4Address.is_reserved" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the address is otherwise IETF reserved.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>A boolean, True if the address is within the
+reserved IPv4 Network range.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv4Address.is_unspecified">
+<code class="descname">is_unspecified</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv4Address.is_unspecified" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the address is unspecified.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>A boolean, True if this is the unspecified address as defined in
+RFC 5735 3.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv4Address.packed">
+<code class="descname">packed</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv4Address.packed" title="Permalink to this definition">¶</a></dt>
+<dd><p>The binary representation of this address.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="securecrt_tools.ipaddress.IPv4Interface">
+<em class="property">class </em><code class="descclassname">securecrt_tools.ipaddress.</code><code class="descname">IPv4Interface</code><span class="sig-paren">(</span><em>address</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.ipaddress.IPv4Interface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#securecrt_tools.ipaddress.IPv4Address" title="securecrt_tools.ipaddress.IPv4Address"><code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.ipaddress.IPv4Address</span></code></a></p>
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv4Interface.ip">
+<code class="descname">ip</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv4Interface.ip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv4Interface.with_hostmask">
+<code class="descname">with_hostmask</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv4Interface.with_hostmask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv4Interface.with_netmask">
+<code class="descname">with_netmask</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv4Interface.with_netmask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv4Interface.with_prefixlen">
+<code class="descname">with_prefixlen</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv4Interface.with_prefixlen" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="securecrt_tools.ipaddress.IPv4Network">
+<em class="property">class </em><code class="descclassname">securecrt_tools.ipaddress.</code><code class="descname">IPv4Network</code><span class="sig-paren">(</span><em>address</em>, <em>strict=True</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.ipaddress.IPv4Network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.ipaddress._BaseV4</span></code>, <code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.ipaddress._BaseNetwork</span></code></p>
+<p>This class represents and manipulates 32-bit IPv4 network + addresses..</p>
+<dl class="docutils">
+<dt>Attributes: [examples for IPv4Network(‘192.0.2.0/27’)]</dt>
+<dd>.network_address: IPv4Address(‘192.0.2.0’)
+.hostmask: IPv4Address(‘0.0.0.31’)
+.broadcast_address: IPv4Address(‘192.0.2.32’)
+.netmask: IPv4Address(‘255.255.255.224’)
+.prefixlen: 27</dd>
+</dl>
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv4Network.is_global">
+<code class="descname">is_global</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv4Network.is_global" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if this address is allocated for public networks.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>A boolean, True if the address is not reserved per
+iana-ipv4-special-registry.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="securecrt_tools.ipaddress.IPv6Address">
+<em class="property">class </em><code class="descclassname">securecrt_tools.ipaddress.</code><code class="descname">IPv6Address</code><span class="sig-paren">(</span><em>address</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.ipaddress._BaseV6</span></code>, <code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.ipaddress._BaseAddress</span></code></p>
+<p>Represent and manipulate single IPv6 Addresses.</p>
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv6Address.ipv4_mapped">
+<code class="descname">ipv4_mapped</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Address.ipv4_mapped" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the IPv4 mapped address.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>If the IPv6 address is a v4 mapped address, return the
+IPv4 mapped address. Return None otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv6Address.is_global">
+<code class="descname">is_global</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Address.is_global" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if this address is allocated for public networks.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>A boolean, true if the address is not reserved per
+iana-ipv6-special-registry.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv6Address.is_link_local">
+<code class="descname">is_link_local</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Address.is_link_local" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the address is reserved for link-local.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>A boolean, True if the address is reserved per RFC 4291.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv6Address.is_loopback">
+<code class="descname">is_loopback</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Address.is_loopback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the address is a loopback address.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>A boolean, True if the address is a loopback address as defined in
+RFC 2373 2.5.3.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv6Address.is_multicast">
+<code class="descname">is_multicast</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Address.is_multicast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the address is reserved for multicast use.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>A boolean, True if the address is a multicast address.
+See RFC 2373 2.7 for details.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv6Address.is_private">
+<code class="descname">is_private</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Address.is_private" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if this address is allocated for private networks.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>A boolean, True if the address is reserved per
+iana-ipv6-special-registry.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv6Address.is_reserved">
+<code class="descname">is_reserved</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Address.is_reserved" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the address is otherwise IETF reserved.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>A boolean, True if the address is within one of the
+reserved IPv6 Network ranges.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv6Address.is_site_local">
+<code class="descname">is_site_local</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Address.is_site_local" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the address is reserved for site-local.</p>
+<p>Note that the site-local address space has been deprecated by RFC 3879.
+Use is_private to test if this address is in the space of unique local
+addresses as defined by RFC 4193.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>A boolean, True if the address is reserved per RFC 3513 2.5.6.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv6Address.is_unspecified">
+<code class="descname">is_unspecified</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Address.is_unspecified" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the address is unspecified.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>A boolean, True if this is the unspecified address as defined in
+RFC 2373 2.5.2.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv6Address.packed">
+<code class="descname">packed</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Address.packed" title="Permalink to this definition">¶</a></dt>
+<dd><p>The binary representation of this address.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv6Address.sixtofour">
+<code class="descname">sixtofour</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Address.sixtofour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the IPv4 6to4 embedded address.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>The IPv4 6to4-embedded address if present or None if the
+address doesn’t appear to contain a 6to4 embedded address.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv6Address.teredo">
+<code class="descname">teredo</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Address.teredo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tuple of embedded teredo IPs.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>Tuple of the (server, client) IPs or None if the address
+doesn’t appear to be a teredo address (doesn’t start with
+2001::/32)</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="securecrt_tools.ipaddress.IPv6Interface">
+<em class="property">class </em><code class="descclassname">securecrt_tools.ipaddress.</code><code class="descname">IPv6Interface</code><span class="sig-paren">(</span><em>address</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Interface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#securecrt_tools.ipaddress.IPv6Address" title="securecrt_tools.ipaddress.IPv6Address"><code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.ipaddress.IPv6Address</span></code></a></p>
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv6Interface.ip">
+<code class="descname">ip</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Interface.ip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv6Interface.is_loopback">
+<code class="descname">is_loopback</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Interface.is_loopback" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv6Interface.is_unspecified">
+<code class="descname">is_unspecified</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Interface.is_unspecified" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv6Interface.with_hostmask">
+<code class="descname">with_hostmask</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Interface.with_hostmask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv6Interface.with_netmask">
+<code class="descname">with_netmask</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Interface.with_netmask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv6Interface.with_prefixlen">
+<code class="descname">with_prefixlen</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Interface.with_prefixlen" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="securecrt_tools.ipaddress.IPv6Network">
+<em class="property">class </em><code class="descclassname">securecrt_tools.ipaddress.</code><code class="descname">IPv6Network</code><span class="sig-paren">(</span><em>address</em>, <em>strict=True</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.ipaddress._BaseV6</span></code>, <code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.ipaddress._BaseNetwork</span></code></p>
+<p>This class represents and manipulates 128-bit IPv6 networks.</p>
+<dl class="docutils">
+<dt>Attributes: [examples for IPv6(‘2001:db8::1000/124’)]</dt>
+<dd>.network_address: IPv6Address(‘2001:db8::1000’)
+.hostmask: IPv6Address(‘::f’)
+.broadcast_address: IPv6Address(‘2001:db8::100f’)
+.netmask: IPv6Address(‘ffff:ffff:ffff:ffff:ffff:ffff:ffff:fff0’)
+.prefixlen: 124</dd>
+</dl>
+<dl class="method">
+<dt id="securecrt_tools.ipaddress.IPv6Network.hosts">
+<code class="descname">hosts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Network.hosts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate Iterator over usable hosts in a network.</p>
+<p>This is like __iter__ except it doesn’t return the
+Subnet-Router anycast address.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.ipaddress.IPv6Network.is_site_local">
+<code class="descname">is_site_local</code><a class="headerlink" href="#securecrt_tools.ipaddress.IPv6Network.is_site_local" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the address is reserved for site-local.</p>
+<p>Note that the site-local address space has been deprecated by RFC 3879.
+Use is_private to test if this address is in the space of unique local
+addresses as defined by RFC 4193.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>A boolean, True if the address is reserved per RFC 3513 2.5.6.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="securecrt_tools.ipaddress.NetmaskValueError">
+<em class="property">exception </em><code class="descclassname">securecrt_tools.ipaddress.</code><code class="descname">NetmaskValueError</code><a class="headerlink" href="#securecrt_tools.ipaddress.NetmaskValueError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.ValueError</span></code></p>
+<p>A Value Error related to the netmask.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="securecrt_tools.ipaddress.collapse_addresses">
+<code class="descclassname">securecrt_tools.ipaddress.</code><code class="descname">collapse_addresses</code><span class="sig-paren">(</span><em>addresses</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.ipaddress.collapse_addresses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collapse a list of IP objects.</p>
+<dl class="docutils">
+<dt>Example:</dt>
+<dd><dl class="first last docutils">
+<dt>collapse_addresses([IPv4Network(‘192.0.2.0/25’),</dt>
+<dd><blockquote class="first">
+<div>IPv4Network(‘192.0.2.128/25’)]) -&gt;</div></blockquote>
+<p class="last">[IPv4Network(‘192.0.2.0/24’)]</p>
+</dd>
+</dl>
+</dd>
+<dt>Args:</dt>
+<dd>addresses: An iterator of IPv4Network or IPv6Network objects.</dd>
+<dt>Returns:</dt>
+<dd>An iterator of the collapsed IPv(4|6)Network objects.</dd>
+<dt>Raises:</dt>
+<dd>TypeError: If passed a list of mixed version objects.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="securecrt_tools.ipaddress.get_mixed_type_key">
+<code class="descclassname">securecrt_tools.ipaddress.</code><code class="descname">get_mixed_type_key</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.ipaddress.get_mixed_type_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a key suitable for sorting between networks and addresses.</p>
+<p>Address and Network objects are not sortable by default; they’re
+fundamentally different so the expression</p>
+<blockquote>
+<div>IPv4Address(‘192.0.2.0’) &lt;= IPv4Network(‘192.0.2.0/24’)</div></blockquote>
+<p>doesn’t make any sense.  There are some times however, where you may wish
+to have ipaddress sort these for you anyway. If you need to do this, you
+can use this function as the key= argument to sorted().</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>obj: either a Network or Address object.</dd>
+<dt>Returns:</dt>
+<dd>appropriate key.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="securecrt_tools.ipaddress.ip_address">
+<code class="descclassname">securecrt_tools.ipaddress.</code><code class="descname">ip_address</code><span class="sig-paren">(</span><em>address</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.ipaddress.ip_address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take an IP string/int and return an object of the correct type.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>address: A string or integer, the IP address.  Either IPv4 or</dt>
+<dd>IPv6 addresses may be supplied; integers less than 2**32 will
+be considered to be IPv4 by default.</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd>An IPv4Address or IPv6Address object.</dd>
+<dt>Raises:</dt>
+<dd><dl class="first last docutils">
+<dt>ValueError: if the <em>address</em> passed isn’t either a v4 or a v6</dt>
+<dd>address</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="securecrt_tools.ipaddress.ip_interface">
+<code class="descclassname">securecrt_tools.ipaddress.</code><code class="descname">ip_interface</code><span class="sig-paren">(</span><em>address</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.ipaddress.ip_interface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take an IP string/int and return an object of the correct type.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>address: A string or integer, the IP address.  Either IPv4 or</dt>
+<dd>IPv6 addresses may be supplied; integers less than 2**32 will
+be considered to be IPv4 by default.</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd>An IPv4Interface or IPv6Interface object.</dd>
+<dt>Raises:</dt>
+<dd><dl class="first last docutils">
+<dt>ValueError: if the string passed isn’t either a v4 or a v6</dt>
+<dd>address.</dd>
+</dl>
+</dd>
+<dt>Notes:</dt>
+<dd>The IPv?Interface classes describe an Address on a particular
+Network, so they’re basically a combination of both the Address
+and Network classes.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="securecrt_tools.ipaddress.ip_network">
+<code class="descclassname">securecrt_tools.ipaddress.</code><code class="descname">ip_network</code><span class="sig-paren">(</span><em>address</em>, <em>strict=True</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.ipaddress.ip_network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take an IP string/int and return an object of the correct type.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>address: A string or integer, the IP network.  Either IPv4 or</dt>
+<dd>IPv6 networks may be supplied; integers less than 2**32 will
+be considered to be IPv4 by default.</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd>An IPv4Network or IPv6Network object.</dd>
+<dt>Raises:</dt>
+<dd><dl class="first last docutils">
+<dt>ValueError: if the string passed isn’t either a v4 or a v6</dt>
+<dd>address. Or if the network has host bits set.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="securecrt_tools.ipaddress.summarize_address_range">
+<code class="descclassname">securecrt_tools.ipaddress.</code><code class="descname">summarize_address_range</code><span class="sig-paren">(</span><em>first</em>, <em>last</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.ipaddress.summarize_address_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Summarize a network range given the first and last IP addresses.</p>
+<dl class="docutils">
+<dt>Example:</dt>
+<dd><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">summarize_address_range</span><span class="p">(</span><span class="n">IPv4Address</span><span class="p">(</span><span class="s1">&#39;192.0.2.0&#39;</span><span class="p">),</span>
+<span class="gp">... </span>                             <span class="n">IPv4Address</span><span class="p">(</span><span class="s1">&#39;192.0.2.130&#39;</span><span class="p">)))</span>
+<span class="gp">... </span>                               
+<span class="go">[IPv4Network(&#39;192.0.2.0/25&#39;), IPv4Network(&#39;192.0.2.128/31&#39;),</span>
+<span class="go"> IPv4Network(&#39;192.0.2.130/32&#39;)]</span>
+</pre></div>
+</div>
+</dd>
+<dt>Args:</dt>
+<dd>first: the first IPv4Address or IPv6Address in the range.
+last: the last IPv4Address or IPv6Address in the range.</dd>
+<dt>Returns:</dt>
+<dd>An iterator of the summarized IPv(4|6) network objects.</dd>
+<dt>Raise:</dt>
+<dd><dl class="first last docutils">
+<dt>TypeError:</dt>
+<dd>If the first and last objects are not IP addresses.
+If the first and last objects are not the same version.</dd>
+<dt>ValueError:</dt>
+<dd>If the last object is not greater than the first.
+If the version of the first address is not 4 or 6.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="securecrt_tools.ipaddress.v4_int_to_packed">
+<code class="descclassname">securecrt_tools.ipaddress.</code><code class="descname">v4_int_to_packed</code><span class="sig-paren">(</span><em>address</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.ipaddress.v4_int_to_packed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represent an address as 4 packed bytes in network (big-endian) order.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>address: An integer representation of an IPv4 IP address.</dd>
+<dt>Returns:</dt>
+<dd>The integer address packed as 4 bytes in network (big-endian) order.</dd>
+<dt>Raises:</dt>
+<dd><dl class="first last docutils">
+<dt>ValueError: If the integer is negative or too large to be an</dt>
+<dd>IPv4 IP address.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="securecrt_tools.ipaddress.v6_int_to_packed">
+<code class="descclassname">securecrt_tools.ipaddress.</code><code class="descname">v6_int_to_packed</code><span class="sig-paren">(</span><em>address</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.ipaddress.v6_int_to_packed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represent an address as 16 packed bytes in network (big-endian) order.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>address: An integer representation of an IPv6 IP address.</dd>
+<dt>Returns:</dt>
+<dd>The integer address packed as 16 bytes in network (big-endian) order.</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-securecrt_tools.manuf">
+<span id="securecrt-tools-manuf-module"></span><h2>securecrt_tools.manuf module<a class="headerlink" href="#module-securecrt_tools.manuf" title="Permalink to this headline">¶</a></h2>
+<p>Parser library for Wireshark’s OUI database.</p>
+<p>Converts MAC addresses into a manufacturer using Wireshark’s OUI database.</p>
+<p>See README.md.</p>
+<dl class="class">
+<dt id="securecrt_tools.manuf.MacParser">
+<em class="property">class </em><code class="descclassname">securecrt_tools.manuf.</code><code class="descname">MacParser</code><span class="sig-paren">(</span><em>manuf_name='manuf'</em>, <em>update=False</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.manuf.MacParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class that contains a parser for Wireshark’s OUI database.</p>
+<p>Optimized for quick lookup performance by reading the entire file into memory on
+initialization. Maps ranges of MAC addresses to manufacturers and comments (descriptions).
+Contains full support for netmasks and other strange things in the database.</p>
+<p>See <a class="reference external" href="https://www.wireshark.org/tools/oui-lookup.html">https://www.wireshark.org/tools/oui-lookup.html</a></p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first docutils">
+<dt>manuf_name (str): Location of the manuf database file. Defaults to “manuf” in the same</dt>
+<dd>directory.</dd>
+</dl>
+<p class="last">update (bool): Whether to update the manuf file automatically. Defaults to False.</p>
+</dd>
+<dt>Raises:</dt>
+<dd>IOError: If manuf file could not be found.</dd>
+</dl>
+<dl class="attribute">
+<dt id="securecrt_tools.manuf.MacParser.MANUF_URL">
+<code class="descname">MANUF_URL</code><em class="property"> = 'https://code.wireshark.org/review/gitweb?p=wireshark.git;a=blob_plain;f=manuf'</em><a class="headerlink" href="#securecrt_tools.manuf.MacParser.MANUF_URL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.manuf.MacParser.get_all">
+<code class="descname">get_all</code><span class="sig-paren">(</span><em>mac</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.manuf.MacParser.get_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a Vendor tuple containing (manuf, comment) from a MAC address.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>mac (str): MAC address in standard format.</dd>
+<dt>Returns:</dt>
+<dd>Vendor: Vendor namedtuple containing (manuf, comment). Either or both may be None if
+not found.</dd>
+<dt>Raises:</dt>
+<dd>ValueError: If the MAC could not be parsed.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.manuf.MacParser.get_comment">
+<code class="descname">get_comment</code><span class="sig-paren">(</span><em>mac</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.manuf.MacParser.get_comment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns comment from a MAC address.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>mac (str): MAC address in standard format.</dd>
+<dt>Returns:</dt>
+<dd>string: String containing comment, or None if not found.</dd>
+<dt>Raises:</dt>
+<dd>ValueError: If the MAC could not be parsed.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.manuf.MacParser.get_manuf">
+<code class="descname">get_manuf</code><span class="sig-paren">(</span><em>mac</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.manuf.MacParser.get_manuf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns manufacturer from a MAC address.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>mac (str): MAC address in standard format.</dd>
+<dt>Returns:</dt>
+<dd>string: String containing manufacturer, or None if not found.</dd>
+<dt>Raises:</dt>
+<dd>ValueError: If the MAC could not be parsed.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.manuf.MacParser.refresh">
+<code class="descname">refresh</code><span class="sig-paren">(</span><em>manuf_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.manuf.MacParser.refresh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Refresh/reload manuf database. Call this when manuf file is updated.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>manuf_name (str): Location of the manuf data base file. Defaults to “manuf” in the</dt>
+<dd>same directory.</dd>
+</dl>
+</dd>
+<dt>Raises:</dt>
+<dd>IOError: If manuf file could not be found.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.manuf.MacParser.search">
+<code class="descname">search</code><span class="sig-paren">(</span><em>mac</em>, <em>maximum=1</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.manuf.MacParser.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search for multiple Vendor tuples possibly matching a MAC address.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>mac (str): MAC address in standard format.
+maximum (int): Maximum results to return. Defaults to 1.</dd>
+<dt>Returns:</dt>
+<dd>List of Vendor namedtuples containing (manuf, comment), with closest result first. May
+be empty if no results found.</dd>
+<dt>Raises:</dt>
+<dd>ValueError: If the MAC could not be parsed.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.manuf.MacParser.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>manuf_url=None</em>, <em>manuf_name=None</em>, <em>refresh=True</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.manuf.MacParser.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the Wireshark OUI database to the latest version.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>manuf_url (str): URL pointing to OUI database. Defaults to database located at</dt>
+<dd>code.wireshark.org.</dd>
+<dt>manuf_name (str): Location to store the new OUI database. Defaults to “manuf” in the</dt>
+<dd>same directory.</dd>
+<dt>refresh (bool): Refresh the database once updated. Defaults to True. Uses database</dt>
+<dd>stored at manuf_name.</dd>
+</dl>
+</dd>
+<dt>Raises:</dt>
+<dd>URLError: If the download fails</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="securecrt_tools.manuf.Vendor">
+<em class="property">class </em><code class="descclassname">securecrt_tools.manuf.</code><code class="descname">Vendor</code><span class="sig-paren">(</span><em>manuf</em>, <em>comment</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.manuf.Vendor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<dl class="attribute">
+<dt id="securecrt_tools.manuf.Vendor.comment">
+<code class="descname">comment</code><a class="headerlink" href="#securecrt_tools.manuf.Vendor.comment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="securecrt_tools.manuf.Vendor.manuf">
+<code class="descname">manuf</code><a class="headerlink" href="#securecrt_tools.manuf.Vendor.manuf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="securecrt_tools.manuf.main">
+<code class="descclassname">securecrt_tools.manuf.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.manuf.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple command line wrapping for MacParser.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="README.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README.html#important-note">Important Note</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README.html#running-the-scripts">Running The Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README.html#settings">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scripts.html">Scripts</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Writing Your Own Scripts</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="securecrt_tools.html">SecureCRT Tools Modules</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Third Party Modules</a></li>
+</ul>
+</li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="securecrt_tools.html" title="SecureCRT Tools Modules"
+              >previous</a> |
+            <a href="py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+              <br/>
+              <a href="_sources/3rdparty.rst.txt"
+                rel="nofollow">Show Source</a>
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Jamie Caesar.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.5.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

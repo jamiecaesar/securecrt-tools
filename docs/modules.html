@@ -1,0 +1,160 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Writing Your Own Scripts &#8212; SecureCRT Tools 2.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="SecureCRT Tools Modules" href="securecrt_tools.html" />
+    <link rel="prev" title="s_vlan_to_csv module" href="s_vlan_to_csv.html" /> 
+  </head>
+  <body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="index.html">SecureCRT Tools 2.1.0 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="s_vlan_to_csv.html" title="s_vlan_to_csv module"
+             accesskey="P">previous</a> |
+          <a href="securecrt_tools.html" title="SecureCRT Tools Modules"
+             accesskey="N">next</a> |
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="writing-your-own-scripts">
+<h1>Writing Your Own Scripts<a class="headerlink" href="#writing-your-own-scripts" title="Permalink to this headline">¶</a></h1>
+<p>For those who have a need to either modify the existing scripts or write completely new ones for specific use cases (I expect that will be the majority), this section has documentation on the classes used to build the scripts in this repository.</p>
+<p>The purpose of building the below classes is to encapsulate many of the common tasks that will be performed on any device so that those methods can simply be called, instead of requiring each person to either copy and paste a lot of blocks of code, or understand the intricate details of interacting with a remote device through SecureCRT.  While that may be required for certain use cases, the goal is that a vast majority of the interaction can be handled using the existing methods documented below.</p>
+<p>Before creating a new script, look at the <cite>templates/</cite> directory, which contains boilerplate starting points for new scripts.  The sections where code is meant to be added has been marked with comments saying “ADD YOUR CODE HERE”.</p>
+<p>There are 2 categories of modules shown below:
+1) The modules written to handle the interaction between these scripts and the remote devices (via SecureCRT), and
+2) 3rd Party modules that are used within some of the scripts to help process our device outputs better.</p>
+<p>The 3rd Party modules are included because someone has already done the work to create modules that perform specific funtions, so there is no reason we shouldn’t take advantage of that instead of writing our own (and probably more buggy) implementations.  For better or worse, SecureCRT includes it’s own Python environment within the application, which means we cannot install new modules like we can for a local installation of Python.  Instead we have to include the source code in this repository for the 3rd party modules so we can use them.</p>
+</div>
+<div class="section" id="a-note-on-textfsm">
+<h1>A Note on TextFSM<a class="headerlink" href="#a-note-on-textfsm" title="Permalink to this headline">¶</a></h1>
+<p>TextFSM is a module written to simply the process of extracting information out of semi-structured outputs (such as CLI command output) that are meant for human readability.  TextFSM uses a template file to define what values we are looking for, as well as how those values get extracted from the output.  You can read some examples of using the <a class="reference external" href="https://github.com/google/textfsm/wiki/TextFSM">TextFSM Wiki</a> and the <a class="reference external" href="https://github.com/google/textfsm/wiki/Code-Lab">Code Lab</a> section for additional examples.</p>
+<p>In addition, there is a large repository of TextFSM templates located in <a class="reference external" href="https://github.com/networktocode/ntc-templates">Network To Code’s Github Repository</a>.  This repository contains TextFSM templates for a variety of vendors and to process a large number of commands.  At best, they’ll have the template you need that is already created, but in some cases you may need to modify the template to get what you want from it.</p>
+<p>In the end, TextFSM still boils down to text matching with <em>Regular Expressions</em> (RegEx), although TextFSM puts some structure around it that makes it much easier than trying to write matching by-hand – especially for more complicated outputs like a routing table.  If you are unfamiliar with RegEx, I’m sure there are plenty of primers on how they work online.  I would highly recommend that if you are trying to develop some new regular expressions or a TextFSM template that you use a site such as <a class="reference external" href="https://regex101.com/">regex101.com</a> to see real-time feedback of what your expressions will match against some sample data you’ve pasted into the site.</p>
+</div>
+<div class="section" id="module-documentation">
+<h1>Module Documentation<a class="headerlink" href="#module-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="securecrt_tools.html">SecureCRT Tools Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="securecrt_tools.html#module-securecrt_tools.script_types">securecrt_tools.script_types module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="securecrt_tools.html#module-securecrt_tools.settings">securecrt_tools.settings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="securecrt_tools.html#module-securecrt_tools.utilities">securecrt_tools.utilities module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="3rdparty.html">Third Party Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="3rdparty.html#module-securecrt_tools.textfsm">securecrt_tools.textfsm module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3rdparty.html#module-securecrt_tools.ipaddress">securecrt_tools.ipaddress module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3rdparty.html#module-securecrt_tools.manuf">securecrt_tools.manuf module</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="README.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README.html#important-note">Important Note</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README.html#running-the-scripts">Running The Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README.html#settings">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scripts.html">Scripts</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Writing Your Own Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#a-note-on-textfsm">A Note on TextFSM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#module-documentation">Module Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="securecrt_tools.html">SecureCRT Tools Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3rdparty.html">Third Party Modules</a></li>
+</ul>
+</li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="s_vlan_to_csv.html" title="s_vlan_to_csv module"
+              >previous</a> |
+            <a href="securecrt_tools.html" title="SecureCRT Tools Modules"
+              >next</a> |
+            <a href="py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+              <br/>
+              <a href="_sources/modules.rst.txt"
+                rel="nofollow">Show Source</a>
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Jamie Caesar.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.5.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>
