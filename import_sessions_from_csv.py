@@ -44,11 +44,8 @@ def script_main(script):
     # Get input CSV, must contain Session Name and IP.  Can also have
     # Protocol and folder
     sessions_csv = ""
-    sessions_csv = script.file_open_dialog("Please select your CSV Import file",
-                                           "Open",
-                                           sessions_csv,
-                                           "CSV Files (*.csv)|*.csv|"
-                                           )
+    sessions_csv = script.file_open_dialog("Please select your CSV Import file", "Open", sessions_csv,
+                                           "CSV Files (*.csv)|*.csv|")
 
     # Check if got an input file name or not
     if sessions_csv != "":
@@ -83,36 +80,40 @@ def script_main(script):
         setting_msg = "{} sessions created\n{} sessions skipped (no Hostname / IP)".format(count, skipped)
         script.message_box(setting_msg, "Sessions Created", script_types.ICON_INFO)
     else:
-        # We didn't get an input file so generate an example and exit.
+        # We didn't get an input file so ask to generate an example and exit.
+        result = script.message_box("Do you want to generate an example CSV file?", "Generate CSV",
+                           script_types.ICON_QUESTION|script_types.BUTTON_YESNO)
+        if result == script_types.IDNO:
+            return
+        else:
+            # Create an example input filename by replacing .py in script
+            # name with .csv
+            example_file = os.path.normpath(os.path.join(script_dir, script_name.replace(".py", ".csv")))
 
-        # Create an example input filename by replacing .py in script
-        # name with .csv
-        example_file = os.path.normpath(os.path.join(script_dir, script_name.replace(".py", ".csv")))
+            # Write out example
+            with open(example_file, 'wb') as ex_file:
+                exWriter = csv.writer(ex_file)
+                exWriter.writerow(
+                    ['session_name', 'hostname', 'protocol', 'folder']
+                )
+                exWriter.writerow(
+                    ['switch1', '10.10.10.10', 'SSH2',
+                     'Customer1/Site1/Building1/IDF1']
+                )
+                exWriter.writerow(
+                    ['switch2', '10.10.20.10', 'SSH2',
+                     'Customer1/Site1/Building1/IDF2']
+                )
+                exWriter.writerow(
+                    ['router1', '10.10.10.1', 'SSH2',
+                     'Customer1/Site1/Building1/IDF1']
+                )
 
-        # Write out example
-        with open(example_file, 'wb') as ex_file:
-            exWriter = csv.writer(ex_file)
-            exWriter.writerow(
-                ['session_name', 'hostname', 'protocol', 'folder']
-            )
-            exWriter.writerow(
-                ['switch1', '10.10.10.10', 'SSH2',
-                 'Customer1/Site1/Building1/IDF1']
-            )
-            exWriter.writerow(
-                ['switch2', '10.10.20.10', 'SSH2',
-                 'Customer1/Site1/Building1/IDF2']
-            )
-            exWriter.writerow(
-                ['router1', '10.10.10.1', 'SSH2',
-                 'Customer1/Site1/Building1/IDF1']
-            )
-
-        # Show where example file was created
-        setting_msg = (
-            "No input file selected\n"
-            "Example Import file, {0}, created in directory:\n{1}\n\n").format(example_file, script_dir)
-        script.message_box(setting_msg, "Example Input Created", script_types.ICON_INFO)
+            # Show where example file was created
+            setting_msg = (
+                "No input file selected\n"
+                "Example Import file, {0}, created in directory:\n{1}\n\n").format(example_file, script_dir)
+            script.message_box(setting_msg, "Example Input Created", script_types.ICON_INFO)
 
 
 # ################################################  SCRIPT LAUNCH   ###################################################
