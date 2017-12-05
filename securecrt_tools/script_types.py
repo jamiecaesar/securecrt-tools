@@ -134,10 +134,11 @@ class Script:
 
         # Extract and store "save path" for future reference by scripts.
         output_dir = self.settings.get("Global", "output_dir")
-        if os.path.isabs(output_dir):
-            self.output_dir = os.path.realpath(output_dir)
+        exp_output_dir = os.path.expandvars(os.path.expanduser(output_dir))
+        if os.path.isabs(exp_output_dir):
+            self.output_dir = os.path.realpath(exp_output_dir)
         else:
-            full_path = os.path.join(self.script_dir, output_dir)
+            full_path = os.path.join(self.script_dir, exp_output_dir)
             self.output_dir = os.path.realpath(full_path)
         self.validate_dir(self.output_dir)
 
