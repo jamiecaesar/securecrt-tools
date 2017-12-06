@@ -26,7 +26,7 @@ logger.debug("Starting execution of {}".format(script_name))
 
 # ################################################   SCRIPT LOGIC   ###################################################
 
-def script_main(script, prompt_checkmode=True, check_mode=True):
+def script_main(script, prompt_checkmode=True, check_mode=True, enable_pass=None):
     """
     | SINGLE device script
     | Author: Jamie Caesar
@@ -53,9 +53,11 @@ def script_main(script, prompt_checkmode=True, check_mode=True):
         only -- does not push config), or not (Pushes the changes to the device).   The default is True for safety
         reasons, and this option will be overwritten unless prompt_checkmode is False.
     :type check_mode: bool
+    :param enable_pass: The enable password for the device.  Will be passed to start_cisco_session method if available.
+    :type enable_pass: str
     """
     # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
-    script.start_cisco_session()
+    script.start_cisco_session(enable_pass=enable_pass)
 
     # Validate device is running a supported OS
     supported_os = ["IOS", "NXOS"]
@@ -90,7 +92,7 @@ def script_main(script, prompt_checkmode=True, check_mode=True):
     fsm_results = utilities.textfsm_parse_to_list(raw_cdp, template_file, add_header=True)
 
     # Get domain names to strip from device IDs from settings file
-    strip_list = script.settings.getlist(script_name, "strip_domains")
+    strip_list = script.settings.getlist("update_interface_desc", "strip_domains")
 
     # Since "System Name" is a newer NXOS feature -- try to extract it from the device ID when its empty.
     for entry in fsm_results:
@@ -123,7 +125,10 @@ def script_main(script, prompt_checkmode=True, check_mode=True):
     # Generate a list of configuration commands (and rollback if necessary)
     for interface in intf_list:
         # Get existing description
-        existing_desc = ex_desc_lookup[interface]
+        try:
+            existing_desc = ex_desc_lookup[interface]
+        except KeyError:
+            existing_desc = ""
 
         # If a port-channel only use hostname in description
         if "Po" in interface:
@@ -155,43 +160,44 @@ def script_main(script, prompt_checkmode=True, check_mode=True):
                 rollback.append(" description {}".format(existing_desc))
 
     # If in check-mode, generate configuration and write it to a file, otherwise push the config to the device.
-    if check_mode:
-        output_filename = script.create_output_filename("intf-desc", include_date=False)
-        with open(output_filename, 'wb') as output_file:
-            for command in config_commands:
-                output_file.write("{}\n".format(command))
-        rollback_filename = script.create_output_filename("rollback", include_date=False)
-    else:
-        # Check settings to see if we prefer to save backups before/after applying changes
-        take_backups = script.settings.getboolean(script_name, "take_backups")
-        if take_backups:
-            # Back up running config prior to changes
-            before_filename = script.create_output_filename("1-show-run-BEFORE")
-            script.write_output_to_file("show run", before_filename)
-            # Push configuration, capturing the configure terminal log
-            output_filename = script.create_output_filename("2-CONFIG-RESULTS")
-            script.send_config_commands(config_commands, output_filename)
-            # Back up configuration after changes are applied
-            after_filename = script.create_output_filename("3-show-run-AFTER")
-            script.write_output_to_file("show run", after_filename)
-            # Set Rollback filename, in case this option is used
-            rollback_filename = script.create_output_filename("4-ROLLBACK")
+    if config_commands:
+        if check_mode:
+            output_filename = script.create_output_filename("intf-desc", include_date=False)
+            with open(output_filename, 'wb') as output_file:
+                for command in config_commands:
+                    output_file.write("{}\n".format(command))
+            rollback_filename = script.create_output_filename("rollback", include_date=False)
         else:
-            # Push configuration, capturing the configure terminal log
-            output_filename = script.create_output_filename("CONFIG-RESULTS")
-            script.send_config_commands(config_commands, output_filename)
-            # Set Rollback filename, in case this option is used
-            rollback_filename = script.create_output_filename("ROLLBACK")
+            # Check settings to see if we prefer to save backups before/after applying changes
+            take_backups = script.settings.getboolean("update_interface_desc", "take_backups")
+            if take_backups:
+                # Back up running config prior to changes
+                before_filename = script.create_output_filename("1-show-run-BEFORE")
+                script.write_output_to_file("show run", before_filename)
+                # Push configuration, capturing the configure terminal log
+                output_filename = script.create_output_filename("2-CONFIG-RESULTS")
+                script.send_config_commands(config_commands, output_filename)
+                # Back up configuration after changes are applied
+                after_filename = script.create_output_filename("3-show-run-AFTER")
+                script.write_output_to_file("show run", after_filename)
+                # Set Rollback filename, in case this option is used
+                rollback_filename = script.create_output_filename("4-ROLLBACK")
+            else:
+                # Push configuration, capturing the configure terminal log
+                output_filename = script.create_output_filename("CONFIG-RESULTS")
+                script.send_config_commands(config_commands, output_filename)
+                # Set Rollback filename, in case this option is used
+                rollback_filename = script.create_output_filename("ROLLBACK")
 
-        # Save configuration
-        script.save()
+            # Save configuration
+            script.save()
 
-    # Check our settings to see if we should create a rollback.
-    create_rollback = script.settings.getboolean(script_name, "rollback_file")
-    if create_rollback:
-        with open(rollback_filename, 'wb') as output_file:
-            for command in rollback:
-                output_file.write("{}\n".format(command))
+        # Check our settings to see if we should create a rollback.
+        create_rollback = script.settings.getboolean("update_interface_desc", "rollback_file")
+        if create_rollback:
+            with open(rollback_filename, 'wb') as output_file:
+                for command in rollback:
+                    output_file.write("{}\n".format(command))
 
     # Return terminal parameters back to the original state.
     script.end_cisco_session()

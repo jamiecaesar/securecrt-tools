@@ -24,7 +24,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Third Party Modules" href="3rdparty.html" />
-    <link rel="prev" title="Writing Your Own Scripts" href="modules.html" /> 
+    <link rel="prev" title="Module Documentation" href="modules.html" /> 
   </head>
   <body>
     <div class="header-wrapper" role="banner">
@@ -32,7 +32,7 @@
         <div class="headertitle"><a
           href="index.html">SecureCRT Tools 2.1.0 documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
-          <a href="modules.html" title="Writing Your Own Scripts"
+          <a href="modules.html" title="Module Documentation"
              accesskey="P">previous</a> |
           <a href="3rdparty.html" title="Third Party Modules"
              accesskey="N">next</a> |
@@ -79,6 +79,31 @@ SecureCRT, and once the code is working working locally it should also run fine 
 <dd><p>Bases: <a class="reference internal" href="#securecrt_tools.script_types.Script" title="securecrt_tools.script_types.Script"><code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.script_types.Script</span></code></a></p>
 <p>This sub-class of the Session class is used to wrap the SecureCRT API to simplify writing new scripts.  This class
 includes some private methods thare are used to support the interaction with SecureCRT (these start with ‘__’).</p>
+<dl class="method">
+<dt id="securecrt_tools.script_types.CRTScript.connect">
+<code class="descname">connect</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>protocol=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.script_types.CRTScript.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempts to connect to a device by any available protocol, starting with SSH2, then SSH1, then telnet</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> (<em>str</em>) – The IP address of DNS name for the device to connect</li>
+<li><strong>username</strong> (<em>str</em>) – The username to login to the device with</li>
+<li><strong>password</strong> (<em>str</em>) – The password that goes with the provided username.  If a password is not specified, the
+user will be prompted for one.</li>
+<li><strong>protocol</strong> (<em>str</em>) – A string with the desired protocol (telnet, ssh1, ssh2, ssh). If left blank it will try all
+starting with SSH2, then SSH1 then Telnet.  “ssh” means SSH2 then SSH1.</li>
+<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
+Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
+type of device (for example “$” for some linux hosts).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="method">
 <dt id="securecrt_tools.script_types.CRTScript.connect_ssh">
 <code class="descname">connect_ssh</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>version=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.script_types.CRTScript.connect_ssh" title="Permalink to this definition">¶</a></dt>
@@ -374,6 +399,9 @@ host.</p>
 <li><strong>password</strong> (<em>str</em>) – Password for logging into the remote device</li>
 <li><strong>options</strong> (<em>str</em>) – Additional “ssh” command paramters.  Default disables strict host key checking so that the
 script will not be prompted to accept the remote key.</li>
+<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
+Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
+type of device (for example “$” for some linux hosts).</li>
 </ul>
 </td>
 </tr>
@@ -418,6 +446,9 @@ host.</p>
 <li><strong>host</strong> (<em>str</em>) – IP address or hostname (resolvable on the jumpbox)</li>
 <li><strong>username</strong> (<em>str</em>) – Username to log into the remote device with</li>
 <li><strong>password</strong> (<em>str</em>) – Password for logging into the remote device</li>
+<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
+Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
+type of device (for example “$” for some linux hosts).</li>
 </ul>
 </td>
 </tr>
@@ -849,6 +880,31 @@ This method can handle any length of output</p>
 sub-classes have to implement.  There are also a couple methods that are common to all sessions so they are defined
 under this class and automatically inherited by the sub-classes.</p>
 <dl class="method">
+<dt id="securecrt_tools.script_types.Script.connect">
+<code class="descname">connect</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>protocol=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.script_types.Script.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempts to connect to a device by any available protocol, starting with SSH2, then SSH1, then telnet</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> (<em>str</em>) – The IP address of DNS name for the device to connect</li>
+<li><strong>username</strong> (<em>str</em>) – The username to login to the device with</li>
+<li><strong>password</strong> (<em>str</em>) – The password that goes with the provided username.  If a password is not specified, the
+user will be prompted for one.</li>
+<li><strong>protocol</strong> (<em>str</em>) – A string with the desired protocol (telnet, ssh1, ssh2, ssh). If left blank it will try all
+starting with SSH2, then SSH1 then Telnet.  “ssh” means SSH2 then SSH1.</li>
+<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
+Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
+type of device (for example “$” for some linux hosts).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="securecrt_tools.script_types.Script.connect_ssh">
 <code class="descname">connect_ssh</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>version=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.script_types.Script.connect_ssh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connects to a device via the SSH protocol. By default, SSH2 will be tried first, but if it fails it will attempt
@@ -1062,6 +1118,32 @@ procedure that this method uses.</p>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Full path to the template location</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.script_types.Script.import_device_list">
+<code class="descname">import_device_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.script_types.Script.import_device_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will prompt for a device list CSV file to import, returns a list containing all of the
+devices that were in the CSV file and their associated credentials.  The CSV file must be of the format, and
+include a header row of [‘Hostname’, ‘Protocol’, ‘Username’, ‘Password’, ‘Enable’, ‘Via-Jumpbox’].  An example
+device list CSV file is at ‘template/sample_device_list.csv’</p>
+<p>Some additional information about missing items from a line in the CSV:
+- If the hostname field is missing, the line will be skipped.
+- If the protocol field is empty, the script will try SSH2, then SSH1, then Telnet.
+- If the username is missing, this method will prompt the user for a default usernaem to use
+- If the password is missing, will prompt the user for a password for each username missing a password
+- If the enable password is missing, the method will ask the user if they want to set a default enable to use
+- If the IP is included then the device will be reached through the jumpbox, otherwise connect directly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A list where each entry is a dictionary representing a device and the associated login information.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list of dict</td>
 </tr>
 </tbody>
 </table>
@@ -1612,16 +1694,14 @@ add_header=True if the header row with value names should be prepended to the st
 <li class="toctree-l1"><a class="reference internal" href="README.html#running-the-scripts">Running The Scripts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="README.html#settings">Settings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="scripts.html">Scripts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">Writing Your Own Scripts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html#a-note-on-textfsm">A Note on TextFSM</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html#module-documentation">Module Documentation</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">SecureCRT Tools Modules</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#module-securecrt_tools.script_types">securecrt_tools.script_types</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-securecrt_tools.settings">securecrt_tools.settings</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-securecrt_tools.utilities">securecrt_tools.utilities</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="writing_scripts.html">Writing Your Own Scripts</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="writing_intro.html">Introduction To Writing SecureCRT Scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="textfsm_note.html">A Note on TextFSM</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="modules.html">Module Documentation</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">SecureCRT Tools Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="3rdparty.html">Third Party Modules</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="3rdparty.html">Third Party Modules</a></li>
 </ul>
 </li>
 </ul>
@@ -1644,7 +1724,7 @@ add_header=True if the header row with value names should be prepended to the st
       <div class="footer">
         <div class="left">
           <div role="navigation" aria-label="related navigaton">
-            <a href="modules.html" title="Writing Your Own Scripts"
+            <a href="modules.html" title="Module Documentation"
               >previous</a> |
             <a href="3rdparty.html" title="Third Party Modules"
               >next</a> |

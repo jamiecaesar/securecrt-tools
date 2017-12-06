@@ -34,8 +34,8 @@ def script_main(script):
     containing the important information, such as Remote Device hostname, model and IP information, in addition to the
     local and remote interfaces that connect the devices.
 
-    Script Settings (found in settings/settings.ini):
-    strip_domains -  A list of domain names that will be stripped away if found in the CDP remote device name.
+    | Script Settings (found in settings/settings.ini):
+    | strip_domains -  A list of domain names that will be stripped away if found in the CDP remote device name.
 
     :param script: A subclass of the sessions.Session object that represents this particular script session (either
                     SecureCRTSession or DirectSession)
@@ -55,7 +55,7 @@ def script_main(script):
     logger.debug("Command set to '{0}'".format(send_cmd))
 
     # Get domain names to strip from device IDs from settings file
-    strip_list = script.settings.getlist(script_name, "strip_domains")
+    strip_list = script.settings.getlist("cdp_to_csv", "strip_domains")
 
     # Get the output from our above command
     raw_cdp = script.get_command_output(send_cmd)

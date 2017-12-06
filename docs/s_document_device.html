@@ -65,12 +65,16 @@
 <p>This script will grab the output for a list of commands from the connected device.  The list of commands is taken
 from the ‘settings/settings.ini’ file.  There is a separate list for each supported network operating system (IOS,
 NXOS and ASA).</p>
-<p>Script Settings (found in settings/settings.ini):
-folder_per_device - If True, Creates a folder for each device, based on the hostname, and saves all files inside
-that folder.  If False, it saves all the files directly into the output folder from the global settings.
-ios - The list of commands that will be run on IOS devices
-nxos - The list of commands that will be run on NXOS devices
-asa - The list of commands that will be run on ASA devices</p>
+<div class="line-block">
+<div class="line">Script Settings (found in settings/settings.ini):</div>
+<div class="line">folder_per_device - If True, Creates a folder for each device, based on the hostname, and saves all files inside</div>
+<div class="line-block">
+<div class="line">that folder.  If False, it saves all the files directly into the output folder from the global settings.</div>
+</div>
+<div class="line">ios - The list of commands that will be run on IOS devices</div>
+<div class="line">nxos - The list of commands that will be run on NXOS devices</div>
+<div class="line">asa - The list of commands that will be run on ASA devices</div>
+</div>
 <p>The outputs will be saved in a folder named after the hostname of the device, with each output file being saved
 inside that directory.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -119,9 +123,7 @@ SecureCRTSession or DirectSession)</td>
 <li class="toctree-l2"><a class="reference internal" href="no_device_scripts.html">No Device Scripts</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">Writing Your Own Scripts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html#a-note-on-textfsm">A Note on TextFSM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html#module-documentation">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing_scripts.html">Writing Your Own Scripts</a></li>
 </ul>
 
           <div role="search">

@@ -241,11 +241,20 @@ class Script:
 
     def import_device_list(self):
         """
-        This function will prompt for a device list CSV file to import, returns a dictionary containing all of the
-        devices that will be connected to and their associated credentials.  If there are missing items, it will prompt
-        he user for those values and fit them in.
+        This function will prompt for a device list CSV file to import, returns a list containing all of the
+        devices that were in the CSV file and their associated credentials.  The CSV file must be of the format, and
+        include a header row of ['Hostname', 'Protocol', 'Username', 'Password', 'Enable', 'Via-Jumpbox'].  An example
+        device list CSV file is at 'template/sample_device_list.csv'
 
-        :return: A list with each entry (dictionary) representing a device and the associated login information.
+        Some additional information about missing items from a line in the CSV:
+        - If the hostname field is missing, the line will be skipped.
+        - If the protocol field is empty, the script will try SSH2, then SSH1, then Telnet.
+        - If the username is missing, this method will prompt the user for a default usernaem to use
+        - If the password is missing, will prompt the user for a password for each username missing a password
+        - If the enable password is missing, the method will ask the user if they want to set a default enable to use
+        - If the IP is included then the device will be reached through the jumpbox, otherwise connect directly.
+
+        :return: A list where each entry is a dictionary representing a device and the associated login information.
         :rtype: list of dict
         """
         # Get the filename of the device list CSV file.
@@ -275,7 +284,7 @@ class Script:
 
             # Get header line and validate it is correct.
             header = next(device_csv, None)
-            if header != ['Hostname', 'Protocol', 'Username', 'Password', 'Enable', 'Via-Jumpbox']:
+            if header != ['Hostname', 'Protocol', 'Username', 'Password', 'Enable']:
                 raise SecureCRTToolsError("CSV file does not have a valid header row.")
 
             # Loop through all lines of the CSV, and decide if any information is missing.
@@ -285,7 +294,6 @@ class Script:
                 username = line[2].strip()
                 password = line[3].strip()
                 enable = line[4].strip()
-                jumpbox = line[5].strip()
 
                 if not hostname:
                     self.logger.debug("<IMPORT_DEVICES> Skipping CSV line {} because no hostname exists.".format(line))
@@ -301,10 +309,10 @@ class Script:
                     if default_username:
                         username = default_username
                         self.logger.debug("<IMPORT_DEVICES> Using default username '{}', for host {}."
-                                     .format(default_username, hostname))
+                                          .format(default_username, hostname))
                     else:
                         self.logger.debug("<IMPORT_DEVICES> Didn't find username for host '{}'.  Prompting for DEFAULT."
-                                     .format(hostname))
+                                          .format(hostname))
                         default_username = self.prompt_window("Enter the DEFAULT USERNAME to use.")
                         if default_username == '':
                             self.logger.debug("<IMPORT_DEVICES> Default username not provided.  Stopping".format(line))
@@ -321,7 +329,7 @@ class Script:
                 if not enable:
                     no_enable = True
 
-                temp_device_list.append([hostname, protocol, username, password, enable, jumpbox])
+                temp_device_list.append([hostname, protocol, username, password, enable])
 
         # Prompt for missing information
         for username in no_password:
@@ -329,6 +337,7 @@ class Script:
             password = self.prompt_window("Enter the password for {}".format(username), hide_input=True)
             credentials[username] = password
 
+        default_enable = None
         if no_enable:
             self.logger.debug("<IMPORT_DEVICES> Devices without enable passwords found.  Prompting fopr password.")
             enable_msg = "Devices were found without enable passwords listed.  Do you want to enter an enable password?"
@@ -364,9 +373,6 @@ class Script:
             if not enable and default_enable:
                 enable = default_enable
             dev_info['enable'] = enable
-
-            # Fill in jumpbox information
-            dev_info['jumpbox'] = line[5]
 
             # Add this device to our dictionary:
             device_list.append(dev_info)
@@ -496,6 +502,28 @@ class Script:
         :param password: The password that goes with the provided username.  If a password is not specified, the
                          user will be prompted for one.
         :type password: str
+        :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
+                               Cisco devices (">" and "#"), but may need to be changed if connecting to another
+                               type of device (for example "$" for some linux hosts).
+        :type prompt_endings: list
+        """
+        pass
+
+    @abstractmethod
+    def connect(self, host, username, password, protocol=None, prompt_endings=("#", ">")):
+        """
+        Attempts to connect to a device by any available protocol, starting with SSH2, then SSH1, then telnet
+
+        :param host: The IP address of DNS name for the device to connect
+        :type host: str
+        :param username: The username to login to the device with
+        :type username: str
+        :param password: The password that goes with the provided username.  If a password is not specified, the
+                         user will be prompted for one.
+        :type password: str
+        :param protocol: A string with the desired protocol (telnet, ssh1, ssh2, ssh). If left blank it will try all
+                         starting with SSH2, then SSH1 then Telnet.  "ssh" means SSH2 then SSH1.
+        :type protocol: str
         :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
                                Cisco devices (">" and "#"), but may need to be changed if connecting to another
                                type of device (for example "$" for some linux hosts).
@@ -977,6 +1005,47 @@ class CRTScript(Script):
         # Make sure banners have printed and we've reached our expected prompt.
         self.__post_connect_check(prompt_endings)
 
+    def connect(self, host, username, password, protocol=None, prompt_endings=("#", ">")):
+        """
+        Attempts to connect to a device by any available protocol, starting with SSH2, then SSH1, then telnet
+
+        :param host: The IP address of DNS name for the device to connect
+        :type host: str
+        :param username: The username to login to the device with
+        :type username: str
+        :param password: The password that goes with the provided username.  If a password is not specified, the
+                         user will be prompted for one.
+        :type password: str
+        :param protocol: A string with the desired protocol (telnet, ssh1, ssh2, ssh). If left blank it will try all
+                         starting with SSH2, then SSH1 then Telnet.  "ssh" means SSH2 then SSH1.
+        :type protocol: str
+        :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
+                               Cisco devices (">" and "#"), but may need to be changed if connecting to another
+                               type of device (for example "$" for some linux hosts).
+        :type prompt_endings: list
+        """
+        if not prompt_endings:
+            raise ConnectError("Cannot connect without knowing what character ends the CLI prompt.")
+
+        if not protocol:
+            try:
+                self.connect_ssh(host, username, password, prompt_endings=prompt_endings)
+            except ConnectError:
+                try:
+                    self.connect_telnet(host, username, password, prompt_endings=prompt_endings)
+                except ConnectError:
+                    raise ConnectError("Unable to make a connection with either SSH or Telnet")
+        elif protocol.lower() == "ssh":
+            self.connect_ssh(host, username, password, prompt_endings=prompt_endings)
+        elif protocol.lower() == "ssh2":
+            self.connect_ssh(host, username, password, version=2, prompt_endings=prompt_endings)
+        elif protocol.lower() == "ssh1":
+            self.connect_ssh(host, username, password, version=1, prompt_endings=prompt_endings)
+        elif protocol.lower() == "telnet":
+            self.connect_telnet(host, username, password, prompt_endings=prompt_endings)
+        else:
+            raise ConnectError("Unknown protocol specified.")
+
     def disconnect(self, command="exit"):
         """
         Disconnects the connected session by sending the "exit" command to the remote device.  If that does not make
@@ -1021,6 +1090,10 @@ class CRTScript(Script):
         :param options: Additional "ssh" command paramters.  Default disables strict host key checking so that the
                         script will not be prompted to accept the remote key.
         :type options: str
+        :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
+                               Cisco devices (">" and "#"), but may need to be changed if connecting to another
+                               type of device (for example "$" for some linux hosts).
+        :type prompt_endings: list
         """
         if not self.prompt:
             self.prompt = self.__get_prompt()
@@ -1048,6 +1121,10 @@ class CRTScript(Script):
         :type username: str
         :param password: Password for logging into the remote device
         :type password: str
+        :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
+                               Cisco devices (">" and "#"), but may need to be changed if connecting to another
+                               type of device (for example "$" for some linux hosts).
+        :type prompt_endings: list
         """
         if not self.prompt:
             self.prompt = self.__get_prompt()
@@ -1715,6 +1792,13 @@ class DirectScript(Script):
         :type prompt_endings: list
         """
         print "Pretending to log into device {} with username {} using TELNET.".format(host, username)
+        self._connected = True
+
+    def connect(self, host, username, password, protocol=None, prompt_endings=("#", ">")):
+        if not protocol:
+            print "Pretending to log into device {} with username {} using ANY.".format(host, username, protocol)
+        else:
+            print "Pretending to log into device {} with username {} using {}.".format(host, username, protocol)
         self._connected = True
 
     def disconnect(self, command="exit"):

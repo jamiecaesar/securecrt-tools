@@ -56,7 +56,7 @@
 <span id="s-update-interface-desc"></span><h1>s_update_interface_desc<a class="headerlink" href="#module-s_update_interface_desc" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="s_update_interface_desc.script_main">
-<code class="descclassname">s_update_interface_desc.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>script</em>, <em>prompt_checkmode=True</em>, <em>check_mode=True</em><span class="sig-paren">)</span><a class="headerlink" href="#s_update_interface_desc.script_main" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">s_update_interface_desc.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>script</em>, <em>prompt_checkmode=True</em>, <em>check_mode=True</em>, <em>enable_pass=None</em><span class="sig-paren">)</span><a class="headerlink" href="#s_update_interface_desc.script_main" title="Permalink to this definition">¶</a></dt>
 <dd><div class="line-block">
 <div class="line">SINGLE device script</div>
 <div class="line">Author: Jamie Caesar</div>
@@ -68,7 +68,8 @@ write the configuration changes to a file (for verification or later manual appl
 will push the configuration commands to the device and save the configuration.</p>
 <p>Local Settings:
 “strip_domains” -  A list of domain names that will be stripped away if found in the CDP remote device name.
-“take_backups” - If set to True, the script will save a copy of the running config before and after making changes.</p>
+“take_backups” - If set to True, the script will save a copy of the running config before and after making changes.
+“rollback_file” - If set to True, the script will generate a rollback configuration script and save it to a file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -82,6 +83,7 @@ process can run continually without prompting the user at each device.</li>
 <li><strong>check_mode</strong> (<em>bool</em>) – A boolean to specify whether we should run in “check mode” (Generate what the script would do
 only – does not push config), or not (Pushes the changes to the device).   The default is True for safety
 reasons, and this option will be overwritten unless prompt_checkmode is False.</li>
+<li><strong>enable_pass</strong> (<em>str</em>) – The enable password for the device.  Will be passed to start_cisco_session method if available.</li>
 </ul>
 </td>
 </tr>
@@ -182,9 +184,7 @@ have members found in the CDP table.</p>
 <li class="toctree-l2"><a class="reference internal" href="no_device_scripts.html">No Device Scripts</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">Writing Your Own Scripts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html#a-note-on-textfsm">A Note on TextFSM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html#module-documentation">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing_scripts.html">Writing Your Own Scripts</a></li>
 </ul>
 
           <div role="search">

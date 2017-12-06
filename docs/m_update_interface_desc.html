@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>s_create_sessions_from_cdp &#8212; SecureCRT Tools 2.1.0 documentation</title>
+    <title>m_update_interface_desc &#8212; SecureCRT Tools 2.1.0 documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -23,8 +23,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="s_document_device" href="s_document_device.html" />
-    <link rel="prev" title="s_cdp_to_csv" href="s_cdp_to_csv.html" /> 
+    <link rel="next" title="No Device Scripts" href="no_device_scripts.html" />
+    <link rel="prev" title="Multiple Device Scripts" href="multi_device_scripts.html" /> 
   </head>
   <body>
     <div class="header-wrapper" role="banner">
@@ -32,9 +32,9 @@
         <div class="headertitle"><a
           href="index.html">SecureCRT Tools 2.1.0 documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
-          <a href="s_cdp_to_csv.html" title="s_cdp_to_csv"
+          <a href="multi_device_scripts.html" title="Multiple Device Scripts"
              accesskey="P">previous</a> |
-          <a href="s_document_device.html" title="s_document_device"
+          <a href="no_device_scripts.html" title="No Device Scripts"
              accesskey="N">next</a> |
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |
@@ -52,47 +52,35 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-s_create_sessions_from_cdp">
-<span id="s-create-sessions-from-cdp"></span><h1>s_create_sessions_from_cdp<a class="headerlink" href="#module-s_create_sessions_from_cdp" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-m_update_interface_desc">
+<span id="m-update-interface-desc"></span><h1>m_update_interface_desc<a class="headerlink" href="#module-m_update_interface_desc" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
-<dt id="s_create_sessions_from_cdp.script_main">
-<code class="descclassname">s_create_sessions_from_cdp.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#s_create_sessions_from_cdp.script_main" title="Permalink to this definition">¶</a></dt>
+<dt id="m_update_interface_desc.script_main">
+<code class="descclassname">m_update_interface_desc.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#m_update_interface_desc.script_main" title="Permalink to this definition">¶</a></dt>
 <dd><div class="line-block">
-<div class="line">SINGLE device script</div>
+<div class="line">MULTIPLE device script</div>
 <div class="line">Author: Jamie Caesar</div>
 <div class="line">Email: <a class="reference external" href="mailto:jcaesar&#37;&#52;&#48;presidio&#46;com">jcaesar<span>&#64;</span>presidio<span>&#46;</span>com</a></div>
 </div>
-<p>This script will grab the detailed CDP information from a Cisco IOS or NX-OS device and create SecureCRT sessions
-based on the information.  By default all sessions will be created as SSH2, so you may have
-to manually change some sessions to make them work, depending on the device capabilities/configuration.</p>
-<p>Script Settings (found in settings/settings.ini):
-folder - The path starting from the &lt;SecureCRT Config&gt;/Sessions/ directory where the sessions will be created.
-strip_domains -  A list of domain names that will be stripped away if found in the CDP remote device name.</p>
+<p>This script will grab the detailed CDP information from a Cisco IOS or NX-OS device and port-channel information and
+generate the commands to update interface descriptions.  The user will be prompted to run in “Check Mode” which will
+write the configuration changes to a file (for verification or later manual application).  If not, then the script
+will push the configuration commands to the device and save the configuration.</p>
+<p>IMPORTANT:  This script imports the script_main() function from the s_update_interface_desc.py to run a majority
+of the script logic.  Much of this script is only handling multiple logins and calling the single-device version of
+this script.</p>
+<div class="line-block">
+<div class="line">Local Settings:</div>
+<div class="line">“strip_domains” -  A list of domain names that will be stripped away if found in the CDP remote device name.</div>
+<div class="line">“take_backups” - If True, the script will save a copy of the running config before and after making changes.</div>
+<div class="line">“rollback_file” - If True, the script will generate a rollback configuration script and save it to a file.</div>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>script</strong> (<a class="reference internal" href="securecrt_tools.html#securecrt_tools.script_types.Script" title="securecrt_tools.script_types.Script"><em>script_types.Script</em></a>) – A subclass of the sessions.Session object that represents this particular script session (either
 SecureCRTSession or DirectSession)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="s_create_sessions_from_cdp.create_session_list">
-<code class="descclassname">s_create_sessions_from_cdp.</code><code class="descname">create_session_list</code><span class="sig-paren">(</span><em>cdp_list</em><span class="sig-paren">)</span><a class="headerlink" href="#s_create_sessions_from_cdp.create_session_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function takes the TextFSM output of the CDP information and uses it to create a list of new SecureCRT sessions
-to create (system name and IP address).</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cdp_list</strong> (<em>list</em>) – The TextFSM output after processing the “show cdp neighbor detail” output</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list (system name and IP address) of the sessions that need to be created.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
 </tr>
 </tbody>
 </table>
@@ -114,22 +102,11 @@ to create (system name and IP address).</p>
 <li class="toctree-l1"><a class="reference internal" href="README.html#running-the-scripts">Running The Scripts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="README.html#settings">Settings</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="scripts.html">Scripts</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="single_device_scripts.html">Single Device Scripts</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="s_arp_to_csv.html">s_arp_to_csv</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_cdp_to_csv.html">s_cdp_to_csv</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">s_create_sessions_from_cdp</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_document_device.html">s_document_device</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_interface_stats.html">s_interface_stats</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_mac_to_csv.html">s_mac_to_csv</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_nexthop_summary.html">s_nexthop_summary</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_save_output.html">s_save_output</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_save_running.html">s_save_running</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_switchport_mapping.html">s_switchport_mapping</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_update_interface_desc.html">s_update_interface_desc</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_vlan_to_csv.html">s_vlan_to_csv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="single_device_scripts.html">Single Device Scripts</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="multi_device_scripts.html">Multiple Device Scripts</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">m_update_interface_desc</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="multi_device_scripts.html">Multiple Device Scripts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="no_device_scripts.html">No Device Scripts</a></li>
 </ul>
 </li>
@@ -154,9 +131,9 @@ to create (system name and IP address).</p>
       <div class="footer">
         <div class="left">
           <div role="navigation" aria-label="related navigaton">
-            <a href="s_cdp_to_csv.html" title="s_cdp_to_csv"
+            <a href="multi_device_scripts.html" title="Multiple Device Scripts"
               >previous</a> |
-            <a href="s_document_device.html" title="s_document_device"
+            <a href="no_device_scripts.html" title="No Device Scripts"
               >next</a> |
             <a href="py-modindex.html" title="Python Module Index"
               >modules</a> |
@@ -165,7 +142,7 @@ to create (system name and IP address).</p>
           </div>
           <div role="note" aria-label="source link">
               <br/>
-              <a href="_sources/s_create_sessions_from_cdp.rst.txt"
+              <a href="_sources/m_update_interface_desc.rst.txt"
                 rel="nofollow">Show Source</a>
           </div>
         </div>

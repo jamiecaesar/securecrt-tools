@@ -62,7 +62,7 @@ def script_main(script):
     cdp_table = utilities.textfsm_parse_to_list(raw_cdp, template_file)
 
     # Since "System Name" is a newer NXOS feature -- try to extract it from the device ID when its empty.
-    strip_list = script.settings.getlist(script_name, "strip_domains")
+    strip_list = script.settings.getlist("create_sessions_from_cdp", "strip_domains")
     for entry in cdp_table:
         # entry[2] is system name, entry[1] is device ID
         if entry[2] == "":
@@ -71,7 +71,7 @@ def script_main(script):
     session_list = create_session_list(cdp_table)
 
     # Get the destination directory from settings
-    dest_folder = script.settings.get(script_name, "folder")
+    dest_folder = script.settings.get("create_sessions_from_cdp", "folder")
 
     for device in session_list:
         system_name = device[0]

@@ -7,4 +7,6 @@ Multiple Device Scripts are scripts that are designed to be executed while NOT a
 .. toctree::
    :maxdepth: 1
 
+   m_update_interface_desc
+
    
