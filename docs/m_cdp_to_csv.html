@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Scripts &#8212; SecureCRT Tools 2.1.0 documentation</title>
+    <title>m_cdp_to_csv &#8212; SecureCRT Tools 2.1.0 documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -23,8 +23,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Single Device Scripts" href="single_device_scripts.html" />
-    <link rel="prev" title="Introduction" href="README.html" /> 
+    <link rel="next" title="m_update_interface_desc" href="m_update_interface_desc.html" />
+    <link rel="prev" title="Multiple Device Scripts" href="multi_device_scripts.html" /> 
   </head>
   <body>
     <div class="header-wrapper" role="banner">
@@ -32,9 +32,9 @@
         <div class="headertitle"><a
           href="index.html">SecureCRT Tools 2.1.0 documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
-          <a href="README.html" title="Introduction"
+          <a href="multi_device_scripts.html" title="Multiple Device Scripts"
              accesskey="P">previous</a> |
-          <a href="single_device_scripts.html" title="Single Device Scripts"
+          <a href="m_update_interface_desc.html" title="m_update_interface_desc"
              accesskey="N">next</a> |
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |
@@ -52,37 +52,38 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="scripts">
-<h1>Scripts<a class="headerlink" href="#scripts" title="Permalink to this headline">¶</a></h1>
-<p>Below is a list of scripts that are available in this repository.  Documentation for each script (including any functions within the script) can be found by clicking on the link below.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="single_device_scripts.html">Single Device Scripts</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="s_arp_to_csv.html">s_arp_to_csv</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_cdp_to_csv.html">s_cdp_to_csv</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_create_sessions_from_cdp.html">s_create_sessions_from_cdp</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_document_device.html">s_document_device</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_interface_stats.html">s_interface_stats</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_mac_to_csv.html">s_mac_to_csv</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_nexthop_summary.html">s_nexthop_summary</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_save_output.html">s_save_output</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_save_running.html">s_save_running</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_switchport_mapping.html">s_switchport_mapping</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_update_interface_desc.html">s_update_interface_desc</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_vlan_to_csv.html">s_vlan_to_csv</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="multi_device_scripts.html">Multiple Device Scripts</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="m_cdp_to_csv.html">m_cdp_to_csv</a></li>
-<li class="toctree-l2"><a class="reference internal" href="m_update_interface_desc.html">m_update_interface_desc</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="no_device_scripts.html">No Device Scripts</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="import_sessions_from_csv.html">import_sessions_from_csv</a></li>
-</ul>
-</li>
-</ul>
+  <div class="section" id="module-m_cdp_to_csv">
+<span id="m-cdp-to-csv"></span><h1>m_cdp_to_csv<a class="headerlink" href="#module-m_cdp_to_csv" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="m_cdp_to_csv.script_main">
+<code class="descclassname">m_cdp_to_csv.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#m_cdp_to_csv.script_main" title="Permalink to this definition">¶</a></dt>
+<dd><div class="line-block">
+<div class="line">MULTIPLE device script</div>
+<div class="line">Author: Jamie Caesar</div>
+<div class="line">Email: <a class="reference external" href="mailto:jcaesar&#37;&#52;&#48;presidio&#46;com">jcaesar<span>&#64;</span>presidio<span>&#46;</span>com</a></div>
 </div>
+<p>This script will grab the detailed CDP information from each Cisco IOS or NX-OS device in the provided device list
+CSV file and export each to a CSV file containing the important information, such as Remote Device hostname, model
+and IP information, in addition to the local and remote interfaces that connect the devices.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>script</strong> (<a class="reference internal" href="securecrt_tools.html#securecrt_tools.script_types.Script" title="securecrt_tools.script_types.Script"><em>script_types.Script</em></a>) – A subclass of the sessions.Session object that represents this particular script session (either
+SecureCRTSession or DirectSession)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="m_cdp_to_csv.per_device_work">
+<code class="descclassname">m_cdp_to_csv.</code><code class="descname">per_device_work</code><span class="sig-paren">(</span><em>script</em>, <em>check_mode</em>, <em>enable_pass</em><span class="sig-paren">)</span><a class="headerlink" href="#m_cdp_to_csv.per_device_work" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function should contain the logic that should be executed on each device.   For this script, it simply calls
+the script_main() function from the standalone version of the CDP to CSV script.  Essentially this calls the
+single version of the script on each device.</p>
+</dd></dl>
+
 </div>
 
 
@@ -98,9 +99,13 @@
 <li class="toctree-l1"><a class="reference internal" href="README.html#important-note">Important Note</a></li>
 <li class="toctree-l1"><a class="reference internal" href="README.html#running-the-scripts">Running The Scripts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="README.html#settings">Settings</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Scripts</a><ul>
+<li class="toctree-l1 current"><a class="reference internal" href="scripts.html">Scripts</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="single_device_scripts.html">Single Device Scripts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="multi_device_scripts.html">Multiple Device Scripts</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="multi_device_scripts.html">Multiple Device Scripts</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">m_cdp_to_csv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="m_update_interface_desc.html">m_update_interface_desc</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="no_device_scripts.html">No Device Scripts</a></li>
 </ul>
 </li>
@@ -125,9 +130,9 @@
       <div class="footer">
         <div class="left">
           <div role="navigation" aria-label="related navigaton">
-            <a href="README.html" title="Introduction"
+            <a href="multi_device_scripts.html" title="Multiple Device Scripts"
               >previous</a> |
-            <a href="single_device_scripts.html" title="Single Device Scripts"
+            <a href="m_update_interface_desc.html" title="m_update_interface_desc"
               >next</a> |
             <a href="py-modindex.html" title="Python Module Index"
               >modules</a> |
@@ -136,7 +141,7 @@
           </div>
           <div role="note" aria-label="source link">
               <br/>
-              <a href="_sources/scripts.rst.txt"
+              <a href="_sources/m_cdp_to_csv.rst.txt"
                 rel="nofollow">Show Source</a>
           </div>
         </div>

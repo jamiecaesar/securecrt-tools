@@ -161,13 +161,9 @@ def script_main(script):
 
 def per_device_work(script, check_mode, enable_pass):
     """
-    This function should contain the logic that should be executed on each device.  It receives the values from
-    prompting the user in the main script logic (check mode and enable password), and is called on every device that is
-    connected to as the script loops through the device list in the script_main() function.
-
-    This function is called immediately after making a connection to a device and should only be the logic needed to
-    interact with the device.  Opening and closing the connection is handled as the main script loops through devices
-    in the list.  In general, that means it should start with "start_cisco_session()" and end with "end_cisco_session()"
+    This function should contain the logic that should be executed on each device.   For this script, it simply calls
+    the script_main() function from the standalone version of the CDP to CSV script.  Essentially this calls the
+    single version of the script on each device.
     """
     s_cdp_to_csv.script_main(script)
 

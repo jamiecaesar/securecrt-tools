@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Scripts &#8212; SecureCRT Tools 2.1.0 documentation</title>
+    <title>About Templates &#8212; SecureCRT Tools 2.1.0 documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -23,8 +23,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Single Device Scripts" href="single_device_scripts.html" />
-    <link rel="prev" title="Introduction" href="README.html" /> 
+    <link rel="next" title="A Note on TextFSM" href="textfsm_note.html" />
+    <link rel="prev" title="Introduction To Writing SecureCRT Scripts" href="writing_intro.html" /> 
   </head>
   <body>
     <div class="header-wrapper" role="banner">
@@ -32,9 +32,9 @@
         <div class="headertitle"><a
           href="index.html">SecureCRT Tools 2.1.0 documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
-          <a href="README.html" title="Introduction"
+          <a href="writing_intro.html" title="Introduction To Writing SecureCRT Scripts"
              accesskey="P">previous</a> |
-          <a href="single_device_scripts.html" title="Single Device Scripts"
+          <a href="textfsm_note.html" title="A Note on TextFSM"
              accesskey="N">next</a> |
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |
@@ -52,37 +52,10 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="scripts">
-<h1>Scripts<a class="headerlink" href="#scripts" title="Permalink to this headline">¶</a></h1>
-<p>Below is a list of scripts that are available in this repository.  Documentation for each script (including any functions within the script) can be found by clicking on the link below.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="single_device_scripts.html">Single Device Scripts</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="s_arp_to_csv.html">s_arp_to_csv</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_cdp_to_csv.html">s_cdp_to_csv</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_create_sessions_from_cdp.html">s_create_sessions_from_cdp</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_document_device.html">s_document_device</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_interface_stats.html">s_interface_stats</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_mac_to_csv.html">s_mac_to_csv</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_nexthop_summary.html">s_nexthop_summary</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_save_output.html">s_save_output</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_save_running.html">s_save_running</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_switchport_mapping.html">s_switchport_mapping</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_update_interface_desc.html">s_update_interface_desc</a></li>
-<li class="toctree-l2"><a class="reference internal" href="s_vlan_to_csv.html">s_vlan_to_csv</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="multi_device_scripts.html">Multiple Device Scripts</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="m_cdp_to_csv.html">m_cdp_to_csv</a></li>
-<li class="toctree-l2"><a class="reference internal" href="m_update_interface_desc.html">m_update_interface_desc</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="no_device_scripts.html">No Device Scripts</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="import_sessions_from_csv.html">import_sessions_from_csv</a></li>
-</ul>
-</li>
-</ul>
-</div>
+  <div class="section" id="about-templates">
+<h1>About Templates<a class="headerlink" href="#about-templates" title="Permalink to this headline">¶</a></h1>
+<p>The <cite>templates</cite> folder contains empty script files that can be used as a tempalte for either single-device or multi-device scripts.  These templates should contain all of the boiler-plate code necessary (which I’ve tried to keep to a minimum) to make the scripts function properly.</p>
+<p>The idea is that you can use these templates to more quickly write a script by simply filling in your code/logic into the areas marked with “Put you code here” in the comments.</p>
 </div>
 
 
@@ -98,13 +71,14 @@
 <li class="toctree-l1"><a class="reference internal" href="README.html#important-note">Important Note</a></li>
 <li class="toctree-l1"><a class="reference internal" href="README.html#running-the-scripts">Running The Scripts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="README.html#settings">Settings</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Scripts</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="single_device_scripts.html">Single Device Scripts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="multi_device_scripts.html">Multiple Device Scripts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="no_device_scripts.html">No Device Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scripts.html">Scripts</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="writing_scripts.html">Writing Your Own Scripts</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="writing_intro.html">Introduction To Writing SecureCRT Scripts</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">About Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="textfsm_note.html">A Note on TextFSM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html">Module Documentation</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="writing_scripts.html">Writing Your Own Scripts</a></li>
 </ul>
 
           <div role="search">
@@ -125,9 +99,9 @@
       <div class="footer">
         <div class="left">
           <div role="navigation" aria-label="related navigaton">
-            <a href="README.html" title="Introduction"
+            <a href="writing_intro.html" title="Introduction To Writing SecureCRT Scripts"
               >previous</a> |
-            <a href="single_device_scripts.html" title="Single Device Scripts"
+            <a href="textfsm_note.html" title="A Note on TextFSM"
               >next</a> |
             <a href="py-modindex.html" title="Python Module Index"
               >modules</a> |
@@ -136,7 +110,7 @@
           </div>
           <div role="note" aria-label="source link">
               <br/>
-              <a href="_sources/scripts.rst.txt"
+              <a href="_sources/about_templates.rst.txt"
                 rel="nofollow">Show Source</a>
           </div>
         </div>
