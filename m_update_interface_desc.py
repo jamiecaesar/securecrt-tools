@@ -16,7 +16,7 @@ else:
 # Now we can import our custom modules
 from securecrt_tools import script_types
 from securecrt_tools.message_box_const import *
-from s_update_interface_desc import script_main as update_interface
+import s_update_interface_desc
 
 # Create global logger so we can write debug messages from any function (if debug mode setting is enabled in settings).
 logger = logging.getLogger("securecrt")
@@ -64,7 +64,10 @@ def script_main(script):
     if not device_list:
         return
 
+    check_mode = True
+    # #########################################  START CHECK MODE SECTION  ###########################################
     # Ask if this should be a test run (generate configs only) or full run (push updates to devices)
+    # Comment out or remove the entire CHECK MODE SECTION if you don't want to prompt for check mode
     check_mode_message = "Do you want to run this script in check mode? (Only generate configs)\n" \
                          "\n" \
                          "Yes = Connect to device and write change scripts to a file ONLY\n" \
@@ -73,17 +76,27 @@ def script_main(script):
     logger.debug("Prompting the user to run in check mode.")
     result = script.message_box(check_mode_message, "Run in Check Mode?", message_box_design)
     if result == IDYES:
+        logger.debug("<M_SCRIPT> Received 'True' for Check Mode.")
         check_mode = True
     elif result == IDNO:
+        logger.debug("<M_SCRIPT> Received 'False' for Check Mode.")
         check_mode = False
     else:
         return
+    # ##########################################  END CHECK MODE SECTION  ############################################
 
-    # Check if we need a jumpbox
+    jumpbox = None
+    # ##########################################  START JUMP BOX SECTION  ############################################
+    # Check if we need to use a jump box, and if so, prompt for the required values.
+    # Delete/Comment out the entire JUMP BOX SECTION if you don't want to prompt for a jump box
     jump_connected = False
+    j_username = None
+    j_password = None
+    j_ending = None
     need_jumpbox = script.message_box("Are these devices access through a jump box?", "Jump Box?",
-                                      options=ICON_QUESTION|BUTTON_YESNO)
+                                      options=ICON_QUESTION | BUTTON_YESNO)
     if need_jumpbox == IDYES:
+        logger.debug("<M_SCRIPT> User selected to use a jump box.  Prompting for information.")
         jumpbox = script.prompt_window("Enter the Hostname of IP of the jump box.")
         if jumpbox:
             j_username = script.prompt_window("Enter the USERNAME for {}".format(jumpbox))
@@ -95,9 +108,12 @@ def script_main(script):
                         script.connect_ssh(jumpbox, j_username, j_password, prompt_endings=[j_ending])
                         jump_connected = True
 
-    # Create a filename to keep track of our connection logs, if we have failures.
-    connect_log = script.create_output_filename("m_update_interface_desc-LOG", include_hostname=False)
+    # ############################################  END JUMP BOX SECTION  ############################################
 
+    # Create a filename to keep track of our connection logs, if we have failures.  Use script name without extension
+    failed_log = script.create_output_filename("{}-LOG".format(script_name.split(".")[0]), include_hostname=False)
+
+    # ########################################  START DEVICE CONNECT LOOP  ###########################################
     for device in device_list:
         hostname = device['hostname']
         protocol = device['protocol']
@@ -105,35 +121,63 @@ def script_main(script):
         password = device['password']
         enable = device['enable']
 
-        if jump_connected:
+        if jumpbox:
             if "ssh" in protocol.lower():
                 try:
+                    if not jump_connected:
+                        script.connect_ssh(jumpbox, j_username, j_password, prompt_endings=[j_ending])
+                        jump_connected = True
                     script.ssh_via_jump(hostname, username, password)
-                    update_interface(script, prompt_checkmode=False, check_mode=check_mode, enable_pass=enable)
+                    per_device_work(script, check_mode, enable)
                     script.disconnect_via_jump()
                 except (script_types.ConnectError, script_types.InteractionError) as e:
                     error_msg = e.message
-                    with open(connect_log, 'a') as logfile:
+                    with open(failed_log, 'a') as logfile:
                         logfile.write("Connect to {} failed: {}\n".format(hostname, error_msg))
+                    script.disconnect()
+                    jump_connected = False
             elif protocol.lower() == "telnet":
                 try:
+                    if not jump_connected:
+                        script.connect_ssh(jumpbox, j_username, j_password, prompt_endings=[j_ending])
+                        jump_connected = True
                     script.telnet_via_jump(hostname, username, password)
-                    update_interface(script, prompt_checkmode=False, check_mode=check_mode, enable_pass=enable)
+                    per_device_work(script, check_mode, enable)
                     script.disconnect_via_jump()
                 except (script_types.ConnectError, script_types.InteractionError) as e:
-                    with open(connect_log, 'a') as logfile:
+                    with open(failed_log, 'a') as logfile:
                         logfile.write("Connect to {} failed: {}\n".format(hostname, e.message))
+                    script.disconnect()
+                    jump_connected = False
         else:
             try:
                 script.connect(hostname, username, password, protocol=protocol)
-                update_interface(script, prompt_checkmode=False, check_mode=check_mode, enable_pass=enable)
+                per_device_work(script, check_mode, enable)
                 script.disconnect()
             except script_types.ConnectError as e:
-                with open(connect_log, 'a') as logfile:
+                with open(failed_log, 'a') as logfile:
                     logfile.write("Connect to {} failed: {}\n".format(hostname, e.message))
             except script_types.InteractionError as e:
-                with open(connect_log, 'a') as logfile:
+                with open(failed_log, 'a') as logfile:
                     logfile.write("Failure on {}: {}\n".format(hostname, e.message))
+
+    # If we are still connected to our jump box, disconnect.
+    if jump_connected:
+        script.disconnect()
+
+    # #########################################  END DEVICE CONNECT LOOP  ############################################
+
+
+def per_device_work(script, check_mode, enable_pass):
+    """
+    This function just recycles the same code from the single-device version of the "update_interface_desc" script.
+    It only passes in the parameters required to direct the script how to perform without prompting the user on every
+    connection.
+
+    This function was imported in the "imports" section at the top of this file with a different name to avoid naming
+    conflicts
+    """
+    s_update_interface_desc.script_main(script, prompt_checkmode=False, check_mode=check_mode, enable_pass=enable_pass)
 
 
 # ################################################  SCRIPT LAUNCH   ###################################################
