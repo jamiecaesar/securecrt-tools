@@ -139,19 +139,22 @@ def script_main(script, prompt_checkmode=True, check_mode=True, enable_pass=None
                 # If there are 2 neighbors, assume a vPC and label appropriately
                 if len(neigh_list) == 2:
                     neigh_list = sorted(neigh_list, key=utilities.human_sort_key)
-                    new_desc = "vPC from {}, {}".format(neigh_list[0], neigh_list[1])
+                    new_desc = "vPC: {}, {}".format(neigh_list[0], neigh_list[1])
                 # Only update description if we will be making a change
                 if new_desc != existing_desc:
                     config_commands.append("interface {}".format(interface))
                     config_commands.append(" description {}".format(new_desc))
                     rollback.append("interface {}".format(interface))
-                    rollback.append(" description {}".format(existing_desc))
+                    if not existing_desc:
+                        rollback.append(" no description")
+                    else:
+                        rollback.append(" description {}".format(existing_desc))
 
         # For other interfaces, use remote hostname and interface
         else:
             remote_host = description_data[interface][0]
             remote_intf = utilities.short_int_name(description_data[interface][1])
-            new_desc = "{}, {}".format(remote_host, remote_intf)
+            new_desc = "{} {}".format(remote_host, remote_intf)
             # Only update description if we will be making a change
             if new_desc != existing_desc:
                 config_commands.append("interface {}".format(interface))
