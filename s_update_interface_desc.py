@@ -157,7 +157,10 @@ def script_main(script, prompt_checkmode=True, check_mode=True, enable_pass=None
                 config_commands.append("interface {}".format(interface))
                 config_commands.append(" description {}".format(new_desc))
                 rollback.append("interface {}".format(interface))
-                rollback.append(" description {}".format(existing_desc))
+                if not existing_desc:
+                    rollback.append(" no description")
+                else:
+                    rollback.append(" description {}".format(existing_desc))
 
     # If in check-mode, generate configuration and write it to a file, otherwise push the config to the device.
     if config_commands:
