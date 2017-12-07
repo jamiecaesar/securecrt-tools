@@ -96,8 +96,9 @@ def script_main(script, prompt_checkmode=True, check_mode=True, enable_pass=None
 
     # Since "System Name" is a newer NXOS feature -- try to extract it from the device ID when its empty.
     for entry in fsm_results:
-        # entry[2] is system name, entry[1] is device ID
-        if entry[2] == "":
+        # entry[2] is system name, entry[1] is device ID. Localhost is a corner case for ESX hosts, where DNS name is
+        # in DeviceID, but localhost is in System Name
+        if entry[2] == "" or entry[2] == "localhost":
             entry[2] = utilities.extract_system_name(entry[1], strip_list=strip_list)
 
     # Get Remote name, local and remote interface info to build descriptions.
