@@ -79,9 +79,11 @@ def script_main(script, prompt_checkmode=True, check_mode=True, enable_pass=None
         elif result == IDNO:
             check_mode = False
         else:
+            script.end_cisco_session()
             return
 
     # Get existing descriptions, so we don't push commands that would not change the description.
+    # TODO mgmt0 isn't always listed in 'show int desc'.  Perhaps parse from show-run?
     ex_desc_lookup = get_desc_table(script)
 
     # Get CDP Data
@@ -108,12 +110,12 @@ def script_main(script, prompt_checkmode=True, check_mode=True, enable_pass=None
     if script.os == "NXOS":
         raw_pc_output = script.get_command_output("show port-channel summary")
         pc_template = script.get_template("cisco_nxos_show_portchannel_summary.template")
-        pc_table = utilities.textfsm_parse_to_list(raw_pc_output, pc_template, add_header=True)
+        pc_table = utilities.textfsm_parse_to_list(raw_pc_output, pc_template, add_header=False)
         add_port_channels(description_data, pc_table)
     else:
         raw_pc_output = script.get_command_output("show etherchannel summary")
         pc_template = script.get_template("cisco_ios_show_etherchannel_summary.template")
-        pc_table = utilities.textfsm_parse_to_list(raw_pc_output, pc_template, add_header=True)
+        pc_table = utilities.textfsm_parse_to_list(raw_pc_output, pc_template, add_header=False)
         add_port_channels(description_data, pc_table)
 
     # Create a list to append configuration commands and rollback commands
@@ -132,7 +134,7 @@ def script_main(script, prompt_checkmode=True, check_mode=True, enable_pass=None
             existing_desc = ""
 
         # If a port-channel only use hostname in description
-        if "Po" in interface:
+        if "port-channel" in interface.lower():
                 neigh_list = description_data[interface]
                 # If there is only 1 neighbor, use that
                 if len(neigh_list) == 1:
@@ -254,7 +256,7 @@ def add_port_channels(desc_data, pc_data):
     :type: pc_data:
     """
     for entry in pc_data:
-        po_name = entry[0]
+        po_name = utilities.long_int_name(entry[0])
         intf_list = entry[4]
         neighbor_set = set()
 
@@ -302,8 +304,10 @@ def get_desc_table(script):
 if __name__ == "__builtin__":
     crt_script = script_types.CRTScript(crt)
     script_main(crt_script)
+    logging.shutdown()
 
 # If the script is being run directly, use the simulation class
 elif __name__ == "__main__":
     direct_script = script_types.DirectScript(os.path.realpath(__file__))
     script_main(direct_script)
+    logging.shutdown()
