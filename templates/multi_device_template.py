@@ -14,7 +14,8 @@ else:
     script_dir, script_name = os.path.split(os.path.realpath(__file__))
 
 # Now we can import our custom modules
-from securecrt_tools import script_types
+from securecrt_tools import scripts
+from securecrt_tools import sessions
 from securecrt_tools import utilities
 # Import message box constants names for use specifying the design of message boxes
 from securecrt_tools.message_box_const import *
@@ -37,17 +38,19 @@ def script_main(script):
 
     :param script: A subclass of the sessions.Session object that represents this particular script session (either
                     SecureCRTSession or DirectSession)
-    :type script: script_types.Script
+    :type script: scripts.Script
     """
     # Create logger instance so we can write debug messages (if debug mode setting is enabled in settings).
     logger = logging.getLogger("securecrt")
     logger.debug("Starting execution of {}".format(script_name))
 
+    session = script.get_script_tab()
+
     # If this is launched on an active tab, disconnect before continuing.
     logger.debug("<M_SCRIPT> Checking if current tab is connected.")
-    if script.is_connected():
+    if session.is_connected():
         logger.debug("<M_SCRIPT> Existing tab connected.  Stopping execution.")
-        raise script_types.SecureCRTToolsError("This script must be launched in a not-connected tab.")
+        raise scripts.ScriptError("This script must be launched in a not-connected tab.")
 
     # Load a device list
     device_list = script.import_device_list()
@@ -95,15 +98,16 @@ def script_main(script):
                 if j_password:
                     j_ending = script.prompt_window("Enter the last character of the jumpbox CLI prompt")
                     if j_ending:
-                        script.connect_ssh(jumpbox, j_username, j_password, prompt_endings=[j_ending])
+                        session.connect_ssh(jumpbox, j_username, j_password, prompt_endings=[j_ending])
                         jump_connected = True
 
     # #############################################  END JUMP BOX SECTION  #############################################
 
     # Create a filename to keep track of our connection logs, if we have failures.  Use script name without extension
-    failed_log = script.create_output_filename("{}-LOG".format(script_name.split(".")[0]), include_hostname=False)
+    failed_log = session.create_output_filename("{}-LOG".format(script_name.split(".")[0]), include_hostname=False)
 
     # #########################################  START DEVICE CONNECT LOOP  ############################################
+
     for device in device_list:
         hostname = device['hostname']
         protocol = device['protocol']
@@ -115,50 +119,50 @@ def script_main(script):
             if "ssh" in protocol.lower():
                 try:
                     if not jump_connected:
-                        script.connect_ssh(jumpbox, j_username, j_password, prompt_endings=[j_ending])
+                        session.connect_ssh(jumpbox, j_username, j_password, prompt_endings=[j_ending])
                         jump_connected = True
-                    script.ssh_via_jump(hostname, username, password)
-                    per_device_work(script, check_mode, enable)
-                    script.disconnect_via_jump()
-                except (script_types.ConnectError, script_types.InteractionError) as e:
+                    session.ssh_via_jump(hostname, username, password)
+                    per_device_work(session, check_mode, enable)
+                    session.disconnect_via_jump()
+                except (sessions.ConnectError, sessions.InteractionError) as e:
                     error_msg = e.message
                     with open(failed_log, 'a') as logfile:
                         logfile.write("Connect to {} failed: {}\n".format(hostname, error_msg))
-                    script.disconnect()
+                    session.disconnect()
                     jump_connected = False
             elif protocol.lower() == "telnet":
                 try:
                     if not jump_connected:
-                        script.connect_ssh(jumpbox, j_username, j_password, prompt_endings=[j_ending])
+                        session.connect_ssh(jumpbox, j_username, j_password, prompt_endings=[j_ending])
                         jump_connected = True
-                    script.telnet_via_jump(hostname, username, password)
-                    per_device_work(script, check_mode, enable)
-                    script.disconnect_via_jump()
-                except (script_types.ConnectError, script_types.InteractionError) as e:
+                    session.telnet_via_jump(hostname, username, password)
+                    per_device_work(session, check_mode, enable)
+                    session.disconnect_via_jump()
+                except (sessions.ConnectError, sessions.InteractionError) as e:
                     with open(failed_log, 'a') as logfile:
                         logfile.write("Connect to {} failed: {}\n".format(hostname, e.message))
-                    script.disconnect()
+                    session.disconnect()
                     jump_connected = False
         else:
             try:
-                script.connect(hostname, username, password, protocol=protocol)
-                per_device_work(script, check_mode, enable)
-                script.disconnect()
-            except script_types.ConnectError as e:
+                session.connect(hostname, username, password, protocol=protocol)
+                per_device_work(session, check_mode, enable)
+                session.disconnect()
+            except sessions.ConnectError as e:
                 with open(failed_log, 'a') as logfile:
                     logfile.write("Connect to {} failed: {}\n".format(hostname, e.message))
-            except script_types.InteractionError as e:
+            except sessions.InteractionError as e:
                 with open(failed_log, 'a') as logfile:
                     logfile.write("Failure on {}: {}\n".format(hostname, e.message))
 
     # If we are still connected to our jump box, disconnect.
     if jump_connected:
-        script.disconnect()
+        session.disconnect()
 
     # ##########################################  END DEVICE CONNECT LOOP  #############################################
 
 
-def per_device_work(script, check_mode, enable_pass):
+def per_device_work(session, check_mode, enable_pass):
     """
     This function should contain the logic that should be executed on each device.  It receives the values from
     prompting the user in the main script logic (check mode and enable password), and is called on every device that is
@@ -168,21 +172,23 @@ def per_device_work(script, check_mode, enable_pass):
     interact with the device.  Opening and closing the connection is handled as the main script loops through devices
     in the list.  In general, that means it should start with "start_cisco_session()" and end with "end_cisco_session()"
     """
-    script.start_cisco_session()
+    session.start_cisco_session()
     #
     # Your Code Here
     #
-    script.end_cisco_session()
+    session.end_cisco_session()
 
 
 # ################################################  SCRIPT LAUNCH   ###################################################
 
 # If this script is run from SecureCRT directly, use the SecureCRT specific class
 if __name__ == "__builtin__":
-    crt_script = script_types.CRTScript(crt)
+    crt_script = scripts.SecureCRTScript(crt)
     script_main(crt_script)
+    logging.shutdown()
 
 # If the script is being run directly, use the simulation class
 elif __name__ == "__main__":
-    direct_script = script_types.DirectScript(os.path.realpath(__file__))
+    direct_script = scripts.DirectScript(os.path.realpath(__file__))
     script_main(direct_script)
+    logging.shutdown()

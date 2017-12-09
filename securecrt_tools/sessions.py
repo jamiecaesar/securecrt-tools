@@ -1,41 +1,37 @@
 """
-This module includes a collection of "session" objects that represent a SecureCRT scripting session.  These classes are
-intended as a wrapper around the SecureCRT Python API to simplify common tasks that are performed against network
-devices such as routers and switches.
+This module includes a collection of "session" objects that represent a SecureCRT session.  These classes are intended
+as a wrapper around the SecureCRT Python API to simplify common tasks that are performed against network devices such
+as routers and switches.
 
 The base class is named "Session" is the parent for more specific session types and includes all methods that must be
 implemented by all sub-classes.
 
-The primary subclass is named "CRTSession" which is specific to interacting with the Python API for SecureCRT.
+The primary subclass is called "CRTSession" which is specific to interacting with the Python API for SecureCRT.
 Whenever a script is launched from SecureCRT, this class should be used to interact with SecureCRT.
 
-A second subclass called "DirectSession" is used to run scripts outside of SecureCRT, such as in an IDE.  The class has
-the same API as CRTSession so that no modifications are needed to run a script directly.  This is useful for debugging
-because you can run your script using IDE (e.g. PyCharm, Eclipse, Spyder) debugging tools while simulating the logic of
-your script.
+A second subclass called "DirectSession" is used to run scripts outside of SecureCRT, such as in an IDE.  This is useful
+for debugging because you can run your script along with the IDE debugging tools while simulating the interactions with
+SecureCRT.  The class has the same API as CRTSession so that no modifications are needed to run a script directly.  For
+example, while a CRTSession may directly pull input from a device before processing it, if the script is launched from
+an IDE, the DirectSession object will instead prompt for a filename containing the same output that would be been
+received from the remote device.  The script can then be debugged step-by-step to help the programmer better understand
+where their logic is having trouble with a particular output.
 
-For example, when if the "get_command_output()" method is called when executing under SecureCRT, the script will issue
-the command to the remote device and save the output to a variable.  When that method is called while running directly,
-the user will be prompted in the console window to supply a file location for that output.  The script will read the
-file and save that output to a variable.  The logic of parsing that output is much easier to troubleshoot outside of
-SecureCRT, and once the code is working working locally it should also run fine within SecureCRT.
 """
 
 import os
 import sys
 import logging
 import time
-import csv
-import datetime
 import re
 from abc import ABCMeta, abstractmethod
-from settings import SettingsImporter
+import scripts
 from message_box_const import *
-
 
 # ################################################    EXCEPTIONS     ###################################################
 
-class SecureCRTToolsError(Exception):
+
+class ToolsError(Exception):
     """
     An exception type that is raised when there is a problem with the tools scripts, such as missing settings files.
     """
@@ -63,10 +59,10 @@ class UnsupportedOSError(Exception):
     pass
 
 
-# ################################################    SCRIPT TYPES    ##################################################
+# ##############################################    SESSION TYPES     ##################################################
 
 
-class Script:
+class Session:
     """
     This is a base class for the other Session types.  This class simply exists to enforce the required methods any
     sub-classes have to implement.  There are also a couple methods that are common to all sessions so they are defined
@@ -74,89 +70,15 @@ class Script:
     """
     __metaclass__ = ABCMeta
 
-    def __init__(self, script_path):
-        # Initialize session variables
-        self.script_dir, self.script_name = os.path.split(script_path)
+    def __init__(self):
+        self.script = None
         self.os = None
         self.prompt = None
         self.prompt_stack = []
         self.hostname = None
         self.term_len = None
         self.term_width = None
-        self.logger = logging
-
-        # Load Settings
-        settings_file = os.path.join(self.script_dir, "settings", "settings.ini")
-        try:
-            self.settings = SettingsImporter(settings_file)
-        except IOError:
-            error_str = "A settings file at {} does not exist.  Do you want to create it?".format(settings_file)
-            result = self.message_box(error_str, "Missing Settings File", ICON_QUESTION | BUTTON_YESNO)
-            if result == IDYES:
-                self.settings = SettingsImporter(settings_file, create=True)
-            else:
-                raise SecureCRTToolsError("Settings file not found")
-
-        # Extract and store "save path" for future reference by scripts.
-        output_dir = self.settings.get("Global", "output_dir")
-        exp_output_dir = os.path.expandvars(os.path.expanduser(output_dir))
-        if os.path.isabs(exp_output_dir):
-            self.output_dir = os.path.realpath(exp_output_dir)
-        else:
-            full_path = os.path.join(self.script_dir, exp_output_dir)
-            self.output_dir = os.path.realpath(full_path)
-        self.validate_dir(self.output_dir)
-
-        # Save date and time of launch to use in file names
-        now = datetime.datetime.now()
-        date_format = self.settings.get("Global", "date_format")
-        self.datetime = now.strftime(date_format)
-        self.logger.debug("<INIT> Saved script launch time as: {}".format(self.datetime))
-
-        # Check if Debug Mode is enabled.
-        if self.settings.getboolean("Global", "debug_mode"):
-            self.debug_dir = os.path.join(self.output_dir, "debugs")
-            self.validate_dir(self.debug_dir)
-            log_file = os.path.join(self.debug_dir, self.script_name.replace(".py", "-debug.txt"))
-            self.logger = logging.getLogger("securecrt")
-            self.logger.propagate = False
-            self.logger.setLevel(logging.DEBUG)
-            formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S')
-            fh = logging.FileHandler(log_file, mode='w')
-            fh.setFormatter(formatter)
-            self.logger.addHandler(fh)
-            self.logger.debug("<INIT> Starting Logging. Running Python version: {0}".format(sys.version))
-
-    def validate_dir(self, path):
-        """
-        Verifies that the path to the supplied directory exists.  If not, prompt the user to create it.
-
-        :param path: A directory path (not including filename) to be validated
-        :type path: str
-        """
-
-        self.logger.debug("<VALIDATE_PATH> Starting validation of path: {0}".format(path))
-
-        # Verify that base_path is valid absolute path, or else error and exit.
-        if not os.path.isabs(path):
-            self.logger.debug("<VALIDATE_PATH> Supplied path is not an absolute path. Raising exception".format(path))
-            error_str = 'Directory {} is invalid.'.format(path)
-            raise IOError(error_str)
-
-        # Check if directory exists.  If not, prompt to create it.
-        if not os.path.exists(os.path.normpath(path)):
-            self.logger.debug("<VALIDATE_PATH> Supplied directory path does not exist. Prompting User.")
-            message_str = "The path: '{}' does not exist.  Do you want to create it?.".format(path)
-            result = self.message_box(message_str, "Create Directory?", ICON_QUESTION | BUTTON_YESNO | DEFBUTTON2)
-
-            if result == IDYES:
-                self.logger.debug("<VALIDATE_PATH> User chose to create directory.".format(path))
-                os.makedirs(path)
-            else:
-                self.logger.debug("<VALIDATE_PATH> User chose NOT to create directory.  Raising exception")
-                error_str = 'Required directory {} does not exist.'.format(path)
-                raise IOError(error_str)
-        self.logger.debug("<VALIDATE_PATH> Path is Valid.")
+        self.logger = logging.getLogger("securecrt")
 
     def create_output_filename(self, desc, ext=".txt", include_hostname=True, include_date=True, base_dir=None):
         """
@@ -182,7 +104,7 @@ class Script:
         if base_dir:
             save_path = os.path.realpath(base_dir)
         else:
-            save_path = self.output_dir
+            save_path = self.script.output_dir
 
         self.logger.debug("<CREATE_FILENAME> Save Location: {0}".format(save_path))
 
@@ -204,7 +126,7 @@ class Script:
 
         if include_date:
             # Get the current date in the format supplied in date_format
-            my_date = self.datetime
+            my_date = self.script.datetime
         else:
             self.logger.debug("<CREATE_FILENAME> Not including date.")
             my_date = ""
@@ -223,240 +145,6 @@ class Script:
 
         return file_path
 
-    def get_template(self, name):
-        """
-        Retrieve the full path to a TextFSM template file.
-
-        :param name: Filename of the template
-        :type name: str
-
-        :return: Full path to the template location
-        :rtype: str
-        """
-        path = os.path.abspath(os.path.join(self.script_dir, "textfsm-templates", name))
-        if os.path.isfile(path):
-            return path
-        else:
-            raise IOError("The template name {} does not exist.")
-
-    def import_device_list(self):
-        """
-        This function will prompt for a device list CSV file to import, returns a list containing all of the
-        devices that were in the CSV file and their associated credentials.  The CSV file must be of the format, and
-        include a header row of ['Hostname', 'Protocol', 'Username', 'Password', 'Enable', 'Via-Jumpbox'].  An example
-        device list CSV file is at 'template/sample_device_list.csv'
-
-        Some additional information about missing items from a line in the CSV:
-        - If the hostname field is missing, the line will be skipped.
-        - If the protocol field is empty, the script will try SSH2, then SSH1, then Telnet.
-        - If the username is missing, this method will prompt the user for a default usernaem to use
-        - If the password is missing, will prompt the user for a password for each username missing a password
-        - If the enable password is missing, the method will ask the user if they want to set a default enable to use
-        - If the IP is included then the device will be reached through the jumpbox, otherwise connect directly.
-
-        :return: A list where each entry is a dictionary representing a device and the associated login information.
-        :rtype: list of dict
-        """
-        # Get the filename of the device list CSV file.
-        self.logger.debug("<IMPORT_DEVICES> Prompting for input CSV file.")
-        device_list_filename = ""
-        device_list_filename = self.file_open_dialog("Please select a device list CSV file.", "Open",
-                                                     device_list_filename, "CSV Files (*.csv)|*.csv||")
-        if device_list_filename == "":
-            self.logger.debug("<IMPORT_DEVICES> No filename received from dialog window.  Exiting.")
-            return
-
-        self.logger.debug("<IMPORT_DEVICES> Starting processing of device CSV file.")
-        # Track how many lines of the CSV are skipped.
-        skipped_lines = 0
-
-        # The username that will be used when one isn't given in the CSV.  This will be prompted for when an empty
-        # username field is found.
-        default_username = None
-        credentials = {}
-        no_password = set()
-        no_enable = False
-        temp_device_list = []
-
-        # Extract the list of devices into a data structure we can use (and fill in any gaps needed).
-        with open(device_list_filename, 'r') as device_file:
-            device_csv = csv.reader(device_file)
-
-            # Get header line and validate it is correct.
-            header = next(device_csv, None)
-            if header != ['Hostname', 'Protocol', 'Username', 'Password', 'Enable']:
-                raise SecureCRTToolsError("CSV file does not have a valid header row.")
-
-            # Loop through all lines of the CSV, and decide if any information is missing.
-            for line in device_csv:
-                hostname = line[0].strip()
-                protocol = line[1].strip()
-                username = line[2].strip()
-                password = line[3].strip()
-                enable = line[4].strip()
-
-                if not hostname:
-                    self.logger.debug("<IMPORT_DEVICES> Skipping CSV line {} because no hostname exists.".format(line))
-                    skipped_lines += 1
-                    continue
-
-                if protocol.lower() not in ['', 'ssh', 'ssh1', 'ssh2', 'telnet']:
-                    self.logger.debug("<IMPORT_DEVICES> Skipping CSV line {} because no valid protocol.".format(line))
-                    skipped_lines += 1
-                    continue
-
-                if not username:
-                    if default_username:
-                        username = default_username
-                        self.logger.debug("<IMPORT_DEVICES> Using default username '{}', for host {}."
-                                          .format(default_username, hostname))
-                    else:
-                        self.logger.debug("<IMPORT_DEVICES> Didn't find username for host '{}'.  Prompting for DEFAULT."
-                                          .format(hostname))
-                        default_username = self.prompt_window("Enter the DEFAULT USERNAME to use.")
-                        if default_username == '':
-                            self.logger.debug("<IMPORT_DEVICES> Default username not provided.  Stopping".format(line))
-                            error = "Found hosts without usernames and no default username provided."
-                            raise SecureCRTToolsError(error)
-                        else:
-                            self.logger.debug("<IMPORT_DEVICES> Using default username '{}', for host {}."
-                                              .format(default_username, hostname))
-                            username = default_username
-
-                if not password:
-                    no_password.add(username)
-
-                if not enable:
-                    no_enable = True
-
-                temp_device_list.append([hostname, protocol, username, password, enable])
-
-        # Prompt for missing information
-        for username in no_password:
-            self.logger.debug("<IMPORT_DEVICES> Prompting for password for username '{}'".format(username))
-            password = self.prompt_window("Enter the password for {}".format(username), hide_input=True)
-            credentials[username] = password
-
-        default_enable = None
-        if no_enable:
-            self.logger.debug("<IMPORT_DEVICES> Devices without enable passwords found.  Prompting fopr password.")
-            enable_msg = "Devices were found without enable passwords listed.  Do you want to enter an enable password?"
-            result = self.message_box(enable_msg, "No Enable PW", BUTTON_YESNO | ICON_QUESTION)
-            if result == IDYES:
-                default_enable = self.prompt_window("Enter default ENABLE password", "Enter Enable", hide_input=True)
-
-        device_list = []
-        # Make second run through device_list filling in the missing values, and create dictionary
-        for line in temp_device_list:
-            # Create a dict with all the information for this host
-            dev_info = {'hostname': line[0], 'protocol': line[1]}
-
-            # Fill in user information
-            username = line[2]
-            if username:
-                dev_info['username'] = username
-            else:
-                dev_info['username'] = default_username
-
-            # Fill in password information
-            password = line[3]
-            if not password:
-                try:
-                    dev_info['password'] = credentials[username]
-                except KeyError:
-                    self.logger.debug("<IMPORT_DEVICES> Skipping {}.  No password for user.".format(line[0]))
-                    skipped_lines += 1
-                    continue
-
-            # Fill in enable information
-            enable = line[4]
-            if not enable and default_enable:
-                enable = default_enable
-            dev_info['enable'] = enable
-
-            # Add this device to our dictionary:
-            device_list.append(dev_info)
-
-        # Give stats on how many devices were found and prompt user before going forward with connections.
-        validate_message = "{} devices found in CSV.\n" \
-                           "{} lines in CSV skipped.\n" \
-                           "\n" \
-                           "Do you want to proceed?".format(len(temp_device_list), skipped_lines)
-        message_box_design = ICON_QUESTION | BUTTON_CANCEL | DEFBUTTON2
-        self.logger.debug("<IMPORT_DEVICES> Prompting the user to continue with updates.")
-        result = self.message_box(validate_message, "Ready to Start?", message_box_design)
-
-        # IF user cancels, end program.
-        if result == IDCANCEL:
-            self.logger.debug("<IMPORT_DEVICES> User chose to cancel the script.")
-            return
-
-        return device_list
-
-    @abstractmethod
-    def message_box(self, message, title="", options=0):
-        """
-        Prints a message for the user.  In SecureCRT, the message is displayed in a pop-up message box.  When used in a
-        DirectSession, the message is printed to the console and the user is prompted to type the button that would be
-        selected.
-
-        This window can be customized by setting the "options" value, using the constants listed at the top of the
-        sessions.py file.  One constant from each of the 3 categories can be OR'd (|) together to make a single option
-        value that will format the message box.
-
-        :param message: The message to send to the user
-        :type message: str
-        :param title: Title for the message box
-        :type title: str
-        :param options: Sets the display format of the messagebox. (See Message Box constants in sessions.py)
-        :type options: int
-
-        :return: The return code that identifies which button the user pressed. (See Message Box constants)
-        :rtype: int
-        """
-        pass
-
-    @abstractmethod
-    def prompt_window(self, message, title="", hide_input=False):
-        """
-        Prompts the user for an input value.  In SecureCRT this will open a pop-up window where the user can input the
-        requested information.  In a direct session, the user will be prompted at the console for input.
-
-        The "hide_input" input will mask the input, so that passwords or other senstive information can be requested.
-
-        :param message: The message to send to the user
-        :type message: str
-        :param title: Title for the prompt window
-        :type title: str
-        :param hide_input: Specifies whether to hide the user input or not.  Default is False.
-        :type hide_input: bool
-
-        :return: The value entered by the user
-        :rtype: str
-        """
-        pass
-
-    @abstractmethod
-    def file_open_dialog(self, title, button_label="Open", default_filename="", file_filter=""):
-        """
-        Prompts the user to select a file that will be processed by the script.  In SecureCRT this will give a pop-up
-        file selection dialog window.  For a direct session, the user will be prompted for the full path to a file.
-        See the SecureCRT built-in Help at Scripting > Script Objects Reference > Dialog Object for more details.
-
-        :param title: <String> Title for the File Open dialog window (Only displays in Windows)
-        :param button_label: <String> Label for the "Open" button
-        :param default_filename: <String> If provided a default filename, the window will open in the parent directory
-            of the file, otherwise the current working directory will be the starting directory.
-        :param file_filter: <String> Specifies a filter for what type of files can be selected.  The format is:
-            <Name of Filter> (*.<extension>)|*.<extension>||
-            For example, a filter for CSV files would be "CSV Files (*.csv)|*.csv||" or multiple filters can be used:
-            "Text Files (*.txt)|*.txt|Log File (*.log)|*.log||"
-
-        :return: The absolute path to the file that was selected
-        :rtype: str
-        """
-        pass
-
     @abstractmethod
     def is_connected(self):
         """
@@ -468,7 +156,7 @@ class Script:
         pass
 
     @abstractmethod
-    def connect_ssh(self, host, username, password, version=None, prompt_endings=("#", ">")):
+    def connect_ssh(self, host, username, password, prompt_endings=("#", ">")):
         """
         Connects to a device via the SSH protocol. By default, SSH2 will be tried first, but if it fails it will attempt
         to fall back to SSH1.
@@ -478,11 +166,8 @@ class Script:
         :param username: The username to login to the device with
         :type username: str
         :param password: The password that goes with the provided username.  If a password is not specified, the
-            user will be prompted for one.
+                         user will be prompted for one.
         :type password: str
-        :param version: The SSH version to connect with (1 or 2).  Default is None, which will try 2 first and fallback
-            to 1 if that fails.
-        :type version: int
         :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
                                Cisco devices (">" and "#"), but may need to be changed if connecting to another
                                type of device (for example "$" for some linux hosts).
@@ -596,6 +281,13 @@ class Script:
         pass
 
     @abstractmethod
+    def close(self):
+        """
+        A method to close the SecureCRT tab associated with this CRTSession.
+        """
+        pass
+
+    @abstractmethod
     def start_cisco_session(self, enable_pass=None):
         """
         Performs initial setup of the session to a Cisco device by detecting parameters (prompt, hostname, network OS,
@@ -686,43 +378,32 @@ class Script:
         """
         pass
 
-    @abstractmethod
-    def create_new_saved_session(self, session_name, ip, protocol="SSH2", folder="_imports"):
-        """
-        Creates a session object that can be opened from the Connect menu in SecureCRT.
 
-        :param session_name: The name of the session
-        :type session_name: str
-        :param ip: The IP address or hostname of the device represented by this session
-        :type ip: str
-        :param protocol: The protocol to use for this connection (TELNET, SSH1, SSH2, etc)
-        :type protocol: str
-        :param folder: The folder (starting from the configured Sessions folder) where this session should be saved.
-        :type folder: str
-        """
-        pass
-
-
-class CRTScript(Script):
+class CRTSession(Session):
     """
     This sub-class of the Session class is used to wrap the SecureCRT API to simplify writing new scripts.  This class
     includes some private methods thare are used to support the interaction with SecureCRT (these start with '__').
     """
 
-    def __init__(self, crt):
-        self.crt = crt
-        super(CRTScript, self).__init__(crt.ScriptFullName)
+    def __init__(self, script, tab, from_new_tab=False, prompt_endings=None):
+        super(CRTSession, self).__init__()
         self.logger.debug("<INIT> Starting creation of CRTSession object")
+
+        self.script = script  # type: scripts.SecureCRTScript
+        self.tab = tab
+        self.screen = tab.Screen
+        self.session = tab.Session
         self.response_timeout = 10
+        self.jump_endings = None
         self.session_set_sync = False
 
-        # Set up SecureCRT tab for interaction with the scripts
-        self.tab = self.crt.GetScriptTab().Screen
-
-        if not self.is_connected():
-            self.logger.debug("<INIT> Session not connected prior to creating object.  Skipping device setup.")
+        if from_new_tab:
+            self.logger.debug("<INIT> Received tab from ConnectInTab method.")
+            self.jump_endings = prompt_endings
+        elif not self.is_connected():
+            self.logger.debug("<INIT> Session not connected prior to creating object.")
         else:
-            self.logger.debug("<INIT> Session already connected.  Moving on.")
+            self.logger.debug("<INIT> Session already connected.")
 
     def __send(self, command):
         if self.is_connected():
@@ -753,72 +434,6 @@ class CRTScript(Script):
         else:
             return result
 
-    def message_box(self, message, title="", options=0):
-        """
-        Prints a message for the user.  In SecureCRT, the message is displayed in a pop-up message box.  When used in a
-        DirectSession, the message is printed to the console and the user is prompted to type the button that would be
-        selected.
-
-        This window can be customized by setting the "options" value, using the constants listed at the top of the
-        sessions.py file.  One constant from each of the 3 categories can be OR'd (|) together to make a single option
-        value that will format the message box.
-
-        :param message: The message to send to the user
-        :type message: str
-        :param title: Title for the message box
-        :type title: str
-        :param options: Sets the display format of the messagebox. (See Message Box constants in sessions.py)
-        :type options: int
-        :return: The return code that identifies which button the user pressed. (See Message Box constants)
-        :rtype: int
-        """
-        self.logger.debug("<MESSAGE_BOX> Creating MessageBox with: \nTitle: {}\nMessage: {}\nOptions: {}"
-                          .format(title, message, options))
-        return self.crt.Dialog.MessageBox(message, title, options)
-
-    def prompt_window(self, message, title="", hide_input=False):
-        """
-        Prompts the user for an input value.  In SecureCRT this will open a pop-up window where the user can input the
-        requested information.  In a direct session, the user will be prompted at the console for input.
-
-        The "hide_input" input will mask the input, so that passwords or other senstive information can be requested.
-
-        :param message: The message to send to the user
-        :type message: str
-        :param title: Title for the prompt window
-        :type title: str
-        :param hide_input: Specifies whether to hide the user input or not.  Default is False.
-        :type hide_input: bool
-        :return: The value entered by the user
-        :rtype: str
-        """
-        self.logger.debug("<PROMPT> Creating Prompt with message: '{}'".format(message))
-        result = self.crt.Dialog.Prompt(message, title, "", hide_input)
-        self.logger.debug("<PROMPT> Captures prompt results: '{}'".format(result))
-        return result
-
-    def file_open_dialog(self, title, button_label="Open", default_filename="", file_filter=""):
-        """
-        Prompts the user to select a file that will be processed by the script.  In SecureCRT this will give a pop-up
-        file selection dialog window.  For a direct session, the user will be prompted for the full path to a file.
-        See the SecureCRT built-in Help at Scripting > Script Objects Reference > Dialog Object for more details.
-
-        :param title: <String> Title for the File Open dialog window (Only displays in Windows)
-        :param button_label: <String> Label for the "Open" button
-        :param default_filename: <String> If provided a default filename, the window will open in the parent directory
-            of the file, otherwise the current working directory will be the starting directory.
-        :param file_filter: <String> Specifies a filter for what type of files can be selected.  The format is:
-            <Name of Filter> (*.<extension>)|*.<extension>||
-            For example, a filter for CSV files would be "CSV Files (*.csv)|*.csv||" or multiple filters can be used:
-            "Text Files (*.txt)|*.txt|Log File (*.log)|*.log||"
-
-        :return: The absolute path to the file that was selected
-        :rtype: str
-        """
-        self.logger.debug("<FILE_OPEN> Creating File Open Dialog with title: '{}'".format(title))
-        result_filename = self.crt.Dialog.FileOpenDialog(title, button_label, default_filename, file_filter)
-        return result_filename
-
     def is_connected(self):
         """
         Returns a boolean value that describes if the session is currently connected.
@@ -826,7 +441,7 @@ class CRTScript(Script):
         :return: True if the session is connected, False if not.
         :rtype: bool
         """
-        session_connected = self.crt.Session.Connected
+        session_connected = self.session.Connected
         if session_connected == 1:
             self.logger.debug("<IS_CONNECTED> Checking Connected Status.  Got: {} (True)".format(session_connected))
             return True
@@ -873,9 +488,9 @@ class CRTScript(Script):
         else:
             try:
                 self.logger.debug("<CONNECT_SSH2> Attempting Connection to: {}@{} via SSH2".format(username, host))
-                self.crt.Session.Connect(ssh2_string)
+                self.session.Connect(ssh2_string)
             except:
-                error = self.crt.GetLastErrorMessage()
+                error = self.script.crt.GetLastErrorMessage()
                 raise ConnectError(error)
 
         # Set Tab parameters to allow correct sending/receiving of data via SecureCRT
@@ -903,9 +518,9 @@ class CRTScript(Script):
         else:
             try:
                 self.logger.debug("<CONNECT_SSH1> Attempting Connection to: {}@{} via SSH1".format(username, host))
-                self.crt.Session.Connect(ssh1_string)
+                self.session.Connect(ssh1_string)
             except:
-                error = self.crt.GetLastErrorMessage()
+                error = self.script.crt.GetLastErrorMessage()
                 raise ConnectError(error)
 
         # Set Tab parameters to allow correct sending/receiving of data via SecureCRT
@@ -986,9 +601,9 @@ class CRTScript(Script):
         else:
             try:
                 self.logger.debug("<CONNECT_TELNET> Attempting Connection to: {} via TELNET".format(host))
-                self.crt.Session.Connect(telnet_string)
+                self.session.Connect(telnet_string)
             except:
-                error = self.crt.GetLastErrorMessage()
+                error = self.script.crt.GetLastErrorMessage()
                 raise ConnectError(error)
 
         # Set Tab parameters to allow correct sending/receiving of data via SecureCRT
@@ -1058,19 +673,26 @@ class CRTScript(Script):
         self.__send("{}\n".format(command))
 
         # Unset Sync and IgnoreEscape upon disconnect
-        self.tab.Synchronous = False
-        self.tab.IgnoreEscape = False
+        self.screen.Synchronous = False
+        self.screen.IgnoreEscape = False
 
         # Give a little time and check if we are disconnected.  If not, force it.
         time.sleep(0.25)
         attempts = 0
         while self.is_connected() and attempts < 10:
             self.logger.debug("<DISCONNECT> Not disconnected.  Attempting ungraceful disconnect.")
-            self.crt.Session.Disconnect()
+            self.session.Disconnect()
             time.sleep(0.1)
             attempts += 1
         if attempts >= 10:
             raise ConnectError("Unable to disconnect from session.")
+
+    def close(self):
+        """
+        A method to close the SecureCRT tab associated with this CRTSession.
+        """
+        if self.tab.Index != self.script.crt.GetScriptTab().Index:
+            self.tab.Close()
 
     def ssh_via_jump(self, host, username, password, options="-o StrictHostKeyChecking=no", prompt_endings=("#", ">")):
         """
@@ -1200,7 +822,7 @@ class CRTScript(Script):
         self.logger.debug("<START> Discovered Term Len: {}, Term Width: {}".format(self.term_len, self.term_width))
 
         # If modify_term setting is True, then prevent "--More--" prompt (length) and wrapping of lines (width)
-        if self.settings.getboolean("Global", "modify_term"):
+        if self.script.settings.getboolean("Global", "modify_term"):
             self.logger.debug("<START> Modify Term setting is set.  Sending commands to adjust terminal")
             if self.os == "IOS" or self.os == "NXOS":
                 # Send term length command and wait for prompt to return
@@ -1238,40 +860,39 @@ class CRTScript(Script):
         # If the 'tab' and 'prompt' options aren't in the session structure, then we aren't actually connected to a
         # device when this is called, and there is nothing to do.
         self.logger.debug("<END> Ending Session")
-        if self.crt:
-            if self.tab:
-                if self.prompt:
-                    if self.settings.getboolean("Global", "modify_term"):
-                        self.logger.debug("<END> Modify Term setting is set.  Sending commands to return terminal "
-                                          "to normal.")
-                        if self.os == "IOS" or self.os == "NXOS":
-                            if self.term_len:
-                                # Set term length back to saved values
-                                self.__send('term length {}\n'.format(self.term_len))
-                                self.__wait_for_string(self.prompt)
+        if self.tab:
+            if self.prompt:
+                if self.script.settings.getboolean("Global", "modify_term"):
+                    self.logger.debug("<END> Modify Term setting is set.  Sending commands to return terminal "
+                                      "to normal.")
+                    if self.os == "IOS" or self.os == "NXOS":
+                        if self.term_len:
+                            # Set term length back to saved values
+                            self.__send('term length {}\n'.format(self.term_len))
+                            self.__wait_for_string(self.prompt)
 
-                            if self.term_width:
-                                # Set term width back to saved values
-                                self.__send('term width {}\n'.format(self.term_width))
-                                self.__wait_for_string(self.prompt)
-                        elif self.os == "ASA":
-                            self.tab.Send("terminal pager {}\n".format(self.term_len))
+                        if self.term_width:
+                            # Set term width back to saved values
+                            self.__send('term width {}\n'.format(self.term_width))
+                            self.__wait_for_string(self.prompt)
+                    elif self.os == "ASA":
+                        self.tab.Send("terminal pager {}\n".format(self.term_len))
 
-                self.prompt = None
-                self.logger.debug("<END> Deleting learned Prompt.")
-                self.hostname = None
-                self.logger.debug("<END> Deleting learned Hostname.")
+            self.prompt = None
+            self.logger.debug("<END> Deleting learned Prompt.")
+            self.hostname = None
+            self.logger.debug("<END> Deleting learned Hostname.")
 
-                # Delete the detected OS
-                self.os = None
-                self.logger.debug("<END> Deleting Discovered OS.")
+            # Delete the detected OS
+            self.os = None
+            self.logger.debug("<END> Deleting Discovered OS.")
 
-                # Return SecureCRT Synchronous and IngoreEscape values back to defaults, if needed.
-                if self.session_set_sync:
-                    self.tab.Synchronous = False
-                    self.tab.IgnoreEscape = False
-                    self.session_set_sync = False
-                    self.logger.debug("<END> Unset Synchronous and IgnoreEscape")
+            # Return SecureCRT Synchronous and IgnoreEscape values back to defaults, if needed.
+            if self.session_set_sync:
+                self.tab.Synchronous = False
+                self.tab.IgnoreEscape = False
+                self.session_set_sync = False
+                self.logger.debug("<END> Unset Synchronous and IgnoreEscape")
 
     def __enter_enable(self, enable_pass, prompt=False):
         """
@@ -1284,7 +905,8 @@ class CRTScript(Script):
             self.logger.debug("<__enter_enable> Already in enable -- Moving on.")
         elif self.prompt[-1] == ">":
             if not enable_pass and prompt:
-                enable_pass = self.prompt_window("Please enter enable password.", "Enter Enable PW", hide_input=True)
+                enable_pass = self.script.prompt_window("Please enter enable password.", "Enter Enable PW",
+                                                        hide_input=True)
             if enable_pass:
                 self.logger.debug("<__enter_enable> Not in enable.  Attempting to elevate privilege.")
                 self.__send("enable\n")
@@ -1436,7 +1058,7 @@ class CRTScript(Script):
         """
         self.logger.debug("<WRITE_FILE> Call to write_output_to_file with command: {}, filename: {}"
                           .format(command, filename))
-        self.validate_dir(os.path.dirname(filename))
+        self.script.validate_dir(os.path.dirname(filename))
         self.logger.debug("<WRITE_FILE> Using filename: {0}".format(filename))
 
         # RegEx to match the whitespace and backspace commands after --More-- prompt
@@ -1489,7 +1111,7 @@ class CRTScript(Script):
 
         except IOError, err:
             error_str = "IO Error for:\n{0}\n\n{1}".format(filename, err)
-            self.message_box(error_str, "IO Error", ICON_STOP)
+            self.script.message_box(error_str, "IO Error", ICON_STOP)
 
     def get_command_output(self, command):
         """
@@ -1519,9 +1141,9 @@ class CRTScript(Script):
             result = temp_file.read()
 
         # If debug mode is enabled, save temporary file to the debug directory.
-        if self.settings.getboolean("Global", "debug_mode"):
+        if self.script.settings.getboolean("Global", "debug_mode"):
             filename = os.path.split(temp_filename)[1]
-            new_filename = os.path.join(self.debug_dir, filename)
+            new_filename = os.path.join(self.script.debug_dir, filename)
             self.logger.debug("<GET OUTPUT> Moving temp file to {0}".format(new_filename))
             os.rename(temp_filename, new_filename)
         else:
@@ -1583,37 +1205,8 @@ class CRTScript(Script):
             self.tab.Send("\n")
         self.logger.debug("<SAVE> Save results: {}".format(save_results))
 
-    def create_new_saved_session(self, session_name, ip, protocol="SSH2", folder="_imports"):
-        """
-        Creates a session object that can be opened from the Connect menu in SecureCRT.
 
-        :param session_name: The name of the session
-        :type session_name: str
-        :param ip: The IP address or hostname of the device represented by this session
-        :type ip: str
-        :param protocol: The protocol to use for this connection (TELNET, SSH1, SSH2, etc)
-        :type protocol: str
-        :param folder: The folder (starting from the configured Sessions folder) where this session should be saved.
-        :type folder: str
-        """
-        now = datetime.datetime.now()
-        creation_date = now.strftime("%A, %B %d %Y at %H:%M:%S")
-
-        # Create a session from the configured default values.
-        new_session = self.crt.OpenSessionConfiguration("Default")
-
-        # Set options based)
-        new_session.SetOption("Protocol Name", protocol)
-        new_session.SetOption("Hostname", ip)
-        desc = ["Created on {} by script:".format(creation_date), self.crt.ScriptFullName]
-        new_session.SetOption("Description", desc)
-        session_path = os.path.join(folder, session_name)
-        # Save session based on passed folder and session name.
-        self.logger.debug("<CREATE_SESSION> Creating new session '{0}'".format(session_path))
-        new_session.Save(session_path)
-
-
-class DirectScript(Script):
+class DirectSession(Session):
     """
     This class is used when the scripts are executed directly from a local Python installation instead of from
     SecureCRT.  This class is intended to simulate connectivity to remote devices by prompting the user for what would
@@ -1623,9 +1216,10 @@ class DirectScript(Script):
     outputs.
     """
 
-    def __init__(self, full_script_path):
-        super(DirectScript, self).__init__(full_script_path)
+    def __init__(self, script):
+        super(DirectSession, self).__init__()
         self.logger.debug("<INIT> Building Direct Session Object")
+        self.script = script  # type: scripts.DirectScript
 
         valid_response = ["yes", "no"]
         response = ""
@@ -1638,107 +1232,6 @@ class DirectScript(Script):
         else:
             self.logger.debug("<INIT> Assuming session is NOT already connected")
             self._connected = False
-
-    def message_box(self, message, title="", options=0):
-        """
-        Prints a message for the user.  In SecureCRT, the message is displayed in a pop-up message box.  When used in a
-        DirectSession, the message is printed to the console and the user is prompted to type the button that would be
-        selected.
-
-        This window can be customized by setting the "options" value, using the constants listed at the top of the
-        sessions.py file.  One constant from each of the 3 categories can be OR'd (|) together to make a single option
-        value that will format the message box.
-
-        :param message: The message to send to the user
-        :type message: str
-        :param title: Title for the message box
-        :type title: str
-        :param options: Sets the display format of the messagebox. (See Message Box constants in sessions.py)
-        :type options: int
-
-        :return: The return code that identifies which button the user pressed. (See Message Box constants)
-        :rtype: int
-        """
-        def get_button_layout(option):
-            # These numbers signify default buttons and icons shown.  We don't care about these when using console.
-            numbers = [512, 256, 64, 48, 32, 16]
-
-            for number in numbers:
-                if option >= number:
-                    option -= number
-
-            return option
-
-        def get_response_code(text):
-            responses = {"OK": IDOK, "Cancel": IDCANCEL, "Yes": IDYES, "No": IDNO, "Retry": IDRETRY, "Abort": IDABORT,
-                         "Ignore": IDIGNORE}
-            return responses[text]
-
-        self.logger.debug("<MESSAGEBOX> Creating Message Box, with Title: {}, Message: {}, and Options: {}"
-                          .format(title, message, options))
-        # Extract the layout paramter in the options field
-        layout = get_button_layout(options)
-        self.logger.debug("<MESSAGEBOX> Layout Value is: {}".format(layout))
-
-        # A mapping of each integer value and which buttons are shown in a MessageBox, so we can prompt for the
-        # same values from the console
-        buttons = {BUTTON_OK: ["OK"], BUTTON_CANCEL: ["OK", "Cancel"],
-                   BUTTON_ABORTRETRYIGNORE: ["Abort", "Retry", "Ignore"],
-                   BUTTON_YESNOCANCEL: ["Yes", "No", "Cancel"], BUTTON_YESNO: ["Yes", "No"],
-                   BUTTON_RETRYCANCEL: ["Retry", "Cancel"]}
-
-        print "{0}: {1}".format(message, title)
-        response = ""
-        while response not in buttons[layout]:
-            response = raw_input("Choose from {0}: ".format(buttons[layout]))
-            self.logger.debug("<MESSAGEBOX> Received: {}".format(response))
-
-        code = get_response_code(response)
-        self.logger.debug("<MESSAGEBOX> Returning Response Code: {}".format(code))
-        return code
-
-    def prompt_window(self, message, title="", hide_input=False):
-        """
-        Prompts the user for an input value.  In SecureCRT this will open a pop-up window where the user can input the
-        requested information.  In a direct session, the user will be prompted at the console for input.
-
-        The "hide_input" input will mask the input, so that passwords or other senstive information can be requested.
-
-        :param message: The message to send to the user
-        :type message: str
-        :param title: Title for the prompt window
-        :type title: str
-        :param hide_input: Specifies whether to hide the user input or not.  Default is False.
-        :type hide_input: bool
-
-        :return: The value entered by the user
-        :rtype: str
-        """
-        self.logger.debug("<PROMPT> Creating Prompt with message: '{}'".format(message))
-        result = raw_input("{}: ".format(message))
-        self.logger.debug("<PROMPT> Captures prompt results: '{}'".format(result))
-        return result
-
-    def file_open_dialog(self, title, button_label="Open", default_filename="", file_filter=""):
-        """
-        Prompts the user to select a file that will be processed by the script.  In SecureCRT this will give a pop-up
-        file selection dialog window.  For a direct session, the user will be prompted for the full path to a file.
-        See the SecureCRT built-in Help at Scripting > Script Objects Reference > Dialog Object for more details.
-
-        :param title: <String> Title for the File Open dialog window (Only displays in Windows)
-        :param button_label: <String> Label for the "Open" button
-        :param default_filename: <String> If provided a default filename, the window will open in the parent directory
-            of the file, otherwise the current working directory will be the starting directory.
-        :param file_filter: <String> Specifies a filter for what type of files can be selected.  The format is:
-            <Name of Filter> (*.<extension>)|*.<extension>||
-            For example, a filter for CSV files would be "CSV Files (*.csv)|*.csv||" or multiple filters can be used:
-            "Text Files (*.txt)|*.txt|Log File (*.log)|*.log||"
-
-        :return: The absolute path to the file that was selected
-        :rtype: str
-        """
-        result_filename = raw_input("{} (type {}): ".format(title, file_filter))
-        return result_filename
 
     def is_connected(self):
         """
@@ -1912,7 +1405,7 @@ class DirectScript(Script):
         self.term_len, self.term_width = None, None
 
         # If modify_term setting is True, then prevent "--More--" prompt (length) and wrapping of lines (width)
-        if self.settings.getboolean("Global", "modify_term"):
+        if self.script.settings.getboolean("Global", "modify_term"):
             self.logger.debug("<START> Pretending to modify term setting.")
 
     def end_cisco_session(self):
@@ -1960,7 +1453,7 @@ class DirectScript(Script):
 
         self.logger.debug("<WRITE OUTPUT> Call to write_output_to_file with command: {0}, filename: {1}"
                           .format(command, filename))
-        self.validate_dir(os.path.dirname(filename))
+        self.script.validate_dir(os.path.dirname(filename))
         self.logger.debug("<WRITE OUTPUT> Using filename: {0}".format(filename))
 
         # Write the output to the specified file
@@ -1973,7 +1466,7 @@ class DirectScript(Script):
                                                                                 .encode('ascii', 'ignore')))
         except IOError, err:
             error_str = "IO Error for:\n{0}\n\n{1}".format(filename, err)
-            self.message_box(error_str, "IO Error", ICON_STOP)
+            self.script.message_box(error_str, "IO Error", ICON_STOP)
 
     def get_command_output(self, command):
         """
@@ -1999,9 +1492,9 @@ class DirectScript(Script):
         with open(temp_filename, 'r') as temp_file:
             result = temp_file.read()
 
-        if self.settings.getboolean("Global", "debug_mode"):
+        if self.script.settings.getboolean("Global", "debug_mode"):
             filename = os.path.split(temp_filename)[1]
-            new_filename = os.path.join(self.debug_dir, filename)
+            new_filename = os.path.join(self.script.debug_dir, filename)
             self.logger.debug("<GET OUTPUT> Moving temp file to {0}".format(new_filename))
             os.rename(temp_filename, new_filename)
         else:
@@ -2050,19 +1543,3 @@ class DirectScript(Script):
         """
         self.logger.debug("<SAVE> Simulating Saving configuration on remote device.")
         print "Saved config."
-
-    def create_new_saved_session(self, session_name, ip, protocol="SSH2", folder="_imports"):
-        """
-        Creates a session object that can be opened from the Connect menu in SecureCRT.
-
-        :param session_name: The name of the session
-        :type session_name: str
-        :param ip: The IP address or hostname of the device represented by this session
-        :type ip: str
-        :param protocol: The protocol to use for this connection (TELNET, SSH1, SSH2, etc)
-        :type protocol: str
-        :param folder: The folder (starting from the configured Sessions folder) where this session should be saved.
-        :type folder: str
-        """
-        print "Pretending to save session {} with hostname: {}, protocol: {}, under folder: {}"\
-              .format(session_name, ip, protocol, folder)

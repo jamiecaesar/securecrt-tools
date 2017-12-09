@@ -14,7 +14,7 @@ else:
     script_dir, script_name = os.path.split(os.path.realpath(__file__))
 
 # Now we can import our custom modules
-from securecrt_tools import script_types
+from securecrt_tools import scripts
 from securecrt_tools import utilities
 # Import message box constants names for use specifying the design of message boxes
 from securecrt_tools.message_box_const import *
@@ -39,29 +39,30 @@ def script_main(script):
                     SecureCRTSession or DirectSession)
     :type script: script_types.Script
     """
-    # Create logger instance so we can write debug messages (if debug mode setting is enabled in settings).
-    logger = logging.getLogger("securecrt")
-    logger.debug("Starting execution of {}".format(script_name))
+    # Get session object that interacts with the SecureCRT tab from where this script was launched
+    session = script.get_script_tab()
 
     # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
-    script.start_cisco_session()
+    session.start_cisco_session()
 
     #
     # PUT YOUR CODE HERE
     #
 
     # Return terminal parameters back to the original state.
-    script.end_cisco_session()
+    session.end_cisco_session()
 
 
 # ################################################  SCRIPT LAUNCH   ###################################################
 
 # If this script is run from SecureCRT directly, use the SecureCRT specific class
 if __name__ == "__builtin__":
-    crt_script = script_types.CRTScript(crt)
+    crt_script = scripts.SecureCRTScript(crt)
     script_main(crt_script)
+    logging.shutdown()
 
 # If the script is being run directly, use the simulation class
 elif __name__ == "__main__":
-    direct_script = script_types.DirectScript(os.path.realpath(__file__))
+    direct_script = scripts.DirectScript(os.path.realpath(__file__))
     script_main(direct_script)
+    logging.shutdown()
