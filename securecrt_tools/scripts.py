@@ -13,6 +13,7 @@ import os
 import sys
 import logging
 import datetime
+import csv
 from abc import ABCMeta, abstractmethod
 import sessions
 from settings import SettingsImporter
@@ -43,7 +44,7 @@ class Script:
         # Initialize application attributes
         self.script_dir, self.script_name = os.path.split(script_path)
         self.logger = logging
-        self.script_tab = sessions.Session()
+        self.script_tab = None
 
         # Load Settings
         settings_file = os.path.join(self.script_dir, "settings", "settings.ini")
@@ -60,7 +61,7 @@ class Script:
         # Get the date and time to use in output file names
         now = datetime.datetime.now()
         date_format = self.settings.get("Global", "date_format")
-        self.launch_datetime = now.strftime(date_format)
+        self.datetime = now.strftime(date_format)
 
         # Extract and store "save path" for future reference by scripts.
         output_dir = self.settings.get("Global", "output_dir")
@@ -84,7 +85,7 @@ class Script:
             fh = logging.FileHandler(log_file, mode='w')
             fh.setFormatter(formatter)
             self.logger.addHandler(fh)
-            self.logger.debug("<INIT> Starting Logging. Running Python version: {0}".format(sys.version))
+            self.logger.debug("<SCRIPT_INIT> Starting Logging. Running Python version: {0}".format(sys.version))
 
     def get_script_tab(self):
         """
@@ -191,7 +192,7 @@ class Script:
             # Get header line and validate it is correct.
             header = next(device_csv, None)
             if header != ['Hostname', 'Protocol', 'Username', 'Password', 'Enable']:
-                raise SecureCRTToolsError("CSV file does not have a valid header row.")
+                raise ScriptError("CSV file does not have a valid header row.")
 
             # Loop through all lines of the CSV, and decide if any information is missing.
             for line in device_csv:
@@ -223,7 +224,7 @@ class Script:
                         if default_username == '':
                             self.logger.debug("<IMPORT_DEVICES> Default username not provided.  Stopping".format(line))
                             error = "Found hosts without usernames and no default username provided."
-                            raise SecureCRTToolsError(error)
+                            raise ScriptError(error)
                         else:
                             self.logger.debug("<IMPORT_DEVICES> Using default username '{}', for host {}."
                                               .format(default_username, hostname))
@@ -402,7 +403,7 @@ class Script:
         pass
 
 
-class SecureCRTScript(Script):
+class CRTScript(Script):
     """
     This sub-class of the App class is used to wrap the portion of the SecureCRT API that interacts with the main
     application.
@@ -410,8 +411,8 @@ class SecureCRTScript(Script):
 
     def __init__(self, crt):
         self.crt = crt
-        super(SecureCRTScript, self).__init__(crt.ScriptFullName)
-        self.logger.debug("<INIT> Starting creation of SecureCRT object")
+        super(CRTScript, self).__init__(crt.ScriptFullName)
+        self.logger.debug("<SCRIPT_INIT> Starting creation of CRTScript object")
 
         # Set up SecureCRT tab for interaction with the scripts
         self.script_tab = sessions.CRTSession(self, self.crt.GetScriptTab())

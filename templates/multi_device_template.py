@@ -183,7 +183,7 @@ def per_device_work(session, check_mode, enable_pass):
 
 # If this script is run from SecureCRT directly, use the SecureCRT specific class
 if __name__ == "__builtin__":
-    crt_script = scripts.SecureCRTScript(crt)
+    crt_script = scripts.CRTScript(crt)
     script_main(crt_script)
     logging.shutdown()
 

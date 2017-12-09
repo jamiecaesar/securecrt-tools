@@ -25,17 +25,9 @@ import logging
 import time
 import re
 from abc import ABCMeta, abstractmethod
-import scripts
 from message_box_const import *
 
 # ################################################    EXCEPTIONS     ###################################################
-
-
-class ToolsError(Exception):
-    """
-    An exception type that is raised when there is a problem with the tools scripts, such as missing settings files.
-    """
-    pass
 
 
 class ConnectError(Exception):
@@ -387,9 +379,9 @@ class CRTSession(Session):
 
     def __init__(self, script, tab, from_new_tab=False, prompt_endings=None):
         super(CRTSession, self).__init__()
-        self.logger.debug("<INIT> Starting creation of CRTSession object")
+        self.logger.debug("<SESSION_INIT> Starting creation of CRTSession object")
 
-        self.script = script  # type: scripts.SecureCRTScript
+        self.script = script
         self.tab = tab
         self.screen = tab.Screen
         self.session = tab.Session
@@ -398,17 +390,17 @@ class CRTSession(Session):
         self.session_set_sync = False
 
         if from_new_tab:
-            self.logger.debug("<INIT> Received tab from ConnectInTab method.")
+            self.logger.debug("<SESSION_INIT> Received tab from ConnectInTab method.")
             self.jump_endings = prompt_endings
         elif not self.is_connected():
-            self.logger.debug("<INIT> Session not connected prior to creating object.")
+            self.logger.debug("<SESSION_INIT> Session not connected prior to creating object.")
         else:
-            self.logger.debug("<INIT> Session already connected.")
+            self.logger.debug("<SESSION_INIT> Session already connected.")
 
     def __send(self, command):
         if self.is_connected():
-            self.tab.Send(command)
-            result = self.tab.WaitForString(command.strip(), self.response_timeout)
+            self.screen.Send(command)
+            result = self.screen.WaitForString(command.strip(), self.response_timeout)
             if not result:
                 self.logger.debug("<__send> Timed out waiting for '{}' from device.".format(command))
                 raise InteractionError("Timed out waiting for sent command to be echoed back to us.")
@@ -419,7 +411,7 @@ class CRTSession(Session):
             raise InteractionError("Session is not connected.  Cannot send command.")
 
     def __wait_for_string(self, wait_string):
-        result = self.tab.WaitForString(wait_string, self.response_timeout)
+        result = self.screen.WaitForString(wait_string, self.response_timeout)
         if not result:
             self.logger.debug("<__wait_for_string> Timed out waiting for '{}' from device.".format(wait_string))
             raise InteractionError("Timeout waiting for response from device.")
@@ -427,7 +419,7 @@ class CRTSession(Session):
             return result
 
     def __wait_for_strings(self, string_list):
-        result = self.tab.WaitForStrings(string_list, self.response_timeout)
+        result = self.screen.WaitForStrings(string_list, self.response_timeout)
         if not result:
             self.logger.debug("<__wait_for_strings> Timed out waiting for '{}' from device.".format(string_list))
             raise InteractionError("Timeout waiting for response from device.")
@@ -460,13 +452,13 @@ class CRTSession(Session):
         self.logger.debug("<CONN_CHECK> Started looking for following prompt endings: {}".format(endings))
         at_prompt = False
         while not at_prompt:
-            found = self.tab.WaitForStrings(endings, self.response_timeout)
+            found = self.screen.WaitForStrings(endings, self.response_timeout)
             if not found:
                 raise InteractionError("Timeout reached looking for prompt endings: {}".format(endings))
             else:
                 test_string = "!@&^"
-                self.tab.Send(test_string + "\b" * len(test_string))
-                result = self.tab.WaitForStrings(test_string, self.response_timeout)
+                self.screen.Send(test_string + "\b" * len(test_string))
+                result = self.screen.WaitForStrings(test_string, self.response_timeout)
                 if result:
                     self.logger.debug("<CONN_CHECK> At prompt.  Continuing".format(result))
                     at_prompt = True
@@ -494,8 +486,8 @@ class CRTSession(Session):
                 raise ConnectError(error)
 
         # Set Tab parameters to allow correct sending/receiving of data via SecureCRT
-        self.tab.Synchronous = True
-        self.tab.IgnoreEscape = True
+        self.screen.Synchronous = True
+        self.screen.IgnoreEscape = True
         self.logger.debug("<CONNECT_SSH2> Set Synchronous and IgnoreEscape")
 
         # Make sure banners have printed and we've reached our expected prompt.
@@ -524,8 +516,8 @@ class CRTSession(Session):
                 raise ConnectError(error)
 
         # Set Tab parameters to allow correct sending/receiving of data via SecureCRT
-        self.tab.Synchronous = True
-        self.tab.IgnoreEscape = True
+        self.screen.Synchronous = True
+        self.screen.IgnoreEscape = True
         self.logger.debug("<CONNECT_SSH1> Set Synchronous and IgnoreEscape")
 
         # Make sure banners have printed and we've reached our expected prompt.
@@ -607,15 +599,15 @@ class CRTSession(Session):
                 raise ConnectError(error)
 
         # Set Tab parameters to allow correct sending/receiving of data via SecureCRT
-        self.tab.Synchronous = True
-        self.tab.IgnoreEscape = True
+        self.screen.Synchronous = True
+        self.screen.IgnoreEscape = True
         self.logger.debug("<CONNECT_TELNET> Set Synchronous and IgnoreEscape")
 
         # Handle Login
         self.__wait_for_strings("sername")
         self.__send("{}\n".format(username))
         self.__wait_for_string("assword")
-        self.tab.Send("{}\n".format(password))
+        self.screen.Send("{}\n".format(password))
 
         # Make sure banners have printed and we've reached our expected prompt.
         self.__post_connect_check(prompt_endings)
@@ -722,7 +714,7 @@ class CRTSession(Session):
         self.__send("ssh {} {}@{}\n".format(options, username, host))
         result = self.__wait_for_strings(["assword", "refused", "denied"])
         if result == 1:
-            self.tab.Send("{}\n".format(password))
+            self.screen.Send("{}\n".format(password))
             self.__post_connect_check(prompt_endings)
             self.prompt_stack.insert(0, self.prompt)
         else:
@@ -755,7 +747,7 @@ class CRTSession(Session):
         if result == 1:
             self.__send("{}\n".format(username))
             self.__wait_for_string("assword")
-            self.tab.Send("{}\n".format(password))
+            self.screen.Send("{}\n".format(password))
             self.__post_connect_check(prompt_endings)
             self.prompt_stack.insert(0, self.prompt)
         else:
@@ -800,10 +792,10 @@ class CRTSession(Session):
         prompt_for_enable = False
         # Set Tab parameters to allow correct sending/receiving of data via SecureCRT, if manually connected session
         # (i.e. it hasn't been set yet)
-        if not self.tab.Synchronous:
+        if not self.screen.Synchronous:
             self.session_set_sync = True
-            self.tab.Synchronous = True
-            self.tab.IgnoreEscape = True
+            self.screen.Synchronous = True
+            self.screen.IgnoreEscape = True
             prompt_for_enable = True
             self.logger.debug("<START> Set Synchronous and IgnoreEscape and Prompt For Enable")
 
@@ -876,7 +868,7 @@ class CRTSession(Session):
                             self.__send('term width {}\n'.format(self.term_width))
                             self.__wait_for_string(self.prompt)
                     elif self.os == "ASA":
-                        self.tab.Send("terminal pager {}\n".format(self.term_len))
+                        self.screen.Send("terminal pager {}\n".format(self.term_len))
 
             self.prompt = None
             self.logger.debug("<END> Deleting learned Prompt.")
@@ -889,8 +881,8 @@ class CRTSession(Session):
 
             # Return SecureCRT Synchronous and IgnoreEscape values back to defaults, if needed.
             if self.session_set_sync:
-                self.tab.Synchronous = False
-                self.tab.IgnoreEscape = False
+                self.screen.Synchronous = False
+                self.screen.IgnoreEscape = False
                 self.session_set_sync = False
                 self.logger.debug("<END> Unset Synchronous and IgnoreEscape")
 
@@ -915,7 +907,7 @@ class CRTSession(Session):
                     self.logger.debug("<__enter_enable> Enable password not set.")
                     raise InteractionError("Unable to enter Enable mode. No password set.")
                 if result == 2:
-                    self.tab.Send("{}\n".format(enable_pass))
+                    self.screen.Send("{}\n".format(enable_pass))
                     self.__wait_for_string("#")
                     self.prompt = self.__get_prompt()
                 else:
@@ -939,8 +931,8 @@ class CRTSession(Session):
         while result == '' and attempts < 3:
             test_string = "\n!&%\b\b\b"
             timeout_seconds = 2
-            self.tab.Send(test_string)
-            result = self.tab.ReadString("!&%", timeout_seconds)
+            self.screen.Send(test_string)
+            result = self.screen.ReadString("!&%", timeout_seconds)
             attempts += 1
             self.logger.debug("<CONNECT> Attempt {}: Prompt result = {}".format(attempts, result))
 
@@ -1039,7 +1031,7 @@ class CRTSession(Session):
         self.__send(command.strip() + '\n')
 
         # Capture the output until we get our prompt back and write it to the file
-        result = self.tab.ReadString(self.prompt)
+        result = self.screen.ReadString(self.prompt)
 
         return result.strip('\r\n')
 
@@ -1083,9 +1075,9 @@ class CRTSession(Session):
                 # write that line to the file.  If we get our prompt back (which won't have CRLF), break the loop b/c we
                 # found the end of the output.
                 while True:
-                    nextline = self.tab.ReadString(matches, 30)
+                    nextline = self.screen.ReadString(matches, 30)
                     # If the match was the 1st index in the endings list -> \r\n
-                    if self.tab.MatchIndex == 1:
+                    if self.screen.MatchIndex == 1:
                         # Strip newlines from front and back of line.
                         nextline = nextline.strip('\r\n')
                         # If there is something left, write it.
@@ -1100,10 +1092,10 @@ class CRTSession(Session):
                             newfile.write(nextline.strip('\r\n').encode('ascii', 'ignore') + "\r\n")
                             self.logger.debug("<WRITE_FILE> Writing Line: {0}".format(nextline.strip('\r\n')
                                                                                       .encode('ascii', 'ignore')))
-                    elif self.tab.MatchIndex == 2:
+                    elif self.screen.MatchIndex == 2:
                         # If we get a --More-- send a space character
-                        self.tab.Send(" ")
-                    elif self.tab.MatchIndex == 3:
+                        self.screen.Send(" ")
+                    elif self.screen.MatchIndex == 3:
                         # We got our prompt, so break the loop
                         break
                     else:
@@ -1177,8 +1169,8 @@ class CRTSession(Session):
         command_list.insert(0, "configure terminal")
 
         for command in command_list:
-            self.tab.Send("{}\n".format(command))
-            output = self.tab.ReadString(")#", 3)
+            self.screen.Send("{}\n".format(command))
+            output = self.screen.ReadString(")#", 3)
             if output:
                 config_results += "{})#".format(output)
             else:
@@ -1186,8 +1178,8 @@ class CRTSession(Session):
                 self.logger.debug("<SEND_CMDS> {}".format(error))
                 raise InteractionError("{}".format(error))
 
-        self.tab.Send("end\n")
-        output = self.tab.ReadString(self.prompt, 2)
+        self.screen.Send("end\n")
+        output = self.screen.ReadString(self.prompt, 2)
         config_results += "{}{}".format(output, self.prompt)
 
         with open(output_filename, 'w') as output_file:
@@ -1202,7 +1194,7 @@ class CRTSession(Session):
         self.__send("{}\n".format(command))
         save_results = self.__wait_for_strings(["?", self.prompt])
         if save_results == 1:
-            self.tab.Send("\n")
+            self.screen.Send("\n")
         self.logger.debug("<SAVE> Save results: {}".format(save_results))
 
 
@@ -1219,7 +1211,7 @@ class DirectSession(Session):
     def __init__(self, script):
         super(DirectSession, self).__init__()
         self.logger.debug("<INIT> Building Direct Session Object")
-        self.script = script  # type: scripts.DirectScript
+        self.script = script
 
         valid_response = ["yes", "no"]
         response = ""
