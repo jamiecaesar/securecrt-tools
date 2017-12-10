@@ -2,13 +2,6 @@ import ConfigParser
 import os
 
 
-class InvalidSettingsError(Exception):
-    """
-    An exception that is raised when the settings file is invalid or corrupt
-    """
-    pass
-
-
 class SettingsImporter:
     """
     A class to handle validating, retrieving and updating settings as needed.
@@ -98,6 +91,21 @@ class SettingsImporter:
         :rtype: str
         """
         return self.config.get(section, setting)
+
+    def update(self, section, setting, value):
+        """
+        A wrapper function to update a setting
+
+        :param section: The section of the settings file where the setting can be found.
+        :type section: str
+        :param setting: The name of the setting we want to retrieve
+        :type setting: str
+        :param value: The value to store for this setting
+        :type value: str
+        """
+        self.config.set(section, setting, value)
+        with open(self.settings_file, 'w') as settings_updates:
+            self.config.write(settings_updates)
 
     def getboolean(self, section, setting):
         """

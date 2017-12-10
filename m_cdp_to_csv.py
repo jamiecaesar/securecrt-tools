@@ -19,6 +19,7 @@ from securecrt_tools import sessions
 from securecrt_tools import utilities
 # Import message box constants names for use specifying the design of message boxes
 from securecrt_tools.message_box_const import *
+import s_cdp_to_csv
 
 # Create global logger so we can write debug messages from any function (if debug mode setting is enabled in settings).
 logger = logging.getLogger("securecrt")
@@ -30,11 +31,12 @@ logger.debug("Starting execution of {}".format(script_name))
 def script_main(script):
     """
     | MULTIPLE device script
-    | Author: XXXXXXXX
-    | Email: XXXXXXX@domain.com
+    | Author: Jamie Caesar
+    | Email: jcaesar@presidio.com
 
-    PUT A DESCRIPTION OF THIS SCRIPT HERE.  WHAT IT DOES, ETC.
-    This script assumes it will be run against a connected device.
+    This script will grab the detailed CDP information from each Cisco IOS or NX-OS device in the provided device list
+    CSV file and export each to a CSV file containing the important information, such as Remote Device hostname, model
+    and IP information, in addition to the local and remote interfaces that connect the devices.
 
     :param script: A subclass of the scripts.Script object that represents the execution of this particular script
                    (either CRTScript or DirectScript)
@@ -168,11 +170,7 @@ def per_device_work(session, check_mode, enable_pass):
     task, it can be imported and called here, essentially making this script connect to all the devices in the chosen
     CSV file and then running a single-device script on each of them.
     """
-    session.start_cisco_session()
-    #
-    # Your Code Here
-    #
-    session.end_cisco_session()
+    s_cdp_to_csv.script_main(session.script)
 
 
 # ################################################  SCRIPT LAUNCH   ###################################################
