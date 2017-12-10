@@ -27,11 +27,12 @@ logger.debug("Starting execution of {}".format(script_name))
 def script_main(script):
     """
     | SINGLE device script
-    | Author: XXXXXXXX
-    | Email: XXXXXXX@domain.com
+    | Author: Jamie Caesar
+    | Email: jcaesar@presidio.com
 
-    PUT A DESCRIPTION OF THIS SCRIPT HERE.  WHAT IT DOES, ETC.
-    This script assumes it will be run against a connected device.
+    This script will capture the ARP table of the attached device and output the results as a CSV file.  While this
+    script can be used to capture the ARP table, the primary purpose is to create the ARP associations that the
+    "s_switchport_mapping.py" script can use to map which MAC and IP addresses are connected to each device.
 
     :param script: A subclass of the scripts.Script object that represents the execution of this particular script
                    (either CRTScript or DirectScript)
@@ -43,9 +44,41 @@ def script_main(script):
     # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
     session.start_cisco_session()
 
-    #
-    # PUT YOUR CODE HERE
-    #
+    # Validate device is running a supported OS
+    session.validate_os(["IOS", "NXOS"])
+
+    # Prompt for the VRF
+    selected_vrf = script.prompt_window("Enter the VRF name.\n(Leave blank for default VRF)")
+    if selected_vrf == "":
+        selected_vrf = None
+    logger.debug("Set VRF to '{0}'".format(selected_vrf))
+
+    # Select template file based on network OS
+    if session.os == "IOS":
+        send_cmd = "show ip arp"
+        template_file = script.get_template("cisco_ios_show_ip_arp.template")
+    else:
+        send_cmd = "show ip arp detail"
+        template_file = script.get_template("cisco_nxos_show_ip_arp_detail.template")
+
+    logger.debug("Command set to '{0}'".format(send_cmd))
+
+    # If a VRF was specified, update the commands and outputs to reflect this.
+    if selected_vrf:
+        send_cmd = send_cmd + " vrf {0}".format(selected_vrf)
+        script.hostname = script.hostname + "-VRF-{0}".format(selected_vrf)
+        logger.debug("Updated hostname to: '{0}'".format(script.hostname))
+
+    # Get "show ip arp" data
+    raw_arp = session.get_command_output(send_cmd)
+
+    # Process with TextFSM
+    logger.debug("Using template: '{0}'".format(template_file))
+    fsm_results = utilities.textfsm_parse_to_list(raw_arp, template_file, add_header=True)
+
+    # Generate filename and output data as CSV
+    output_filename = session.create_output_filename("arp", ext=".csv")
+    utilities.list_of_lists_to_csv(fsm_results, output_filename)
 
     # Return terminal parameters back to the original state.
     session.end_cisco_session()

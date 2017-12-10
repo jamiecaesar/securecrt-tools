@@ -137,6 +137,19 @@ class Session:
 
         return file_path
 
+    def validate_os(self, valid_os_list):
+        """
+        This method checks if the remote device is running an OS in a list of valid OSes passed into the method.  If
+        the OS is not in the list then an exception is raised, which can either be allowed to cause the script to exit
+        or be caught in a "try, except" statement and allow the script to take another action based on the result.  If
+        the remote OS is in the valid list, then nothing happens.
+
+        :param valid_os_list: A list of OSs that
+        """
+        if self.os not in valid_os_list:
+            self.logger.debug("Unsupported OS: {} not in {}.  Raising exception.".format(self.os, valid_os_list))
+            raise UnsupportedOSError("Remote device running unsupported OS: {}.".format(self.os))
+
     @abstractmethod
     def is_connected(self):
         """

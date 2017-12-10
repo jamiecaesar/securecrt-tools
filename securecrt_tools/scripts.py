@@ -321,6 +321,7 @@ class Script:
         :return: The return code that identifies which button the user pressed. (See Message Box constants)
         :rtype: int
         """
+        # TODO Re-write this function to avoid needing to import constants to know how to modify the message box.
         pass
 
     @abstractmethod

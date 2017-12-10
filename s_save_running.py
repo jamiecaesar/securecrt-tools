@@ -15,7 +15,6 @@ else:
 
 # Now we can import our custom modules
 from securecrt_tools import scripts
-from securecrt_tools import utilities
 
 # Create global logger so we can write debug messages from any function (if debug mode setting is enabled in settings).
 logger = logging.getLogger("securecrt")
@@ -27,15 +26,17 @@ logger.debug("Starting execution of {}".format(script_name))
 def script_main(script):
     """
     | SINGLE device script
-    | Author: XXXXXXXX
-    | Email: XXXXXXX@domain.com
+    | Author: Jamie Caesar
+    | Email: jcaesar@presidio.com
 
-    PUT A DESCRIPTION OF THIS SCRIPT HERE.  WHAT IT DOES, ETC.
-    This script assumes it will be run against a connected device.
+    This script will grab the running configuration of a Cisco IOS, NX-OS or ASA device and save it into a file.
+    The path where the file is saved is specified in settings.ini file.
+    This script assumes that you are already connected to the device before running it.
 
     :param script: A subclass of the scripts.Script object that represents the execution of this particular script
                    (either CRTScript or DirectScript)
     :type script: scripts.Script
+
     """
     # Get session object that interacts with the SecureCRT tab from where this script was launched
     session = script.get_script_tab()
@@ -43,9 +44,11 @@ def script_main(script):
     # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
     session.start_cisco_session()
 
-    #
-    # PUT YOUR CODE HERE
-    #
+    supported_os = ["IOS", "NXOS", "ASA"]
+    if session.os in supported_os:
+        send_cmd = "show run"
+        filename = session.create_output_filename(send_cmd)
+        session.write_output_to_file(send_cmd, filename)
 
     # Return terminal parameters back to the original state.
     session.end_cisco_session()
@@ -57,6 +60,7 @@ def script_main(script):
 if __name__ == "__builtin__":
     crt_script = scripts.CRTScript(crt)
     script_main(crt_script)
+    # End logging so that the log file won't be locked after execution finishes
     logging.shutdown()
 
 # If the script is being run directly, use the simulation class

@@ -36,8 +36,8 @@ def script_main(script):
     PUT A DESCRIPTION OF THIS SCRIPT HERE.  WHAT IT DOES, ETC.
     This script assumes it will be run against a connected device.
 
-    :param script: A subclass of the sessions.Session object that represents this particular script session (either
-                    SecureCRTSession or DirectSession)
+    :param script: A subclass of the scripts.Script object that represents the execution of this particular script
+                   (either CRTScript or DirectScript)
     :type script: scripts.Script
     """
     # Create logger instance so we can write debug messages (if debug mode setting is enabled in settings).
