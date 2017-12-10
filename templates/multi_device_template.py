@@ -44,7 +44,7 @@ def script_main(script):
     logger = logging.getLogger("securecrt")
     logger.debug("Starting execution of {}".format(script_name))
 
-    session = script.get_script_tab()
+    session = script.get_main_session()
 
     # If this is launched on an active tab, disconnect before continuing.
     logger.debug("<M_SCRIPT> Checking if current tab is connected.")

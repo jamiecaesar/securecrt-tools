@@ -15,6 +15,7 @@ else:
 
 # Now we can import our custom modules
 from securecrt_tools import scripts
+from securecrt_tools import utilities
 
 # Create global logger so we can write debug messages from any function (if debug mode setting is enabled in settings).
 logger = logging.getLogger("securecrt")
@@ -29,14 +30,16 @@ def script_main(script):
     | Author: Jamie Caesar
     | Email: jcaesar@presidio.com
 
-    This script will grab the running configuration of a Cisco IOS, NX-OS or ASA device and save it into a file.
-    The path where the file is saved is specified in settings.ini file.
-    This script assumes that you are already connected to the device before running it.
+    This script will grab the detailed CDP information from a Cisco IOS or NX-OS device and export it to a CSV file
+    containing the important information, such as Remote Device hostname, model and IP information, in addition to the
+    local and remote interfaces that connect the devices.
+
+    | Script Settings (found in settings/settings.ini):
+    | strip_domains -  A list of domain names that will be stripped away if found in the CDP remote device name.
 
     :param script: A subclass of the scripts.Script object that represents the execution of this particular script
                    (either CRTScript or DirectScript)
     :type script: scripts.Script
-
     """
     # Get session object that interacts with the SecureCRT tab from where this script was launched
     session = script.get_main_session()
@@ -44,11 +47,31 @@ def script_main(script):
     # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
     session.start_cisco_session()
 
-    supported_os = ["IOS", "NXOS", "ASA"]
-    if session.os in supported_os:
-        send_cmd = "show run"
-        filename = session.create_output_filename(send_cmd)
-        session.write_output_to_file(send_cmd, filename)
+    # Validate device is running a supported OS
+    session.validate_os(["IOS", "NXOS"])
+
+    # Define the command to send to the remote device
+    send_cmd = "show cdp neighbors detail"
+    logger.debug("Command set to '{0}'".format(send_cmd))
+
+    # Get domain names to strip from device IDs from settings file
+    strip_list = script.settings.getlist("cdp_to_csv", "strip_domains")
+
+    # Get the output from our above command
+    raw_cdp = session.get_command_output(send_cmd)
+
+    # Choose the TextFSM template and process the data
+    template_file = script.get_template("cisco_os_show_cdp_neigh_det.template")
+    fsm_results = utilities.textfsm_parse_to_list(raw_cdp, template_file, add_header=True)
+
+    # Since "System Name" is a newer NXOS feature -- try to extract it from the device ID when its empty.
+    for entry in fsm_results:
+        # entry[2] is system name, entry[1] is device ID
+        if entry[2] == "":
+            entry[2] = utilities.extract_system_name(entry[1], strip_list=strip_list)
+
+    output_filename = session.create_output_filename("cdp", ext=".csv")
+    utilities.list_of_lists_to_csv(fsm_results, output_filename)
 
     # Return terminal parameters back to the original state.
     session.end_cisco_session()
@@ -60,7 +83,6 @@ def script_main(script):
 if __name__ == "__builtin__":
     crt_script = scripts.CRTScript(crt)
     script_main(crt_script)
-    # End logging so that the log file won't be locked after execution finishes
     logging.shutdown()
 
 # If the script is being run directly, use the simulation class

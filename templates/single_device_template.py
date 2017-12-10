@@ -38,7 +38,7 @@ def script_main(script):
     :type script: scripts.Script
     """
     # Get session object that interacts with the SecureCRT tab from where this script was launched
-    session = script.get_script_tab()
+    session = script.get_main_session()
 
     # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
     session.start_cisco_session()

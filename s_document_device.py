@@ -29,14 +29,23 @@ def script_main(script):
     | Author: Jamie Caesar
     | Email: jcaesar@presidio.com
 
-    This script will grab the running configuration of a Cisco IOS, NX-OS or ASA device and save it into a file.
-    The path where the file is saved is specified in settings.ini file.
-    This script assumes that you are already connected to the device before running it.
+    This script will grab the output for a list of commands from the connected device.  The list of commands is taken
+    from the 'settings/settings.ini' file.  There is a separate list for each supported network operating system (IOS,
+    NXOS and ASA).
+
+    | Script Settings (found in settings/settings.ini):
+    | folder_per_device - If True, Creates a folder for each device, based on the hostname, and saves all files inside
+    |   that folder.  If False, it saves all the files directly into the output folder from the global settings.
+    | ios - The list of commands that will be run on IOS devices
+    | nxos - The list of commands that will be run on NXOS devices
+    | asa - The list of commands that will be run on ASA devices
+
+    The outputs will be saved in a folder named after the hostname of the device, with each output file being saved
+    inside that directory.
 
     :param script: A subclass of the scripts.Script object that represents the execution of this particular script
                    (either CRTScript or DirectScript)
     :type script: scripts.Script
-
     """
     # Get session object that interacts with the SecureCRT tab from where this script was launched
     session = script.get_main_session()
@@ -44,11 +53,23 @@ def script_main(script):
     # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
     session.start_cisco_session()
 
-    supported_os = ["IOS", "NXOS", "ASA"]
-    if session.os in supported_os:
-        send_cmd = "show run"
-        filename = session.create_output_filename(send_cmd)
-        session.write_output_to_file(send_cmd, filename)
+    # Validate device is running a supported OS
+    session.validate_os(["IOS", "NXOS", "ASA"])
+
+    command_list = script.settings.getlist("document_device", session.os)
+    folder_per_device = script.settings.getboolean("document_device", "folder_per_device")
+
+    if folder_per_device:
+        output_dir = os.path.join(script.output_dir, session.hostname)
+    else:
+        output_dir = script.output_dir
+
+    for command in command_list:
+        # Generate filename used for output files.
+        full_file_name = session.create_output_filename(command, include_hostname=not folder_per_device,
+                                                       base_dir=output_dir)
+        # Get the output of our command and save it to the filename specified
+        session.write_output_to_file(command, full_file_name)
 
     # Return terminal parameters back to the original state.
     session.end_cisco_session()
@@ -60,7 +81,6 @@ def script_main(script):
 if __name__ == "__builtin__":
     crt_script = scripts.CRTScript(crt)
     script_main(crt_script)
-    # End logging so that the log file won't be locked after execution finishes
     logging.shutdown()
 
 # If the script is being run directly, use the simulation class

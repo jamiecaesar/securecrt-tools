@@ -44,7 +44,7 @@ class Script:
         # Initialize application attributes
         self.script_dir, self.script_name = os.path.split(script_path)
         self.logger = logging
-        self.script_tab = None
+        self.main_session = None
 
         # Load Settings
         settings_file = os.path.join(self.script_dir, "settings", "settings.ini")
@@ -87,7 +87,7 @@ class Script:
             self.logger.addHandler(fh)
             self.logger.debug("<SCRIPT_INIT> Starting Logging. Running Python version: {0}".format(sys.version))
 
-    def get_script_tab(self):
+    def get_main_session(self):
         """
         Returns a CRTSession object that interacts with the SecureCRT tab that the script was lauched within.  This is
         the primary tab that will be used to interact with remote devices.  While new tabs can be created to connect to
@@ -97,7 +97,7 @@ class Script:
         :return: A session object that represents the tab where the script was launched
         :rtype: sessions.Session
         """
-        return self.script_tab
+        return self.main_session
 
     def validate_dir(self, path):
         """
@@ -416,7 +416,7 @@ class CRTScript(Script):
         self.logger.debug("<SCRIPT_INIT> Starting creation of CRTScript object")
 
         # Set up SecureCRT tab for interaction with the scripts
-        self.script_tab = sessions.CRTSession(self, self.crt.GetScriptTab())
+        self.main_session = sessions.CRTSession(self, self.crt.GetScriptTab())
 
     def message_box(self, message, title="", options=0):
         """
@@ -591,7 +591,7 @@ class DirectScript(Script):
     def __init__(self, full_script_path):
         super(DirectScript, self).__init__(full_script_path)
         self.logger.debug("<INIT> Building DirectExecution Object")
-        self.script_tab = sessions.DirectSession(self)
+        self.main_session = sessions.DirectSession(self)
 
     def message_box(self, message, title="", options=0):
         """

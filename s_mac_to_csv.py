@@ -15,6 +15,7 @@ else:
 
 # Now we can import our custom modules
 from securecrt_tools import scripts
+from securecrt_tools import utilities
 
 # Create global logger so we can write debug messages from any function (if debug mode setting is enabled in settings).
 logger = logging.getLogger("securecrt")
@@ -29,14 +30,11 @@ def script_main(script):
     | Author: Jamie Caesar
     | Email: jcaesar@presidio.com
 
-    This script will grab the running configuration of a Cisco IOS, NX-OS or ASA device and save it into a file.
-    The path where the file is saved is specified in settings.ini file.
-    This script assumes that you are already connected to the device before running it.
+    This script will grab the MAC address table from a Cisco IOS or NX-OS device and export it to a CSV file.
 
     :param script: A subclass of the scripts.Script object that represents the execution of this particular script
                    (either CRTScript or DirectScript)
     :type script: scripts.Script
-
     """
     # Get session object that interacts with the SecureCRT tab from where this script was launched
     session = script.get_main_session()
@@ -44,11 +42,28 @@ def script_main(script):
     # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
     session.start_cisco_session()
 
-    supported_os = ["IOS", "NXOS", "ASA"]
-    if session.os in supported_os:
-        send_cmd = "show run"
-        filename = session.create_output_filename(send_cmd)
-        session.write_output_to_file(send_cmd, filename)
+    # Validate device is running a supported OS
+    session.validate_os(["IOS", "NXOS"])
+
+    # TextFSM template for parsing "show mac address-table" output
+    if session.os == "NXOS":
+        template_file = script.get_template("cisco_nxos_show_mac_addr_table.template")
+    else:
+        template_file = script.get_template("cisco_ios_show_mac_addr_table.template")
+
+    raw_mac = session.get_command_output("show mac address-table")
+    fsm_results = utilities.textfsm_parse_to_list(raw_mac, template_file, add_header=True)
+
+    # Check if IOS mac_table is empty -- if so, it is probably because the switch has an older IOS
+    # that expects "show mac-address-table" instead of "show mac address-table".
+    if session.os == "IOS" and len(fsm_results) == 1:
+        send_cmd = "show mac-address-table dynamic"
+        logger.debug("Retrying with command set to '{0}'".format(send_cmd))
+        raw_mac = session.get_command_output(send_cmd)
+        fsm_results = utilities.textfsm_parse_to_list(raw_mac, template_file, add_header=True)
+
+    output_filename = session.create_output_filename("mac-addr", ext=".csv")
+    utilities.list_of_lists_to_csv(fsm_results, output_filename)
 
     # Return terminal parameters back to the original state.
     session.end_cisco_session()
@@ -60,7 +75,6 @@ def script_main(script):
 if __name__ == "__builtin__":
     crt_script = scripts.CRTScript(crt)
     script_main(crt_script)
-    # End logging so that the log file won't be locked after execution finishes
     logging.shutdown()
 
 # If the script is being run directly, use the simulation class
