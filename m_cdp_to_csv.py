@@ -82,23 +82,23 @@ def script_main(script):
     use_jumpbox = script.settings.getboolean("Global", "use_jumpbox")
 
     if use_jumpbox:
-        jumpbox = script.settings.get("Global", "jumpbox")
-        j_username = script.settings.get("Global", "jump_user")
-        j_ending = script.settings.get("Global", "jump_prompt_end")
+        jumpbox = script.settings.get("Global", "jumpbox_host")
+        j_username = script.settings.get("Global", "jumpbox_user")
+        j_ending = script.settings.get("Global", "jumpbox_prompt_end")
 
         if not jumpbox:
             jumpbox = script.prompt_window("Enter the HOSTNAME or IP for the jumpbox".format(jumpbox))
-            script.settings.update("Global", "jumpbox", j_username)
+            script.settings.update("Global", "jumpbox_host", j_username)
 
         if not j_username:
             j_username = script.prompt_window("Enter the USERNAME for {}".format(jumpbox))
-            script.settings.update("Global", "jump_user", j_username)
+            script.settings.update("Global", "jumpbox_user", j_username)
 
         j_password = script.prompt_window("Enter the PASSWORD for {}".format(j_username), hide_input=True)
 
         if not j_ending:
             j_ending = script.prompt_window("Enter the last character of the jumpbox CLI prompt")
-            script.settings.update("Global", "jump_prompt_end", j_ending)
+            script.settings.update("Global", "jumpbox_prompt_end", j_ending)
 
     # #############################################  END JUMP BOX SECTION  #############################################
 
