@@ -174,7 +174,7 @@ def script_main(session, prompt_check_mode=True, check_mode=True, enable_pass=No
             with open(output_filename, 'wb') as output_file:
                 for command in config_commands:
                     output_file.write("{}\n".format(command))
-            rollback_filename = session.create_output_filename("rollback", include_date=False)
+            rollback_filename = session.create_output_filename("intf-rollback", include_date=False)
         else:
             # Check settings to see if we prefer to save backups before/after applying changes
             take_backups = script.settings.getboolean("update_interface_desc", "take_backups")
