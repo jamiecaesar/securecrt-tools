@@ -101,7 +101,7 @@ def script_main(script):
 
         if not jumpbox:
             jumpbox = script.prompt_window("Enter the HOSTNAME or IP for the jumpbox".format(jumpbox))
-            script.settings.update("Global", "jumpbox_host", j_username)
+            script.settings.update("Global", "jumpbox_host", jumpbox)
 
         if not j_username:
             j_username = script.prompt_window("Enter the USERNAME for {}".format(jumpbox))
