@@ -59,9 +59,9 @@ def script_main(script):
     session = script.get_main_session()
 
     # If this is launched on an active tab, disconnect before continuing.
-    logger.debug("<M_SCRIPT> Checking if current tab is connected.")
+    logger.debug("<M_INTF_DESC> Checking if current tab is connected.")
     if session.is_connected():
-        logger.debug("<M_SCRIPT> Existing tab connected.  Stopping execution.")
+        logger.debug("<M_INTF_DESC> Existing tab connected.  Stopping execution.")
         raise scripts.ScriptError("This script must be launched in a not-connected tab.")
 
     # Load a device list
@@ -104,10 +104,10 @@ def script_main(script):
             script.settings.update("Global", "jumpbox_host", jumpbox)
 
         if not j_username:
-            j_username = script.prompt_window("Enter the USERNAME for {}".format(jumpbox))
+            j_username = script.prompt_window("JUMPBOX: Enter the USERNAME for {}".format(jumpbox))
             script.settings.update("Global", "jumpbox_user", j_username)
 
-        j_password = script.prompt_window("Enter the PASSWORD for {}".format(j_username), hide_input=True)
+        j_password = script.prompt_window("JUMPBOX: Enter the PASSWORD for {}".format(j_username), hide_input=True)
 
         if not j_ending:
             j_ending = script.prompt_window("Enter the last character of the jumpbox CLI prompt")
@@ -129,7 +129,8 @@ def script_main(script):
         password = device['password']
         enable = device['enable']
 
-        if jumpbox:
+        if use_jumpbox:
+            logger.debug("<M_INTF_DESC> Connecting to {} via jumpbox.".format(hostname))
             if "ssh" in protocol.lower():
                 try:
                     if not jump_connected:
@@ -158,6 +159,7 @@ def script_main(script):
                     session.disconnect()
                     jump_connected = False
         else:
+            logger.debug("<M_INTF_DESC> Connecting to {}".format(hostname))
             try:
                 session.connect(hostname, username, password, protocol=protocol)
                 per_device_work(session, check_mode, enable)

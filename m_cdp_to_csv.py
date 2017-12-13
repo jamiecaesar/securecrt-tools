@@ -39,43 +39,18 @@ def script_main(script):
                    (either CRTScript or DirectScript)
     :type script: scripts.Script
     """
-    # Create logger instance so we can write debug messages (if debug mode setting is enabled in settings).
-    logger = logging.getLogger("securecrt")
-    logger.debug("Starting execution of {}".format(script_name))
-
     session = script.get_main_session()
 
     # If this is launched on an active tab, disconnect before continuing.
-    logger.debug("<M_SCRIPT> Checking if current tab is connected.")
+    logger.debug("<M_CDP_TO_CSV> Checking if current tab is connected.")
     if session.is_connected():
-        logger.debug("<M_SCRIPT> Existing tab connected.  Stopping execution.")
+        logger.debug("<M_CDP_TO_CSV> Existing tab connected.  Stopping execution.")
         raise scripts.ScriptError("This script must be launched in a not-connected tab.")
 
     # Load a device list
     device_list = script.import_device_list()
     if not device_list:
         return
-
-    check_mode = True
-    # # #########################################  START CHECK MODE SECTION  ###########################################
-    # # Ask if this should be a test run (generate configs only) or full run (push updates to devices)
-    # # Comment out or remove the entire CHECK MODE SECTION if you don't want to prompt for check mode
-    # check_mode_message = "Do you want to run this script in check mode? (Only generate configs)\n" \
-    #                      "\n" \
-    #                      "Yes = Connect to device and write change scripts to a file ONLY\n" \
-    #                      "No = Connect to device and PUSH configuration changes"
-    # message_box_design = ICON_QUESTION | BUTTON_YESNOCANCEL
-    # logger.debug("Prompting the user to run in check mode.")
-    # result = script.message_box(check_mode_message, "Run in Check Mode?", message_box_design)
-    # if result == IDYES:
-    #     logger.debug("<M_SCRIPT> Received 'True' for Check Mode.")
-    #     check_mode = True
-    # elif result == IDNO:
-    #     logger.debug("<M_SCRIPT> Received 'False' for Check Mode.")
-    #     check_mode = False
-    # else:
-    #     return
-    # ###########################################  END CHECK MODE SECTION  #############################################
 
     # ###########################################  START JUMP BOX SECTION  #############################################
     # Check settings if we should use a jumpbox.  If so, prompt for password (and possibly missing values)
@@ -91,10 +66,10 @@ def script_main(script):
             script.settings.update("Global", "jumpbox_host", jumpbox)
 
         if not j_username:
-            j_username = script.prompt_window("Enter the USERNAME for {}".format(jumpbox))
+            j_username = script.prompt_window("JUMPBOX: Enter the USERNAME for {}".format(jumpbox))
             script.settings.update("Global", "jumpbox_user", j_username)
 
-        j_password = script.prompt_window("Enter the PASSWORD for {}".format(j_username), hide_input=True)
+        j_password = script.prompt_window("JUMPBOX: Enter the PASSWORD for {}".format(j_username), hide_input=True)
 
         if not j_ending:
             j_ending = script.prompt_window("Enter the last character of the jumpbox CLI prompt")
@@ -116,14 +91,15 @@ def script_main(script):
         password = device['password']
         enable = device['enable']
 
-        if jumpbox:
+        if use_jumpbox:
+            logger.debug("<M_CDP_TO_CSV> Connecting to {} via jumpbox.".format(hostname))
             if "ssh" in protocol.lower():
                 try:
                     if not jump_connected:
                         session.connect_ssh(jumpbox, j_username, j_password, prompt_endings=[j_ending])
                         jump_connected = True
                     session.ssh_via_jump(hostname, username, password)
-                    per_device_work(session, check_mode, enable)
+                    per_device_work(session, enable)
                     session.disconnect_via_jump()
                 except (sessions.ConnectError, sessions.InteractionError) as e:
                     error_msg = e.message
@@ -137,7 +113,7 @@ def script_main(script):
                         session.connect_ssh(jumpbox, j_username, j_password, prompt_endings=[j_ending])
                         jump_connected = True
                     session.telnet_via_jump(hostname, username, password)
-                    per_device_work(session, check_mode, enable)
+                    per_device_work(session, enable)
                     session.disconnect_via_jump()
                 except (sessions.ConnectError, sessions.InteractionError) as e:
                     with open(failed_log, 'a') as logfile:
@@ -145,9 +121,10 @@ def script_main(script):
                     session.disconnect()
                     jump_connected = False
         else:
+            logger.debug("<M_CDP_TO_CSV> Connecting to {}".format(hostname))
             try:
                 session.connect(hostname, username, password, protocol=protocol)
-                per_device_work(session, check_mode, enable)
+                per_device_work(session, enable)
                 session.disconnect()
             except sessions.ConnectError as e:
                 with open(failed_log, 'a') as logfile:
@@ -163,7 +140,7 @@ def script_main(script):
     # ##########################################  END DEVICE CONNECT LOOP  #############################################
 
 
-def per_device_work(session, check_mode, enable_pass):
+def per_device_work(session, enable_pass):
     """
     This function contains the code that should be executed on each device that this script connects to.  It is called
     after establishing a connection to each device in the loop above.

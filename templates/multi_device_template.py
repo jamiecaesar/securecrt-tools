@@ -92,10 +92,10 @@ def script_main(script):
             script.settings.update("Global", "jumpbox_host", jumpbox)
 
         if not j_username:
-            j_username = script.prompt_window("Enter the USERNAME for {}".format(jumpbox))
+            j_username = script.prompt_window("JUMPBOX: Enter the USERNAME for {}".format(jumpbox))
             script.settings.update("Global", "jumpbox_user", j_username)
 
-        j_password = script.prompt_window("Enter the PASSWORD for {}".format(j_username), hide_input=True)
+        j_password = script.prompt_window("JUMPBOX: Enter the PASSWORD for {}".format(j_username), hide_input=True)
 
         if not j_ending:
             j_ending = script.prompt_window("Enter the last character of the jumpbox CLI prompt")
@@ -117,7 +117,8 @@ def script_main(script):
         password = device['password']
         enable = device['enable']
 
-        if jumpbox:
+        if use_jumpbox:
+            logger.debug("<M_SCRIPT> Connecting to {} via jumpbox.".format(hostname))
             if "ssh" in protocol.lower():
                 try:
                     if not jump_connected:
@@ -127,9 +128,8 @@ def script_main(script):
                     per_device_work(session, check_mode, enable)
                     session.disconnect_via_jump()
                 except (sessions.ConnectError, sessions.InteractionError) as e:
-                    error_msg = e.message
                     with open(failed_log, 'a') as logfile:
-                        logfile.write("Connect to {} failed: {}\n".format(hostname, error_msg))
+                        logfile.write("Connect to {} failed: {}\n".format(hostname, e.message.strip()))
                     session.disconnect()
                     jump_connected = False
             elif protocol.lower() == "telnet":
@@ -142,20 +142,21 @@ def script_main(script):
                     session.disconnect_via_jump()
                 except (sessions.ConnectError, sessions.InteractionError) as e:
                     with open(failed_log, 'a') as logfile:
-                        logfile.write("Connect to {} failed: {}\n".format(hostname, e.message))
+                        logfile.write("Connect to {} failed: {}\n".format(hostname, e.message.strip()))
                     session.disconnect()
                     jump_connected = False
         else:
+            logger.debug("<M_SCRIPT> Connecting to {}.".format(hostname))
             try:
                 session.connect(hostname, username, password, protocol=protocol)
                 per_device_work(session, check_mode, enable)
                 session.disconnect()
             except sessions.ConnectError as e:
                 with open(failed_log, 'a') as logfile:
-                    logfile.write("Connect to {} failed: {}\n".format(hostname, e.message))
+                    logfile.write("Connect to {} failed: {}\n".format(hostname, e.message.strip()))
             except sessions.InteractionError as e:
                 with open(failed_log, 'a') as logfile:
-                    logfile.write("Failure on {}: {}\n".format(hostname, e.message))
+                    logfile.write("Failure on {}: {}\n".format(hostname, e.message.strip()))
 
     # If we are still connected to our jump box, disconnect.
     if jump_connected:
