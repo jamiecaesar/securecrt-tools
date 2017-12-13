@@ -21,16 +21,17 @@ from securecrt_tools import utilities
 # Try importing the socket module for DNS lookups
 try:
     import socket
-except ImportError:
-    pass
-
-if socket:
     dns_lookup = True
-else:
+except ImportError:
     dns_lookup = False
 
 # Import the manuf module for MAC to Vendor lookups
-import securecrt_tools.manuf as manuf
+try:
+    import securecrt_tools.manuf as manuf
+    mac_lookup = True
+except ImportError:
+    mac_lookup = False
+
 
 # Create global logger so we can write debug messages from any function (if debug mode setting is enabled in settings).
 logger = logging.getLogger("securecrt")
@@ -96,7 +97,7 @@ def script_main(session, gateway_hostname=""):
                 arp_list = arp_lookup[intf]
                 for entry in arp_list:
                     mac, ip = entry
-                    if mac:
+                    if mac and mac_lookup:
                         mac_vendor = mac_to_vendor(mac)
                     if dns_lookup and ip:
                         try:
@@ -120,7 +121,7 @@ def script_main(session, gateway_hostname=""):
                     for entry in arp_lookup[mac]:
                         ip, arp_vlan = entry
                         if vlan == arp_vlan:
-                            if mac:
+                            if mac and mac_lookup:
                                 mac_vendor = mac_to_vendor(mac)
                             if dns_lookup and ip:
                                 try:
@@ -188,7 +189,7 @@ def get_mac_table(session):
     if session.os == "IOS":
         template_file = session.script.get_template("cisco_ios_show_mac_addr_table.template")
     else:
-        template_file = session.script.get_template("cisco_nxos_show_mac_addr_table.template")\
+        template_file = session.script.get_template("cisco_nxos_show_mac_addr_table.template")
 
     raw_mac = session.get_command_output(send_cmd)
     mac_table = utilities.textfsm_parse_to_list(raw_mac, template_file, add_header=True)
@@ -206,7 +207,7 @@ def get_mac_table(session):
     # Check for vPCs on NXOS to account for "vPC Peer-Link" entries in MAC table of N9Ks
     elif session.os == "NXOS":
         send_cmd = "show vpc"
-        vpc_template = session.get_template("cisco_nxos_show_vpc.template")
+        vpc_template = session.script.get_template("cisco_nxos_show_vpc.template")
 
         raw_show_vpc = session.get_command_output(send_cmd)
         vpc_table = utilities.textfsm_parse_to_list(raw_show_vpc, vpc_template)
