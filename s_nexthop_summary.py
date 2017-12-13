@@ -25,7 +25,7 @@ logger.debug("Starting execution of {}".format(script_name))
 
 # ################################################   SCRIPT LOGIC   ###################################################
 
-def script_main(script, ask_vrf=True, vrf=None):
+def script_main(session, ask_vrf=True, vrf=None):
     """
     | SINGLE device script
     | Author: Jamie Caesar
@@ -35,17 +35,17 @@ def script_main(script, ask_vrf=True, vrf=None):
     next-hop address (how many routes and from which protocol) into a CSV file.  It will also list all connected
     networks and give a detailed breakdown of every route that goes to each next-hop.
 
-    :param script: A subclass of the scripts.Script object that represents the execution of this particular script
-                   (either CRTScript or DirectScript)
-    :type script: scripts.Script
+    :param session: A subclass of the sessions.Session object that represents this particular script session (either
+                SecureCRTSession or DirectSession)
+    :type session: sessions.Session
     :param ask_vrf: A boolean that specifies if we should prompt for which VRF.  The default is true, but when this
         module is called from other scripts, we may want avoid prompting and supply the VRF with the "vrf" input.
     :type ask_vrf: bool
     :param vrf: The VRF that we should get the route table from.  This is used only when ask_vrf is False.
     :type vrf: str
     """
-    # Get session object that interacts with the SecureCRT tab from where this script was launched
-    session = script.get_main_session()
+    # Get script object that owns this session, so we can check settings, get textfsm templates, etc
+    script = session.script
 
     # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
     session.start_cisco_session()
@@ -298,12 +298,22 @@ def nexthop_summary(textfsm_dict):
 
 # If this script is run from SecureCRT directly, use the SecureCRT specific class
 if __name__ == "__builtin__":
+    # Initialize script object
     crt_script = scripts.CRTScript(crt)
-    script_main(crt_script)
+    # Get session object for the SecureCRT tab that the script was launched from.
+    crt_session = crt_script.get_main_session()
+    # Run script's main logic against our session
+    script_main(crt_session)
+    # Shutdown logging after
     logging.shutdown()
 
 # If the script is being run directly, use the simulation class
 elif __name__ == "__main__":
+    # Initialize script object
     direct_script = scripts.DirectScript(os.path.realpath(__file__))
-    script_main(direct_script)
+    # Get a simulated session object to pass into the script.
+    sim_session = direct_script.get_main_session()
+    # Run script's main logic against our session
+    script_main(sim_session)
+    # Shutdown logging after
     logging.shutdown()

@@ -25,7 +25,7 @@ logger = logging.getLogger("securecrt")
 logger.debug("Starting execution of {}".format(script_name))
 
 
-# ################################################   SCRIPT LOGIC   ###################################################
+# ################################################   SCRIPT LOGIC   ##################################################
 
 def script_main(script):
     """
@@ -58,7 +58,7 @@ def script_main(script):
         return
 
     check_mode = True
-    # ##########################################  START CHECK MODE SECTION  ############################################
+    # #########################################  START CHECK MODE SECTION  ###########################################
     # Ask if this should be a test run (generate configs only) or full run (push updates to devices)
     # Comment out or remove the entire CHECK MODE SECTION if you don't want to prompt for check mode
     check_mode_message = "Do you want to run this script in check mode? (Only generate configs)\n" \
@@ -76,9 +76,9 @@ def script_main(script):
         check_mode = False
     else:
         return
-    # ###########################################  END CHECK MODE SECTION  #############################################
+    # ########################################### END CHECK MODE SECTION  ############################################
 
-    # ###########################################  START JUMP BOX SECTION  #############################################
+    # ##########################################  START JUMP BOX SECTION  ############################################
     # Check settings if we should use a jumpbox.  If so, prompt for password (and possibly missing values)
     jumpbox = script.settings.get("Global", "jumpbox")
 
@@ -96,9 +96,9 @@ def script_main(script):
             j_ending = script.prompt_window("Enter the last character of the jumpbox CLI prompt")
             script.settings.update("Global", "jump_prompt_end", j_ending)
 
-    # #############################################  END JUMP BOX SECTION  #############################################
+    # ############################################  END JUMP BOX SECTION  ############################################
 
-    # #########################################  START DEVICE CONNECT LOOP  ############################################
+    # ########################################  START DEVICE CONNECT LOOP  ###########################################
 
     # We are not yet connected to a jump box.  This will be updated later in the code if needed.
     jump_connected = False
@@ -156,7 +156,7 @@ def script_main(script):
     if jump_connected:
         session.disconnect()
 
-    # ##########################################  END DEVICE CONNECT LOOP  #############################################
+    # #########################################  END DEVICE CONNECT LOOP  ############################################
 
 
 def per_device_work(session, check_mode, enable_pass):
@@ -179,12 +179,18 @@ def per_device_work(session, check_mode, enable_pass):
 
 # If this script is run from SecureCRT directly, use the SecureCRT specific class
 if __name__ == "__builtin__":
+    # Initialize script object
     crt_script = scripts.CRTScript(crt)
+    # Run script's main logic against the script object
     script_main(crt_script)
+    # Shutdown logging after
     logging.shutdown()
 
 # If the script is being run directly, use the simulation class
 elif __name__ == "__main__":
+    # Initialize script object
     direct_script = scripts.DirectScript(os.path.realpath(__file__))
+    # Run script's main logic against the script object
     script_main(direct_script)
+    # Shutdown logging after
     logging.shutdown()

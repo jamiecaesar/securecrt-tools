@@ -39,7 +39,7 @@ logger.debug("Starting execution of {}".format(script_name))
 
 # ################################################   SCRIPT LOGIC   ###################################################
 
-def script_main(script, gateway_hostname=""):
+def script_main(session, gateway_hostname=""):
     """
     | SINGLE device script
     | Author: Jamie Caesar
@@ -49,12 +49,13 @@ def script_main(script, gateway_hostname=""):
     of the active session will be captured and a CSV file showing the MAC address and IP of what is attached to each port
     on the device will be output.
 
-    :param script: A subclass of the scripts.Script object that represents the execution of this particular script
-                   (either CRTScript or DirectScript)
-    :type script: scripts.Script
+    :param session: A subclass of the sessions.Session object that represents this particular script session (either
+                SecureCRTSession or DirectSession)
+    :type session: sessions.Session
+
     """
-    # Get session object that interacts with the SecureCRT tab from where this script was launched
-    session = script.get_main_session()
+    # Get script object that owns this session, so we can check settings, get textfsm templates, etc
+    script = session.script
 
     # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
     session.start_cisco_session()
@@ -334,12 +335,22 @@ def mac_to_vendor(mac):
 
 # If this script is run from SecureCRT directly, use the SecureCRT specific class
 if __name__ == "__builtin__":
+    # Initialize script object
     crt_script = scripts.CRTScript(crt)
-    script_main(crt_script)
+    # Get session object for the SecureCRT tab that the script was launched from.
+    crt_session = crt_script.get_main_session()
+    # Run script's main logic against our session
+    script_main(crt_session)
+    # Shutdown logging after
     logging.shutdown()
 
 # If the script is being run directly, use the simulation class
 elif __name__ == "__main__":
+    # Initialize script object
     direct_script = scripts.DirectScript(os.path.realpath(__file__))
-    script_main(direct_script)
+    # Get a simulated session object to pass into the script.
+    sim_session = direct_script.get_main_session()
+    # Run script's main logic against our session
+    script_main(sim_session)
+    # Shutdown logging after
     logging.shutdown()

@@ -25,7 +25,7 @@ logger.debug("Starting execution of {}".format(script_name))
 
 # ################################################   SCRIPT LOGIC   ###################################################
 
-def script_main(script, prompt_checkmode=True, check_mode=True, enable_pass=None):
+def script_main(session, prompt_check_mode=True, check_mode=True, enable_pass=None):
     """
     | SINGLE device script
     | Author: Jamie Caesar
@@ -41,13 +41,13 @@ def script_main(script, prompt_checkmode=True, check_mode=True, enable_pass=None
     "take_backups" - If set to True, the script will save a copy of the running config before and after making changes.
     "rollback_file" - If set to True, the script will generate a rollback configuration script and save it to a file.
 
-    :param script: A subclass of the scripts.Script object that represents the execution of this particular script
-                   (either CRTScript or DirectScript)
-    :type script: scripts.Script
-    :param prompt_checkmode: A boolean that specifies if we should prompt the user to find out if we should run in
+     :param session: A subclass of the sessions.Session object that represents this particular script session (either
+                SecureCRTSession or DirectSession)
+    :type session: sessions.Session
+    :param prompt_check_mode: A boolean that specifies if we should prompt the user to find out if we should run in
         "check mode".  We would make this False if we were using this function in a multi-device script, so that the
         process can run continually without prompting the user at each device.
-    :type prompt_checkmode: bool
+    :type prompt_check_mode: bool
     :param check_mode: A boolean to specify whether we should run in "check mode" (Generate what the script would do
         only -- does not push config), or not (Pushes the changes to the device).   The default is True for safety
         reasons, and this option will be overwritten unless prompt_checkmode is False.
@@ -55,8 +55,8 @@ def script_main(script, prompt_checkmode=True, check_mode=True, enable_pass=None
     :param enable_pass: The enable password for the device.  Will be passed to start_cisco_session method if available.
     :type enable_pass: str
     """
-    # Get session object that interacts with the SecureCRT tab from where this script was launched
-    session = script.get_main_session()
+    # Get script object that owns this session, so we can check settings, get textfsm templates, etc
+    script = session.script
 
     # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
     session.start_cisco_session()
@@ -64,7 +64,7 @@ def script_main(script, prompt_checkmode=True, check_mode=True, enable_pass=None
     # Validate device is running a supported OS
     session.validate_os(["IOS", "NXOS"])
 
-    if prompt_checkmode:
+    if prompt_check_mode:
         # Ask if this should be a test run (generate configs only) or full run (push updates to devices)
         check_mode_message = "Do you want to run this script in check mode? (Only generate configs)\n" \
                              "\n" \
@@ -300,12 +300,22 @@ def get_desc_table(session):
 
 # If this script is run from SecureCRT directly, use the SecureCRT specific class
 if __name__ == "__builtin__":
+    # Initialize script object
     crt_script = scripts.CRTScript(crt)
-    script_main(crt_script)
+    # Get session object for the SecureCRT tab that the script was launched from.
+    crt_session = crt_script.get_main_session()
+    # Run script's main logic against our session
+    script_main(crt_session)
+    # Shutdown logging after
     logging.shutdown()
 
 # If the script is being run directly, use the simulation class
 elif __name__ == "__main__":
+    # Initialize script object
     direct_script = scripts.DirectScript(os.path.realpath(__file__))
-    script_main(direct_script)
+    # Get a simulated session object to pass into the script.
+    sim_session = direct_script.get_main_session()
+    # Run script's main logic against our session
+    script_main(sim_session)
+    # Shutdown logging after
     logging.shutdown()
