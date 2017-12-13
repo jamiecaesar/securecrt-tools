@@ -1373,6 +1373,12 @@ class DirectSession(Session):
             print "Simulated disconnect from remote host.  Prompt not recorded from previous device".format
             self.prompt = prev_prompt
 
+    def close(self):
+        """
+        A method to close the SecureCRT tab associated with this CRTSession.
+        """
+        print "Closing tab."
+
     def start_cisco_session(self, enable_pass=None):
         """
         Performs initial setup of the session to a Cisco device by detecting parameters (prompt, hostname, network OS,

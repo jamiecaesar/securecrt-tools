@@ -80,11 +80,17 @@ def script_main(script):
 
     # ##########################################  START JUMP BOX SECTION  ############################################
     # Check settings if we should use a jumpbox.  If so, prompt for password (and possibly missing values)
-    jumpbox = script.settings.get("Global", "jumpbox")
 
-    if jumpbox:
+    use_jumpbox = script.settings.getboolean("Global", "use_jumpbox")
+
+    if use_jumpbox:
+        jumpbox = script.settings.get("Global", "jumpbox")
         j_username = script.settings.get("Global", "jump_user")
         j_ending = script.settings.get("Global", "jump_prompt_end")
+
+        if not jumpbox:
+            jumpbox = script.prompt_window("Enter the HOSTNAME or IP for the jumpbox".format(jumpbox))
+            script.settings.update("Global", "jumpbox", j_username)
 
         if not j_username:
             j_username = script.prompt_window("Enter the USERNAME for {}".format(jumpbox))
