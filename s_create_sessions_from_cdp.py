@@ -22,7 +22,7 @@ from securecrt_tools.message_box_const import *
 
 # Create global logger so we can write debug messages from any function (if debug mode setting is enabled in settings).
 logger = logging.getLogger("securecrt")
-logger.debug("Starting execution of {}".format(script_name))
+logger.debug("Starting execution of {0}".format(script_name))
 
 
 # ################################################   SCRIPT LOGIC   ###################################################
@@ -77,15 +77,15 @@ def script_main(session):
         mgmt_ip = device[1]
         script.create_new_saved_session(system_name, mgmt_ip, folder=dest_folder)
         # Track the names of the hosts we've made already
-        logger.debug("Created session for {}.".format(system_name))
+        logger.debug("Created session for {0}.".format(system_name))
 
     # Calculate statistics
     num_created = len(session_list)
     num_skipped = len(cdp_table) - len(session_list)
 
-    setting_msg = "{} sessions created in the Sessions sub-directory '{}'\n" \
+    setting_msg = "{0} sessions created in the Sessions sub-directory '{1}'\n" \
                   "\n" \
-                  "{} sessions skipped (no IP or duplicate)".format(num_created, dest_folder, num_skipped)
+                  "{0} sessions skipped (no IP or duplicate)".format(num_created, dest_folder, num_skipped)
     script.message_box(setting_msg, "Sessions Created", ICON_INFO)
 
     # Return terminal parameters back to the original state.
@@ -114,7 +114,7 @@ def create_session_list(cdp_list):
             system_name = device[1]
 
         if system_name in created:
-            logger.debug("Skipping {} because it is a duplicate.".format(system_name))
+            logger.debug("Skipping {0} because it is a duplicate.".format(system_name))
             # Go directly to the next device (skip this one)
             continue
 
@@ -122,14 +122,14 @@ def create_session_list(cdp_list):
         if mgmt_ip == "":
             if device[4] == "":
                 # If no mgmt IP or interface IP, skip device.
-                logger.debug("Skipping {} because cannot find IP in CDP data.".format(system_name))
+                logger.debug("Skipping {0} because cannot find IP in CDP data.".format(system_name))
                 # Go directly to the next device (skip this one)
                 continue
             else:
                 mgmt_ip = device[4]
-                logger.debug("Using interface IP ({}) for {}.".format(mgmt_ip, system_name))
+                logger.debug("Using interface IP ({0}) for {1}.".format(mgmt_ip, system_name))
         else:
-            logger.debug("Using management IP ({}) for {}.".format(mgmt_ip, system_name))
+            logger.debug("Using management IP ({0}) for {1}.".format(mgmt_ip, system_name))
 
         # Add device to session_list
         session_list.append((system_name, mgmt_ip,))

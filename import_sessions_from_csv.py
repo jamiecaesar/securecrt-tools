@@ -20,7 +20,7 @@ from securecrt_tools import utilities
 
 # Create global logger so we can write debug messages from any function (if debug mode setting is enabled in settings).
 logger = logging.getLogger("securecrt")
-logger.debug("Starting execution of {}".format(script_name))
+logger.debug("Starting execution of {0}".format(script_name))
 
 
 # ################################################   SCRIPT LOGIC   ###################################################
@@ -73,7 +73,7 @@ def script_main(script):
                 count += 1
 
         # Display summary of created / skipped sessions
-        setting_msg = "{} sessions created\n{} sessions skipped (no Hostname / IP)".format(count, skipped)
+        setting_msg = "{0} sessions created\n{1} sessions skipped (no Hostname / IP)".format(count, skipped)
         script.message_box(setting_msg, "Sessions Created", scripts.ICON_INFO)
     else:
         # We didn't get an input file so ask to generate an example and exit.

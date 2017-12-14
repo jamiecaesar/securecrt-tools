@@ -51,7 +51,7 @@ class Script:
         try:
             self.settings = SettingsImporter(settings_file)
         except IOError:
-            error_msg = "A settings file at {} does not exist.  Do you want to create it?".format(settings_file)
+            error_msg = "A settings file at {0} does not exist.  Do you want to create it?".format(settings_file)
             result = self.message_box(error_msg, "Missing Settings File", ICON_QUESTION | BUTTON_YESNO)
             if result == IDYES:
                 self.settings = SettingsImporter(settings_file, create=True)
@@ -112,13 +112,13 @@ class Script:
         # Verify that base_path is valid absolute path, or else error and exit.
         if not os.path.isabs(path):
             self.logger.debug("<VALIDATE_PATH> Supplied path is not an absolute path. Raising exception".format(path))
-            error_str = 'Directory {} is invalid.'.format(path)
+            error_str = 'Directory {0} is invalid.'.format(path)
             raise IOError(error_str)
 
         # Check if directory exists.  If not, prompt to create it.
         if not os.path.exists(os.path.normpath(path)):
             self.logger.debug("<VALIDATE_PATH> Supplied directory path does not exist. Prompting User.")
-            message_str = "The path: '{}' does not exist.  Do you want to create it?.".format(path)
+            message_str = "The path: '{0}' does not exist.  Do you want to create it?.".format(path)
             result = self.message_box(message_str, "Create Directory?", ICON_QUESTION | BUTTON_YESNO | DEFBUTTON2)
 
             if result == IDYES:
@@ -126,7 +126,7 @@ class Script:
                 os.makedirs(path)
             else:
                 self.logger.debug("<VALIDATE_PATH> User chose NOT to create directory.  Raising exception")
-                error_str = 'Required directory {} does not exist.'.format(path)
+                error_str = 'Required directory {0} does not exist.'.format(path)
                 raise IOError(error_str)
         self.logger.debug("<VALIDATE_PATH> Path is Valid.")
 
@@ -144,7 +144,7 @@ class Script:
         if os.path.isfile(path):
             return path
         else:
-            raise IOError("The template name {} does not exist.")
+            raise IOError("The template name {0} does not exist.")
 
     def import_device_list(self):
         """
@@ -203,22 +203,22 @@ class Script:
                 enable = line[4].strip()
 
                 if not hostname:
-                    self.logger.debug("<IMPORT_DEVICES> Skipping CSV line {} because no hostname exists.".format(line))
+                    self.logger.debug("<IMPORT_DEVICES> Skipping CSV line {0} because no hostname exists.".format(line))
                     skipped_lines += 1
                     continue
 
                 if protocol.lower() not in ['', 'ssh', 'ssh1', 'ssh2', 'telnet']:
-                    self.logger.debug("<IMPORT_DEVICES> Skipping CSV line {} because no valid protocol.".format(line))
+                    self.logger.debug("<IMPORT_DEVICES> Skipping CSV line {0} because no valid protocol.".format(line))
                     skipped_lines += 1
                     continue
 
                 if not username:
                     if default_username:
                         username = default_username
-                        self.logger.debug("<IMPORT_DEVICES> Using default username '{}', for host {}."
+                        self.logger.debug("<IMPORT_DEVICES> Using default username '{0}', for host {1}."
                                           .format(default_username, hostname))
                     else:
-                        self.logger.debug("<IMPORT_DEVICES> Didn't find username for host '{}'.  Prompting for DEFAULT."
+                        self.logger.debug("<IMPORT_DEVICES> Didn't find username for host '{0}'.  Prompting for DEFAULT."
                                           .format(hostname))
                         default_username = self.prompt_window("Enter the DEFAULT USERNAME to use.")
                         if default_username == '':
@@ -226,7 +226,7 @@ class Script:
                             error = "Found hosts without usernames and no default username provided."
                             raise ScriptError(error)
                         else:
-                            self.logger.debug("<IMPORT_DEVICES> Using default username '{}', for host {}."
+                            self.logger.debug("<IMPORT_DEVICES> Using default username '{0}', for host {1}."
                                               .format(default_username, hostname))
                             username = default_username
 
@@ -240,8 +240,8 @@ class Script:
 
         # Prompt for missing information
         for username in no_password:
-            self.logger.debug("<IMPORT_DEVICES> Prompting for password for username '{}'".format(username))
-            password = self.prompt_window("Enter the password for {}".format(username), hide_input=True)
+            self.logger.debug("<IMPORT_DEVICES> Prompting for password for username '{0}'".format(username))
+            password = self.prompt_window("Enter the password for {0}".format(username), hide_input=True)
             credentials[username] = password
 
         default_enable = None
@@ -271,7 +271,7 @@ class Script:
                 try:
                     dev_info['password'] = credentials[username]
                 except KeyError:
-                    self.logger.debug("<IMPORT_DEVICES> Skipping {}.  No password for user.".format(line[0]))
+                    self.logger.debug("<IMPORT_DEVICES> Skipping {0}.  No password for user.".format(line[0]))
                     skipped_lines += 1
                     continue
 
@@ -285,8 +285,8 @@ class Script:
             device_list.append(dev_info)
 
         # Give stats on how many devices were found and prompt user before going forward with connections.
-        validate_message = "{} devices found in CSV.\n" \
-                           "{} lines in CSV skipped.\n" \
+        validate_message = "{0} devices found in CSV.\n" \
+                           "{0} lines in CSV skipped.\n" \
                            "\n" \
                            "Do you want to proceed?".format(len(temp_device_list), skipped_lines)
         message_box_design = ICON_QUESTION | BUTTON_CANCEL | DEFBUTTON2
@@ -437,7 +437,7 @@ class CRTScript(Script):
         :return: The return code that identifies which button the user pressed. (See Message Box constants)
         :rtype: int
         """
-        self.logger.debug("<MESSAGE_BOX> Creating MessageBox with: \nTitle: {}\nMessage: {}\nOptions: {}"
+        self.logger.debug("<MESSAGE_BOX> Creating MessageBox with: \nTitle: {0}\nMessage: {1}\nOptions: {2}"
                           .format(title, message, options))
         return self.crt.Dialog.MessageBox(message, title, options)
 
@@ -457,9 +457,9 @@ class CRTScript(Script):
         :return: The value entered by the user
         :rtype: str
         """
-        self.logger.debug("<PROMPT> Creating Prompt with message: '{}'".format(message))
+        self.logger.debug("<PROMPT> Creating Prompt with message: '{0}'".format(message))
         result = self.crt.Dialog.Prompt(message, title, "", hide_input)
-        self.logger.debug("<PROMPT> Captures prompt results: '{}'".format(result))
+        self.logger.debug("<PROMPT> Captures prompt results: '{0}'".format(result))
         return result
 
     def file_open_dialog(self, title, button_label="Open", default_filename="", file_filter=""):
@@ -480,7 +480,7 @@ class CRTScript(Script):
         :return: The absolute path to the file that was selected
         :rtype: str
         """
-        self.logger.debug("<FILE_OPEN> Creating File Open Dialog with title: '{}'".format(title))
+        self.logger.debug("<FILE_OPEN> Creating File Open Dialog with title: '{0}'".format(title))
         result_filename = self.crt.Dialog.FileOpenDialog(title, button_label, default_filename, file_filter)
         return result_filename
 
@@ -504,39 +504,39 @@ class CRTScript(Script):
         :type prompt_endings: list
         """
         response_timeout = 10
-        self.logger.debug("<NEW_TAB> Attempting new tab connection to: {}@{}".format(username, host))
+        self.logger.debug("<NEW_TAB> Attempting new tab connection to: {0}@{1}".format(username, host))
 
         expanded_endings = []
         for ending in prompt_endings:
-            expanded_endings.append("{}".format(ending))
-            expanded_endings.append("{} ".format(ending))
+            expanded_endings.append("{0}".format(ending))
+            expanded_endings.append("{0} ".format(ending))
 
-        ssh2_string = "/SSH2 /ACCEPTHOSTKEYS /L {} /PASSWORD {} {}".format(username, password, host)
+        ssh2_string = "/SSH2 /ACCEPTHOSTKEYS /L {0} /PASSWORD {1} {2}".format(username, password, host)
         self.logger.debug("<NEW_TAB> Attempting connection in a new tab.")
         new_tab = self.crt.Session.ConnectInTab(ssh2_string, failSilently=True)
 
         # Check if we successfully connected.  If not, try SSH1
         if not new_tab.Session.Connected:
-            ssh1_string = "/SSH1 /ACCEPTHOSTKEYS /L {} /PASSWORD {} {}".format(username, password, host)
+            ssh1_string = "/SSH1 /ACCEPTHOSTKEYS /L {0} /PASSWORD {1} {2}".format(username, password, host)
             self.logger.debug("<NEW_TAB> Attempting connection via SSH1 in existing new tab")
             new_tab.Session.Connect(ssh1_string)
 
             if not new_tab.Session.Connected:
                 self.logger.debug("<NEW_TAB> SSH1 Failed.  Closing tab and raising exception.")
                 new_tab.Close()
-                raise sessions.ConnectError("Unabled to connect to {} in a new tab with SSH2 or SSH1.")
+                raise sessions.ConnectError("Unabled to connect to {0} in a new tab with SSH2 or SSH1.")
 
         # Set Tab parameters to allow correct sending/receiving of data via SecureCRT
         self.logger.debug("<NEW_TAB> Set Synchronous and IgnoreEscape")
         new_tab.Screen.Synchronous = True
         new_tab.Screen.IgnoreEscape = True
 
-        self.logger.debug("<NEW_TAB> Started looking for following prompt endings: {}".format(expanded_endings))
+        self.logger.debug("<NEW_TAB> Started looking for following prompt endings: {0}".format(expanded_endings))
         at_prompt = False
         while not at_prompt:
             found = new_tab.Screen.WaitForStrings(expanded_endings, response_timeout)
             if not found:
-                raise sessions.InteractionError("Timeout reached looking for prompt endings: {}"
+                raise sessions.InteractionError("Timeout reached looking for prompt endings: {0}"
                                                 .format(expanded_endings))
             else:
                 test_string = "!@&^"
@@ -574,7 +574,7 @@ class CRTScript(Script):
         # Set options based)
         new_session.SetOption("Protocol Name", protocol)
         new_session.SetOption("Hostname", ip)
-        desc = ["Created on {} by script:".format(creation_date), self.crt.ScriptFullName]
+        desc = ["Created on {0} by script:".format(creation_date), self.crt.ScriptFullName]
         new_session.SetOption("Description", desc)
         session_path = os.path.join(folder, session_name)
         # Save session based on passed folder and session name.
@@ -628,11 +628,11 @@ class DirectScript(Script):
                          "Ignore": IDIGNORE}
             return responses[text]
 
-        self.logger.debug("<MESSAGEBOX> Creating Message Box, with Title: {}, Message: {}, and Options: {}"
+        self.logger.debug("<MESSAGEBOX> Creating Message Box, with Title: {0}, Message: {1}, and Options: {2}"
                           .format(title, message, options))
         # Extract the layout paramter in the options field
         layout = get_button_layout(options)
-        self.logger.debug("<MESSAGEBOX> Layout Value is: {}".format(layout))
+        self.logger.debug("<MESSAGEBOX> Layout Value is: {0}".format(layout))
 
         # A mapping of each integer value and which buttons are shown in a MessageBox, so we can prompt for the
         # same values from the console
@@ -645,10 +645,10 @@ class DirectScript(Script):
         response = ""
         while response not in buttons[layout]:
             response = raw_input("Choose from {0}: ".format(buttons[layout]))
-            self.logger.debug("<MESSAGEBOX> Received: {}".format(response))
+            self.logger.debug("<MESSAGEBOX> Received: {0}".format(response))
 
         code = get_response_code(response)
-        self.logger.debug("<MESSAGEBOX> Returning Response Code: {}".format(code))
+        self.logger.debug("<MESSAGEBOX> Returning Response Code: {0}".format(code))
         return code
 
     def prompt_window(self, message, title="", hide_input=False):
@@ -668,9 +668,9 @@ class DirectScript(Script):
         :return: The value entered by the user
         :rtype: str
         """
-        self.logger.debug("<PROMPT> Creating Prompt with message: '{}'".format(message))
-        result = raw_input("{}: ".format(message))
-        self.logger.debug("<PROMPT> Captures prompt results: '{}'".format(result))
+        self.logger.debug("<PROMPT> Creating Prompt with message: '{0}'".format(message))
+        result = raw_input("{0}: ".format(message))
+        self.logger.debug("<PROMPT> Captures prompt results: '{0}'".format(result))
         return result
 
     def file_open_dialog(self, title, button_label="Open", default_filename="", file_filter=""):
@@ -691,7 +691,7 @@ class DirectScript(Script):
         :return: The absolute path to the file that was selected
         :rtype: str
         """
-        result_filename = raw_input("{} (type {}): ".format(title, file_filter))
+        result_filename = raw_input("{0} (type {0}): ".format(title, file_filter))
         return result_filename
 
     def ssh_in_new_tab(self, host, username, password, prompt_endings=("#", ">")):
@@ -710,6 +710,6 @@ class DirectScript(Script):
         :param folder: The folder (starting from the configured Sessions folder) where this session should be saved.
         :type folder: str
         """
-        print "Pretending to save session {} with hostname: {}, protocol: {}, under folder: {}"\
+        print "Pretending to save session {0} with hostname: {1}, protocol: {2}, under folder: {3}"\
               .format(session_name, ip, protocol, folder)
 

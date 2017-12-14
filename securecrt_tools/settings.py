@@ -26,7 +26,7 @@ class SettingsImporter:
                 with open(self.settings_file, 'w') as settings_fp:
                     self.defaults.write(settings_fp)
             else:
-                raise IOError("Settings file does not exist: {}".format(self.settings_file))
+                raise IOError("Settings file does not exist: {0}".format(self.settings_file))
         self.config.read(self.settings_file)
         if not self.validate_settings():
             self.correct_settings()

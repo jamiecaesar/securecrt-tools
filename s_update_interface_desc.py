@@ -20,7 +20,7 @@ from securecrt_tools.message_box_const import *
 
 # Create global logger so we can write debug messages from any function (if debug mode setting is enabled in settings).
 logger = logging.getLogger("securecrt")
-logger.debug("Starting execution of {}".format(script_name))
+logger.debug("Starting execution of {0}".format(script_name))
 
 
 # ################################################   SCRIPT LOGIC   ###################################################
@@ -141,31 +141,31 @@ def script_main(session, prompt_check_mode=True, check_mode=True, enable_pass=No
             # If there are 2 neighbors, assume a vPC and label appropriately
             if len(neigh_list) == 2:
                 neigh_list = sorted(neigh_list, key=utilities.human_sort_key)
-                new_desc = "vPC: {}, {}".format(neigh_list[0], neigh_list[1])
+                new_desc = "vPC: {0}, {1}".format(neigh_list[0], neigh_list[1])
             # Only update description if we will be making a change
             if new_desc != existing_desc:
-                config_commands.append("interface {}".format(interface))
-                config_commands.append(" description {}".format(new_desc))
-                rollback.append("interface {}".format(interface))
+                config_commands.append("interface {0}".format(interface))
+                config_commands.append(" description {0}".format(new_desc))
+                rollback.append("interface {0}".format(interface))
                 if not existing_desc:
                     rollback.append(" no description")
                 else:
-                    rollback.append(" description {}".format(existing_desc))
+                    rollback.append(" description {0}".format(existing_desc))
 
         # For other interfaces, use remote hostname and interface
         else:
             remote_host = description_data[interface][0]
             remote_intf = utilities.short_int_name(description_data[interface][1])
-            new_desc = "{} {}".format(remote_host, remote_intf)
+            new_desc = "{0} {1}".format(remote_host, remote_intf)
             # Only update description if we will be making a change
             if new_desc != existing_desc:
-                config_commands.append("interface {}".format(interface))
-                config_commands.append(" description {}".format(new_desc))
-                rollback.append("interface {}".format(interface))
+                config_commands.append("interface {0}".format(interface))
+                config_commands.append(" description {0}".format(new_desc))
+                rollback.append("interface {0}".format(interface))
                 if not existing_desc:
                     rollback.append(" no description")
                 else:
-                    rollback.append(" description {}".format(existing_desc))
+                    rollback.append(" description {0}".format(existing_desc))
 
     # If in check-mode, generate configuration and write it to a file, otherwise push the config to the device.
     if config_commands:
@@ -173,7 +173,7 @@ def script_main(session, prompt_check_mode=True, check_mode=True, enable_pass=No
             output_filename = session.create_output_filename("intf-desc", include_date=False)
             with open(output_filename, 'wb') as output_file:
                 for command in config_commands:
-                    output_file.write("{}\n".format(command))
+                    output_file.write("{0}\n".format(command))
             rollback_filename = session.create_output_filename("intf-rollback", include_date=False)
         else:
             # Check settings to see if we prefer to save backups before/after applying changes
@@ -205,7 +205,7 @@ def script_main(session, prompt_check_mode=True, check_mode=True, enable_pass=No
         if create_rollback:
             with open(rollback_filename, 'wb') as output_file:
                 for command in rollback:
-                    output_file.write("{}\n".format(command))
+                    output_file.write("{0}\n".format(command))
 
     # Return terminal parameters back to the original state.
     session.end_cisco_session()

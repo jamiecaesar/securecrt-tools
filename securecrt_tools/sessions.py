@@ -90,8 +90,8 @@ class Session:
         :rtype: str
         """
 
-        self.logger.debug("<CREATE_FILENAME> Starting creation of filename with Desc: {}, Base Dir: {}, ext: {}, "
-                          "include_date: {}".format(desc, base_dir, ext, include_date))
+        self.logger.debug("<CREATE_FILENAME> Starting creation of filename with Desc: {0}, Base Dir: {1}, ext: {2}, "
+                          "include_date: {3}".format(desc, base_dir, ext, include_date))
 
         if base_dir:
             save_path = os.path.realpath(base_dir)
@@ -124,16 +124,16 @@ class Session:
             my_date = ""
 
         file_bits = [hostname, clean_desc, my_date]
-        self.logger.debug("<CREATE_FILENAME> Using {} to create filename".format(file_bits))
+        self.logger.debug("<CREATE_FILENAME> Using {0} to create filename".format(file_bits))
         # Create filename, stripping off leading or trailing "-" if some fields are not used.
         filename = '-'.join(file_bits).strip("-")
         # If ext starts with a '.', add it, otherwise put the '.' in there ourselves.
         if ext[0] == '.':
             filename = filename + ext
         else:
-            filename = "{}.{}".format(filename, ext)
+            filename = "{0}.{1}".format(filename, ext)
         file_path = os.path.join(save_path, filename)
-        self.logger.debug("<CREATE_FILENAME> Final Filename: {}".format(file_path))
+        self.logger.debug("<CREATE_FILENAME> Final Filename: {0}".format(file_path))
 
         return file_path
 
@@ -147,8 +147,8 @@ class Session:
         :param valid_os_list: A list of OSs that
         """
         if self.os not in valid_os_list:
-            self.logger.debug("Unsupported OS: {} not in {}.  Raising exception.".format(self.os, valid_os_list))
-            raise UnsupportedOSError("Remote device running unsupported OS: {}.".format(self.os))
+            self.logger.debug("Unsupported OS: {0} not in {1}.  Raising exception.".format(self.os, valid_os_list))
+            raise UnsupportedOSError("Remote device running unsupported OS: {0}.".format(self.os))
 
     @abstractmethod
     def is_connected(self):
@@ -415,7 +415,7 @@ class CRTSession(Session):
             self.screen.Send(command)
             result = self.screen.WaitForString(command.strip(), self.response_timeout)
             if not result:
-                self.logger.debug("<__send> Timed out waiting for '{}' from device.".format(command))
+                self.logger.debug("<__send> Timed out waiting for '{0}' from device.".format(command))
                 raise InteractionError("Timed out waiting for sent command to be echoed back to us.")
             else:
                 return result
@@ -426,7 +426,7 @@ class CRTSession(Session):
     def __wait_for_string(self, wait_string):
         result = self.screen.WaitForString(wait_string, self.response_timeout)
         if not result:
-            self.logger.debug("<__wait_for_string> Timed out waiting for '{}' from device.".format(wait_string))
+            self.logger.debug("<__wait_for_string> Timed out waiting for '{0}' from device.".format(wait_string))
             raise InteractionError("Timeout waiting for response from device.")
         else:
             return result
@@ -434,7 +434,7 @@ class CRTSession(Session):
     def __wait_for_strings(self, string_list):
         result = self.screen.WaitForStrings(string_list, self.response_timeout)
         if not result:
-            self.logger.debug("<__wait_for_strings> Timed out waiting for '{}' from device.".format(string_list))
+            self.logger.debug("<__wait_for_strings> Timed out waiting for '{0}' from device.".format(string_list))
             raise InteractionError("Timeout waiting for response from device.")
         else:
             return result
@@ -448,10 +448,10 @@ class CRTSession(Session):
         """
         session_connected = self.session.Connected
         if session_connected == 1:
-            self.logger.debug("<IS_CONNECTED> Checking Connected Status.  Got: {} (True)".format(session_connected))
+            self.logger.debug("<IS_CONNECTED> Checking Connected Status.  Got: {0} (True)".format(session_connected))
             return True
         else:
-            self.logger.debug("<IS_CONNECTED> Checking Connected Status.  Got: {} (False)".format(session_connected))
+            self.logger.debug("<IS_CONNECTED> Checking Connected Status.  Got: {0} (False)".format(session_connected))
             return False
 
     def __post_connect_check(self, endings):
@@ -462,12 +462,12 @@ class CRTSession(Session):
                         of the CLI prompt for the remote device.
         :type endings: list
         """
-        self.logger.debug("<CONN_CHECK> Started looking for following prompt endings: {}".format(endings))
+        self.logger.debug("<CONN_CHECK> Started looking for following prompt endings: {0}".format(endings))
         at_prompt = False
         while not at_prompt:
             found = self.screen.WaitForStrings(endings, self.response_timeout)
             if not found:
-                raise InteractionError("Timeout reached looking for prompt endings: {}".format(endings))
+                raise InteractionError("Timeout reached looking for prompt endings: {0}".format(endings))
             else:
                 test_string = "!@&^"
                 self.screen.Send(test_string + "\b" * len(test_string))
@@ -482,17 +482,17 @@ class CRTSession(Session):
 
         expanded_endings = []
         for ending in prompt_endings:
-            expanded_endings.append("{}".format(ending))
-            expanded_endings.append("{} ".format(ending))
+            expanded_endings.append("{0}".format(ending))
+            expanded_endings.append("{0} ".format(ending))
 
-        ssh2_string = "/SSH2 /ACCEPTHOSTKEYS /L {} /PASSWORD {} {}".format(username, password, host)
+        ssh2_string = "/SSH2 /ACCEPTHOSTKEYS /L {0} /PASSWORD {1} {2}".format(username, password, host)
         # If the tab is already connected, then give an exception that we cannot connect.
         if self.is_connected():
             self.logger.debug("<CONNECT_SSH2> Session already connected.  Raising exception")
             raise ConnectError("Tab is already connected to another device.")
         else:
             try:
-                self.logger.debug("<CONNECT_SSH2> Attempting Connection to: {}@{} via SSH2".format(username, host))
+                self.logger.debug("<CONNECT_SSH2> Attempting Connection to: {0}@{1} via SSH2".format(username, host))
                 self.session.Connect(ssh2_string)
             except:
                 error = self.script.crt.GetLastErrorMessage()
@@ -512,17 +512,17 @@ class CRTSession(Session):
 
         expanded_endings = []
         for ending in prompt_endings:
-            expanded_endings.append("{}".format(ending))
-            expanded_endings.append("{} ".format(ending))
+            expanded_endings.append("{0}".format(ending))
+            expanded_endings.append("{0} ".format(ending))
 
-        ssh1_string = "/SSH1 /ACCEPTHOSTKEYS /L {} /PASSWORD {} {}".format(username, password, host)
+        ssh1_string = "/SSH1 /ACCEPTHOSTKEYS /L {0} /PASSWORD {1} {2}".format(username, password, host)
         # If the tab is already connected, then give an exception that we cannot connect.
         if self.is_connected():
             self.logger.debug("<CONNECT_SSH1> Session already connected.  Raising exception")
             raise ConnectError("Tab is already connected to another device.")
         else:
             try:
-                self.logger.debug("<CONNECT_SSH1> Attempting Connection to: {}@{} via SSH1".format(username, host))
+                self.logger.debug("<CONNECT_SSH1> Attempting Connection to: {0}@{1} via SSH1".format(username, host))
                 self.session.Connect(ssh1_string)
             except:
                 error = self.script.crt.GetLastErrorMessage()
@@ -556,7 +556,7 @@ class CRTSession(Session):
                                type of device (for example "$" for some linux hosts).
         :type prompt_endings: list
         """
-        self.logger.debug("<CONNECT_SSH> Attempting Connection to: {}@{}".format(username, host))
+        self.logger.debug("<CONNECT_SSH> Attempting Connection to: {0}@{1}".format(username, host))
 
         if not prompt_endings:
             raise ConnectError("Cannot connect without knowing what character ends the CLI prompt.")
@@ -569,14 +569,14 @@ class CRTSession(Session):
             try:
                 self.__connect_ssh_2(host, username, password, prompt_endings)
             except ConnectError as e:
-                self.logger.debug("<CONNECT_SSH> Failure trying SSH2: {}".format(e.message))
+                self.logger.debug("<CONNECT_SSH> Failure trying SSH2: {0}".format(e.message))
                 ssh2_error = e.message
                 try:
                     self.__connect_ssh_1(host, username, password, prompt_endings)
                 except ConnectError as e:
                     ssh1_error = e.message
-                    self.logger.debug("<CONNECT_SSH> Failure trying SSH1: {}".format(e.message))
-                    error = "SSH2 and SSH1 failed.\nSSH2 Failure:{}\nSSH1 Failure:{}".format(ssh2_error, ssh1_error)
+                    self.logger.debug("<CONNECT_SSH> Failure trying SSH1: {0}".format(e.message))
+                    error = "SSH2 and SSH1 failed.\nSSH2 Failure:{0}\nSSH1 Failure:{1}".format(ssh2_error, ssh1_error)
                     raise ConnectError(error)
 
     def connect_telnet(self, host, username, password, prompt_endings=("#", ">")):
@@ -598,14 +598,14 @@ class CRTSession(Session):
         if not prompt_endings:
             raise ConnectError("Cannot connect without knowing what character ends the CLI prompt.")
 
-        telnet_string = "/TELNET {}".format(host)
+        telnet_string = "/TELNET {0}".format(host)
         # If the tab is already connected, then give an exception that we cannot connect.
         if self.is_connected():
             self.logger.debug("<CONNECT_TELNET> Session already connected.  Raising exception")
             raise ConnectError("Tab is already connected to another device.")
         else:
             try:
-                self.logger.debug("<CONNECT_TELNET> Attempting Connection to: {} via TELNET".format(host))
+                self.logger.debug("<CONNECT_TELNET> Attempting Connection to: {0} via TELNET".format(host))
                 self.session.Connect(telnet_string)
             except:
                 error = self.script.crt.GetLastErrorMessage()
@@ -618,9 +618,9 @@ class CRTSession(Session):
 
         # Handle Login
         self.__wait_for_strings("sername")
-        self.__send("{}\n".format(username))
+        self.__send("{0}\n".format(username))
         self.__wait_for_string("assword")
-        self.screen.Send("{}\n".format(password))
+        self.screen.Send("{0}\n".format(password))
 
         # Make sure banners have printed and we've reached our expected prompt.
         self.__post_connect_check(prompt_endings)
@@ -674,8 +674,8 @@ class CRTSession(Session):
         :param command: The command to be issued to the remote device to disconnect.  The default is 'exit'
         :type command: str
         """
-        self.logger.debug("<DISCONNECT> Sending '{}' command.".format(command))
-        self.__send("{}\n".format(command))
+        self.logger.debug("<DISCONNECT> Sending '{0}' command.".format(command))
+        self.__send("{0}\n".format(command))
 
         # Unset Sync and IgnoreEscape upon disconnect
         self.screen.Synchronous = False
@@ -724,10 +724,10 @@ class CRTSession(Session):
         """
         if not self.prompt:
             self.prompt = self.__get_prompt()
-        self.__send("ssh {} {}@{}\n".format(options, username, host))
+        self.__send("ssh {0} {1}@{2}\n".format(options, username, host))
         result = self.__wait_for_strings(["assword", "refused", "denied"])
         if result == 1:
-            self.screen.Send("{}\n".format(password))
+            self.screen.Send("{0}\n".format(password))
             self.__post_connect_check(prompt_endings)
             self.prompt_stack.insert(0, self.prompt)
         else:
@@ -755,12 +755,12 @@ class CRTSession(Session):
         """
         if not self.prompt:
             self.prompt = self.__get_prompt()
-        self.__send("telnet {}\n".format(host))
+        self.__send("telnet {0}\n".format(host))
         result = self.__wait_for_strings(["sername", "refused", "denied"])
         if result == 1:
-            self.__send("{}\n".format(username))
+            self.__send("{0}\n".format(username))
             self.__wait_for_string("assword")
-            self.screen.Send("{}\n".format(password))
+            self.screen.Send("{0}\n".format(password))
             self.__post_connect_check(prompt_endings)
             self.prompt_stack.insert(0, self.prompt)
         else:
@@ -779,7 +779,7 @@ class CRTSession(Session):
             prev_prompt = self.prompt_stack.pop(0)
         except IndexError:
             prev_prompt = None
-        self.__send("{}\n".format(command))
+        self.__send("{0}\n".format(command))
         self.__wait_for_string(prev_prompt)
 
     def start_cisco_session(self, enable_pass=None):
@@ -816,15 +816,15 @@ class CRTSession(Session):
         self.prompt = self.__get_prompt()
         self.__enter_enable(enable_pass, prompt_for_enable)
         self.hostname = self.prompt[:-1]
-        self.logger.debug("<START> Set Hostname: {}".format(self.hostname))
+        self.logger.debug("<START> Set Hostname: {0}".format(self.hostname))
 
         # Detect the OS of the device, because outputs will differ per OS
         self.os = self.__get_network_os()
-        self.logger.debug("<START> Discovered OS: {}".format(self.os))
+        self.logger.debug("<START> Discovered OS: {0}".format(self.os))
 
         # Get terminal length and width, so we can revert back after changing them.
         self.term_len, self.term_width = self.__get_term_info()
-        self.logger.debug("<START> Discovered Term Len: {}, Term Width: {}".format(self.term_len, self.term_width))
+        self.logger.debug("<START> Discovered Term Len: {0}, Term Width: {1}".format(self.term_len, self.term_width))
 
         # If modify_term setting is True, then prevent "--More--" prompt (length) and wrapping of lines (width)
         if self.script.settings.getboolean("Global", "modify_term"):
@@ -873,15 +873,15 @@ class CRTSession(Session):
                     if self.os == "IOS" or self.os == "NXOS":
                         if self.term_len:
                             # Set term length back to saved values
-                            self.__send('term length {}\n'.format(self.term_len))
+                            self.__send('term length {0}\n'.format(self.term_len))
                             self.__wait_for_string(self.prompt)
 
                         if self.term_width:
                             # Set term width back to saved values
-                            self.__send('term width {}\n'.format(self.term_width))
+                            self.__send('term width {0}\n'.format(self.term_width))
                             self.__wait_for_string(self.prompt)
                     elif self.os == "ASA":
-                        self.screen.Send("terminal pager {}\n".format(self.term_len))
+                        self.screen.Send("terminal pager {0}\n".format(self.term_len))
 
             self.prompt = None
             self.logger.debug("<END> Deleting learned Prompt.")
@@ -920,7 +920,7 @@ class CRTSession(Session):
                     self.logger.debug("<__enter_enable> Enable password not set.")
                     raise InteractionError("Unable to enter Enable mode. No password set.")
                 if result == 2:
-                    self.screen.Send("{}\n".format(enable_pass))
+                    self.screen.Send("{0}\n".format(enable_pass))
                     self.__wait_for_string("#")
                     self.prompt = self.__get_prompt()
                 else:
@@ -947,14 +947,14 @@ class CRTSession(Session):
             self.screen.Send(test_string)
             result = self.screen.ReadString("!&%", timeout_seconds)
             attempts += 1
-            self.logger.debug("<CONNECT> Attempt {}: Prompt result = {}".format(attempts, result))
+            self.logger.debug("<CONNECT> Attempt {0}: Prompt result = {1}".format(attempts, result))
 
         prompt = result.strip(u"\r\n\b ")
         if prompt == '':
             self.logger.debug("<GET PROMPT> Prompt discovery failed.  Raising exception.")
             raise InteractionError("Unable to discover device prompt")
 
-        self.logger.debug("<GET PROMPT> Discovered prompt as '{}'.".format(prompt))
+        self.logger.debug("<GET PROMPT> Discovered prompt as '{0}'.".format(prompt))
         return prompt
 
     def __get_network_os(self):
@@ -1061,7 +1061,7 @@ class CRTSession(Session):
         :param filename: A string with the absolute path to the filename to be written.
         :type filename: str
         """
-        self.logger.debug("<WRITE_FILE> Call to write_output_to_file with command: {}, filename: {}"
+        self.logger.debug("<WRITE_FILE> Call to write_output_to_file with command: {0}, filename: {0}"
                           .format(command, filename))
         self.script.validate_dir(os.path.dirname(filename))
         self.logger.debug("<WRITE_FILE> Using filename: {0}".format(filename))
@@ -1175,28 +1175,28 @@ class CRTSession(Session):
         :type output_filename: str
         """
         self.logger.debug("<SEND_CMDS> Preparing to write commands to device.")
-        self.logger.debug("<SEND_CMDS> Received: {}".format(str(command_list)))
+        self.logger.debug("<SEND_CMDS> Received: {0}".format(str(command_list)))
 
         # Build text commands to send to device, and book-end with "conf t" and "end"
         config_results = ""
         command_list.insert(0, "configure terminal")
 
         for command in command_list:
-            self.screen.Send("{}\n".format(command))
+            self.screen.Send("{0}\n".format(command))
             output = self.screen.ReadString(")#", 3)
             if output:
-                config_results += "{})#".format(output)
+                config_results += "{0})#".format(output)
             else:
-                error = "Did not receive expected prompt after issuing command: {}".format(command)
-                self.logger.debug("<SEND_CMDS> {}".format(error))
-                raise InteractionError("{}".format(error))
+                error = "Did not receive expected prompt after issuing command: {0}".format(command)
+                self.logger.debug("<SEND_CMDS> {0}".format(error))
+                raise InteractionError("{0}".format(error))
 
         self.screen.Send("end\n")
         output = self.screen.ReadString(self.prompt, 2)
-        config_results += "{}{}".format(output, self.prompt)
+        config_results += "{0}{1}".format(output, self.prompt)
 
         with open(output_filename, 'w') as output_file:
-            self.logger.debug("<SEND_CMDS> Writing config session output to: {}".format(output_filename))
+            self.logger.debug("<SEND_CMDS> Writing config session output to: {0}".format(output_filename))
             output_file.write(config_results.replace("\r", ""))
 
     def save(self, command="copy running-config startup-config"):
@@ -1204,11 +1204,11 @@ class CRTSession(Session):
         Sends a "copy running-config startup-config" command to the remote device to save the running configuration.
         """
         self.logger.debug("<SAVE> Saving configuration on remote device.")
-        self.__send("{}\n".format(command))
+        self.__send("{0}\n".format(command))
         save_results = self.__wait_for_strings(["?", self.prompt])
         if save_results == 1:
             self.screen.Send("\n")
-        self.logger.debug("<SAVE> Save results: {}".format(save_results))
+        self.logger.debug("<SAVE> Save results: {0}".format(save_results))
 
 
 class DirectSession(Session):
@@ -1229,7 +1229,7 @@ class DirectSession(Session):
         valid_response = ["yes", "no"]
         response = ""
         while response.lower() not in valid_response:
-            response = raw_input("Is this device already connected?({}): ".format(str(valid_response)))
+            response = raw_input("Is this device already connected?({0}): ".format(str(valid_response)))
 
         if response.lower() == "yes":
             self.logger.debug("<INIT> Assuming session is already connected")
@@ -1268,9 +1268,9 @@ class DirectSession(Session):
         :type prompt_endings: list
         """
         if version == 2 or version == 1:
-            print "Pretending to log into device {} with username {} using SSH{}.".format(host, username, version)
+            print "Pretending to log into device {0} with username {1} using SSH{2}.".format(host, username, version)
         else:
-            print "Pretending to log into device {} with username {} using SSH2.".format(host, username)
+            print "Pretending to log into device {0} with username {1} using SSH2.".format(host, username)
         self._connected = True
 
     def connect_telnet(self, host, username, password, prompt_endings=("#", ">")):
@@ -1289,14 +1289,14 @@ class DirectSession(Session):
                                type of device (for example "$" for some linux hosts).
         :type prompt_endings: list
         """
-        print "Pretending to log into device {} with username {} using TELNET.".format(host, username)
+        print "Pretending to log into device {0} with username {1} using TELNET.".format(host, username)
         self._connected = True
 
     def connect(self, host, username, password, protocol=None, prompt_endings=("#", ">")):
         if not protocol:
-            print "Pretending to log into device {} with username {} using ANY.".format(host, username, protocol)
+            print "Pretending to log into device {0} with username {1} using ANY.".format(host, username, protocol)
         else:
-            print "Pretending to log into device {} with username {} using {}.".format(host, username, protocol)
+            print "Pretending to log into device {0} with username {1} using {2}.".format(host, username, protocol)
         self._connected = True
 
     def disconnect(self, command="exit"):
@@ -1307,7 +1307,7 @@ class DirectSession(Session):
         :param command: The command to be issued to the remote device to disconnect.  The default is 'exit'
         :type command: str
         """
-        print "Pretending to disconnect from device {}.".format(self.hostname)
+        print "Pretending to disconnect from device {0}.".format(self.hostname)
         self._connected = False
 
     def ssh_via_jump(self, host, username, password, options="-o StrictHostKeyChecking=no"):
@@ -1331,8 +1331,8 @@ class DirectSession(Session):
         """
         if self.prompt:
             self.prompt_stack.insert(0,self.prompt)
-        self.prompt = "{}#".format(host)
-        print "Now connected to: {} (using prompt: {})".format(host, self.prompt)
+        self.prompt = "{0}#".format(host)
+        print "Now connected to: {0} (using prompt: {1})".format(host, self.prompt)
 
     def telnet_via_jump(self, host, username, password):
         """
@@ -1352,8 +1352,8 @@ class DirectSession(Session):
         """
         if self.prompt:
             self.prompt_stack.insert(0,self.prompt)
-        self.prompt = "{}#".format(host)
-        print "Now connected to: {} (using prompt: {})".format(host, self.prompt)
+        self.prompt = "{0}#".format(host)
+        print "Now connected to: {0} (using prompt: {1})".format(host, self.prompt)
 
     def disconnect_via_jump(self, command="exit"):
         """
@@ -1367,7 +1367,7 @@ class DirectSession(Session):
         prev_prompt = None
         try:
             prev_prompt = self.prompt_stack.pop(0)
-            print "Simulated disconnect from remote host.  Now at prompt: {}".format(prev_prompt)
+            print "Simulated disconnect from remote host.  Now at prompt: {0}".format(prev_prompt)
             self.prompt = prev_prompt
         except IndexError:
             print "Simulated disconnect from remote host.  Prompt not recorded from previous device".format
@@ -1402,7 +1402,7 @@ class DirectSession(Session):
         # Get prompt (and thus hostname) from device
         self.prompt = "DebugHost#"
         self.hostname = self.prompt[:-1]
-        self.logger.debug("<START> Set Hostname: {}".format(self.hostname))
+        self.logger.debug("<START> Set Hostname: {0}".format(self.hostname))
 
         # Detect the OS of the device, because outputs will differ per OS
         valid_os = ["IOS", "NXOS", "ASA"]
@@ -1532,21 +1532,21 @@ class DirectSession(Session):
         :type output_filename: str
         """
         self.logger.debug("<SEND CONFIG> Preparing to write commands to device.")
-        self.logger.debug("<SEND CONFIG> Received: {}".format(str(command_list)))
+        self.logger.debug("<SEND CONFIG> Received: {0}".format(str(command_list)))
 
         command_string = ""
         command_string += "configure terminal\n"
         for command in command_list:
-            command_string += "{}\n".format(command.strip())
+            command_string += "{0}\n".format(command.strip())
         command_string += "end\n"
 
-        self.logger.debug("<SEND CONFIG> Final command list:\n {}".format(command_string))
+        self.logger.debug("<SEND CONFIG> Final command list:\n {0}".format(command_string))
 
         output_filename = self.create_output_filename("CONFIG_RESULT")
         config_results = command_string
         with open(output_filename, 'w') as output_file:
-            self.logger.debug("<SEND CONFIG> Writing output to: {}".format(output_filename))
-            output_file.write("{}{}".format(self.prompt, config_results))
+            self.logger.debug("<SEND CONFIG> Writing output to: {0}".format(output_filename))
+            output_file.write("{0}{1}".format(self.prompt, config_results))
 
     def save(self, command="copy running-config startup-config"):
         """
