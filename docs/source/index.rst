@@ -7,7 +7,7 @@ Welcome to the SecureCRT Tools documentation!
 =============================================
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
    :caption: Contents:
 
    README.rst

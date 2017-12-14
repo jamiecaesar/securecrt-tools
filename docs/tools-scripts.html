@@ -1,0 +1,550 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>securecrt_tools.scripts &#8212; SecureCRT Tools 2.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="securecrt_tools.sessions" href="tools-sessions.html" />
+    <link rel="prev" title="SecureCRT Tools Modules" href="securecrt_tools.html" /> 
+  </head>
+  <body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="index.html">SecureCRT Tools 2.1.0 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="securecrt_tools.html" title="SecureCRT Tools Modules"
+             accesskey="P">previous</a> |
+          <a href="tools-sessions.html" title="securecrt_tools.sessions"
+             accesskey="N">next</a> |
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-securecrt_tools.scripts">
+<span id="securecrt-tools-scripts"></span><h1>securecrt_tools.scripts<a class="headerlink" href="#module-securecrt_tools.scripts" title="Permalink to this headline">¶</a></h1>
+<p>This module contains classes for representing the execution of a script in SecureCRT.  These attributes and methods
+defined with these classes are more “global” in nature, meaning that they focus on either the interaction with the
+application, or anything that is common to the entire script regardless of how many sessions (in tabs) are open to
+remote devices.</p>
+<div class="section" id="the-script-base-class">
+<h2>The Script Base Class<a class="headerlink" href="#the-script-base-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="securecrt_tools.scripts.Script">
+<em class="property">class </em><code class="descclassname">securecrt_tools.scripts.</code><code class="descname">Script</code><span class="sig-paren">(</span><em>script_path</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.Script" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a base class for the script object.  This class cannot be used directly, but is instead a blueprint that
+enforces what any sub-classes must implement.  The most important sub-class is the CRTScript subclass which
+represents the script being executed from SecureCRT.  The CRT Script class is designed to interact with SecureCRT
+directly.   The other sub-class is the DirectScript, which is used to simulate interactions with SecureCRT if the
+script is being run directly.  The purpose of DirectScript class is to allow the programmer to debug their code in
+their favorite IDE or debugger, which cannot be done when executing the script from SecureCRT.  DirectScript allows
+the same code to run locally without SecureCRT and the class will prompt for the information it needs to continue
+running the main script.</p>
+<p>Any methods that are not prepended with the &#64;abstractmethod tag preceding the method definition will be inherited
+and available to the sub-classes without needing to define them specifically in each sub-class.  Methods designed
+this way would use the exact same code in all sub-classes, and so there is no reason to re-create them in each
+subclass.</p>
+<p>Methods defined with the &#64;abstractmethod tag should be left empty in this class.  They are required to be
+implemented in each sub-class.  Methods are defined this way when they are required to exist in all sub-classes
+for consistency, but the could would be completely different depending on which class is being used.  One example
+is the SecureCRT Message Box.  When a script is run in SecureCRT, this should use the SecureCRT API to create a
+message box that pops up within SecureCRT.  When the script is being run directly in an IDE, we would want the same
+information to be printed to the console.  When written this way, if a script calls the message_box() method, the
+script will function regardless of how the script was being executed.</p>
+<dl class="method">
+<dt id="securecrt_tools.scripts.Script.get_main_session">
+<code class="descname">get_main_session</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.Script.get_main_session" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a CRTSession object that interacts with the SecureCRT tab that the script was lauched within.  This is
+the primary tab that will be used to interact with remote devices.  While new tabs can be created to connect to
+other devices, SecureCRT does not support multi-threading so multiple devices cannot be interacted with
+simultaneously via a script.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A session object that represents the tab where the script was launched</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="tools-sessions.html#securecrt_tools.sessions.Session" title="securecrt_tools.sessions.Session">sessions.Session</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.scripts.Script.get_template">
+<code class="descname">get_template</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.Script.get_template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the full path to a TextFSM template file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>str</em>) – Filename of the template</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Full path to the template location</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.scripts.Script.import_device_list">
+<code class="descname">import_device_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.Script.import_device_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will prompt for a device list CSV file to import, returns a list containing all of the
+devices that were in the CSV file and their associated credentials.  The CSV file must be of the format, and
+include a header row of [‘Hostname’, ‘Protocol’, ‘Username’, ‘Password’, ‘Enable’, ‘Via-Jumpbox’].  An example
+device list CSV file is at ‘template/sample_device_list.csv’</p>
+<p>Some additional information about missing items from a line in the CSV:
+- If the hostname field is missing, the line will be skipped.
+- If the protocol field is empty, the script will try SSH2, then SSH1, then Telnet.
+- If the username is missing, this method will prompt the user for a default usernaem to use
+- If the password is missing, will prompt the user for a password for each username missing a password
+- If the enable password is missing, the method will ask the user if they want to set a default enable to use
+- If the IP is included then the device will be reached through the jumpbox, otherwise connect directly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A list where each entry is a dictionary representing a device and the associated login information.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list of dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.scripts.Script.validate_dir">
+<code class="descname">validate_dir</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.Script.validate_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Verifies that the path to the supplied directory exists.  If not, prompt the user to create it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<em>str</em>) – A directory path (not including filename) to be validated</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="crtscript-class">
+<h2>CRTScript Class<a class="headerlink" href="#crtscript-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="securecrt_tools.scripts.CRTScript">
+<em class="property">class </em><code class="descclassname">securecrt_tools.scripts.</code><code class="descname">CRTScript</code><span class="sig-paren">(</span><em>crt</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.CRTScript" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#securecrt_tools.scripts.Script" title="securecrt_tools.scripts.Script"><code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.scripts.Script</span></code></a></p>
+<p>This class is a sub-class of the Script base class, and is meant to be used in any scripts that are being executed
+from inside of SecureCRT.  This sub-class is designed to interact with the SecureCRT application itself (not with
+tabs that have connections to remote devices) and represent a script being executed from within SecureCRT.  This
+class inherits the methods from the Script class that are documented above, and is required to implement all of the
+abstract classes defined in the Script class.</p>
+<dl class="method">
+<dt id="securecrt_tools.scripts.CRTScript.create_new_saved_session">
+<code class="descname">create_new_saved_session</code><span class="sig-paren">(</span><em>session_name</em>, <em>ip</em>, <em>protocol='SSH2'</em>, <em>folder='_imports'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.CRTScript.create_new_saved_session" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a session object that can be opened from the Connect menu in SecureCRT.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>session_name</strong> (<em>str</em>) – The name of the session</li>
+<li><strong>ip</strong> (<em>str</em>) – The IP address or hostname of the device represented by this session</li>
+<li><strong>protocol</strong> (<em>str</em>) – The protocol to use for this connection (TELNET, SSH1, SSH2, etc)</li>
+<li><strong>folder</strong> (<em>str</em>) – The folder (starting from the configured Sessions folder) where this session should be saved.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.scripts.CRTScript.file_open_dialog">
+<code class="descname">file_open_dialog</code><span class="sig-paren">(</span><em>title</em>, <em>button_label='Open'</em>, <em>default_filename=''</em>, <em>file_filter=''</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.CRTScript.file_open_dialog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prompts the user to select a file that will be processed by the script.  In SecureCRT this will give a pop-up
+file selection dialog window, and will return the full path to the file chosen.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>title</strong> (<em>str</em>) – Title for the File Open dialog window (Only displays in Windows)</li>
+<li><strong>button_label</strong> (<em>str</em>) – Label for the “Open” button</li>
+<li><strong>default_filename</strong> (<em>str</em>) – If provided a default filename, the window will open in the parent directory
+of the file, otherwise the current working directory will be the starting directory.</li>
+<li><strong>file_filter</strong> (<em>str</em>) – Specifies a filter for what type of files can be selected.  The format is:
+&lt;Name of Filter&gt; (<em>.&lt;extension&gt;)|</em>.&lt;extension&gt;||
+For example, a filter for CSV files would be “CSV Files (<em>.csv)|</em>.csv||” or multiple filters can be used:
+“Text Files (<em>.txt)|</em>.txt|Log File (<em>.log)|</em>.log||”</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The absolute path to the file that was selected</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.scripts.CRTScript.message_box">
+<code class="descname">message_box</code><span class="sig-paren">(</span><em>message</em>, <em>title=''</em>, <em>options=0</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.CRTScript.message_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints a message for the user.  In SecureCRT, the message is displayed in a pop-up message box with a variety
+of buttons, depending on which options are chosen.   The default is just an “OK” button.</p>
+<p>This window can be customized by setting the “options” value, using the constants listed at the top of the
+sessions.py file.  One constant from each of the 3 categories can be OR’d (|) together to make a single option
+value that will format the message box.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>message</strong> (<em>str</em>) – The message to send to the user</li>
+<li><strong>title</strong> (<em>str</em>) – Title for the message box</li>
+<li><strong>options</strong> (<em>int</em>) – Sets the display format of the messagebox. (See Message Box constants in sessions.py)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The return code that identifies which button the user pressed. (See Message Box constants)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.scripts.CRTScript.prompt_window">
+<code class="descname">prompt_window</code><span class="sig-paren">(</span><em>message</em>, <em>title=''</em>, <em>hide_input=False</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.CRTScript.prompt_window" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prompts the user for an input value.  In SecureCRT this will open a pop-up window where the user can input the
+requested information.</p>
+<p>The “hide_input” input will mask the input, so that passwords or other senstive information can be requested.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>message</strong> (<em>str</em>) – The message to send to the user</li>
+<li><strong>title</strong> (<em>str</em>) – Title for the prompt window</li>
+<li><strong>hide_input</strong> (<em>bool</em>) – Specifies whether to hide the user input or not.  Default is False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The value entered by the user</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.scripts.CRTScript.ssh_in_new_tab">
+<code class="descname">ssh_in_new_tab</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.CRTScript.ssh_in_new_tab" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connects to a device via the SSH protocol in a new tab.  A new CRTSession object that controls the new tab is
+returned by this method.</p>
+<p>By default, SSH2 will be tried first, but if it fails it will attempt to fall back to SSH1.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> (<em>str</em>) – The IP address of DNS name for the device to connect</li>
+<li><strong>username</strong> (<em>str</em>) – The username to login to the device with</li>
+<li><strong>password</strong> (<em>str</em>) – The password that goes with the provided username.  If a password is not specified, the
+user will be prompted for one.</li>
+<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
+Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
+type of device (for example “$” for some linux hosts).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="directscript-class">
+<h2>DirectScript Class<a class="headerlink" href="#directscript-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="securecrt_tools.scripts.DirectScript">
+<em class="property">class </em><code class="descclassname">securecrt_tools.scripts.</code><code class="descname">DirectScript</code><span class="sig-paren">(</span><em>full_script_path</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DirectScript" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#securecrt_tools.scripts.Script" title="securecrt_tools.scripts.Script"><code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.scripts.Script</span></code></a></p>
+<p>This class is a sub-class of the Script base class, and is meant to be used in any scripts that are being executed
+directly from a local python installation.  This sub-class is designed to simulate the interaction with SecureCRT
+while the script is being run from a local python installation.  For example, when a script attempts to create a
+pop-up message box in SecureCRT, this class will simply print the information to the console (or request information
+from the user via the console).</p>
+<p>This class inherits the methods from the Script class that are documented above, and is required to implement all
+of the abstract classes defined in the Script class.  This way, it is a complete replacement for the CRTScript class
+if a script is run directly.</p>
+<dl class="method">
+<dt id="securecrt_tools.scripts.DirectScript.create_new_saved_session">
+<code class="descname">create_new_saved_session</code><span class="sig-paren">(</span><em>session_name</em>, <em>ip</em>, <em>protocol='SSH2'</em>, <em>folder='_imports'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DirectScript.create_new_saved_session" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pretends to create a new SecureCRT session.  Since we aren’t running in SecureCRT, it does nothing except
+print a message that a device was created.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>session_name</strong> (<em>str</em>) – The name of the session</li>
+<li><strong>ip</strong> (<em>str</em>) – The IP address or hostname of the device represented by this session</li>
+<li><strong>protocol</strong> (<em>str</em>) – The protocol to use for this connection (TELNET, SSH1, SSH2, etc)</li>
+<li><strong>folder</strong> (<em>str</em>) – The folder (starting from the configured Sessions folder) where this session should be saved.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.scripts.DirectScript.file_open_dialog">
+<code class="descname">file_open_dialog</code><span class="sig-paren">(</span><em>title</em>, <em>button_label='Open'</em>, <em>default_filename=''</em>, <em>file_filter=''</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DirectScript.file_open_dialog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prompts the user to select a file that will be processed by the script.  In a direct session, the user will be
+prompted for the full path to a file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>title</strong> (<em>str</em>) – Title for the File Open dialog window (Only displays in Windows)</li>
+<li><strong>button_label</strong> (<em>str</em>) – Label for the “Open” button</li>
+<li><strong>default_filename</strong> (<em>str</em>) – If provided a default filename, the window will open in the parent directory
+of the file, otherwise the current working directory will be the starting directory.</li>
+<li><strong>file_filter</strong> (<em>str</em>) – Specifies a filter for what type of files can be selected.  The format is:
+&lt;Name of Filter&gt; (<em>.&lt;extension&gt;)|</em>.&lt;extension&gt;||
+For example, a filter for CSV files would be “CSV Files (<em>.csv)|</em>.csv||” or multiple filters can be used:
+“Text Files (<em>.txt)|</em>.txt|Log File (<em>.log)|</em>.log||”</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The absolute path to the file that was selected</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.scripts.DirectScript.message_box">
+<code class="descname">message_box</code><span class="sig-paren">(</span><em>message</em>, <em>title=''</em>, <em>options=0</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DirectScript.message_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints a message for the user.  When used in a DirectSession, the message is printed to the console and the
+user is prompted to type the button that would be selected.</p>
+<p>This window can be customized by setting the “options” value, using the constants listed at the top of the
+sessions.py file.  One constant from each of the 3 categories can be OR’d (|) together to make a single option
+value that will format the message box.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>message</strong> (<em>str</em>) – The message to send to the user</li>
+<li><strong>title</strong> (<em>str</em>) – Title for the message box</li>
+<li><strong>options</strong> (<em>int</em>) – Sets the display format of the messagebox. (See Message Box constants in sessions.py)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The return code that identifies which button the user pressed. (See Message Box constants)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.scripts.DirectScript.prompt_window">
+<code class="descname">prompt_window</code><span class="sig-paren">(</span><em>message</em>, <em>title=''</em>, <em>hide_input=False</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DirectScript.prompt_window" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prompts the user for an input value.  In a direct session, the user will be prompted at the console for input.</p>
+<p>The “hide_input” input will mask the input, so that passwords or other senstive information can be requested.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>message</strong> (<em>str</em>) – The message to send to the user</li>
+<li><strong>title</strong> (<em>str</em>) – Title for the prompt window</li>
+<li><strong>hide_input</strong> (<em>bool</em>) – Specifies whether to hide the user input or not.  Default is False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The value entered by the user</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.scripts.DirectScript.ssh_in_new_tab">
+<code class="descname">ssh_in_new_tab</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DirectScript.ssh_in_new_tab" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pretends to open a new tab.  Since this is being run directly and no tabs exist, the function really does
+nothing but return a new Session object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> (<em>str</em>) – The IP address of DNS name for the device to connect (only for API compatibility - not used)</li>
+<li><strong>username</strong> (<em>str</em>) – The username to login to the device with (only for API compatibility - not used)</li>
+<li><strong>password</strong> (<em>str</em>) – The password that goes with the provided username.  If a password is not specified, the
+user will be prompted for one. (only for API compatibility - not used)</li>
+<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
+Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
+type of device (for example “$” for some linux hosts). (only for API compatibility
+- not used)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="script-class-exceptions">
+<h2>Script Class Exceptions:<a class="headerlink" href="#script-class-exceptions" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="securecrt_tools.scripts.ScriptError">
+<em class="property">exception </em><code class="descclassname">securecrt_tools.scripts.</code><code class="descname">ScriptError</code><a class="headerlink" href="#securecrt_tools.scripts.ScriptError" title="Permalink to this definition">¶</a></dt>
+<dd><p>An exception type that is raised when there is a problem with the main scripts, such as missing settings files.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="README.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README.html#important-note">Important Note</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README.html#running-the-scripts">Running The Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README.html#settings">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scripts.html">Scripts</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="writing_scripts.html">Writing Your Own Scripts</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="writing_intro.html">Introduction To Writing SecureCRT Scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="about_templates.html">About Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="textfsm_note.html">A Note on TextFSM</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="modules.html">Module Documentation</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="securecrt_tools.html">SecureCRT Tools Modules</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">securecrt_tools.scripts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tools-sessions.html">securecrt_tools.sessions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tools-settings.html">securecrt_tools.settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tools-utilities.html">securecrt_tools.utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="3rdparty.html">Third Party Modules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="securecrt_tools.html" title="SecureCRT Tools Modules"
+              >previous</a> |
+            <a href="tools-sessions.html" title="securecrt_tools.sessions"
+              >next</a> |
+            <a href="py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+              <br/>
+              <a href="_sources/tools-scripts.rst.txt"
+                rel="nofollow">Show Source</a>
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Jamie Caesar.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.5.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

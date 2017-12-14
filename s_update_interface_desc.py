@@ -41,8 +41,8 @@ def script_main(session, prompt_check_mode=True, check_mode=True, enable_pass=No
     "take_backups" - If set to True, the script will save a copy of the running config before and after making changes.
     "rollback_file" - If set to True, the script will generate a rollback configuration script and save it to a file.
 
-     :param session: A subclass of the sessions.Session object that represents this particular script session (either
-                SecureCRTSession or DirectSession)
+    :param session: A subclass of the sessions.Session object that represents this particular script session (either
+        SecureCRTSession or DirectSession)
     :type session: sessions.Session
     :param prompt_check_mode: A boolean that specifies if we should prompt the user to find out if we should run in
         "check mode".  We would make this False if we were using this function in a multi-device script, so that the

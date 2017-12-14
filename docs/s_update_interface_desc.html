@@ -56,7 +56,7 @@
 <span id="s-update-interface-desc"></span><h1>s_update_interface_desc<a class="headerlink" href="#module-s_update_interface_desc" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="s_update_interface_desc.script_main">
-<code class="descclassname">s_update_interface_desc.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>script</em>, <em>prompt_checkmode=True</em>, <em>check_mode=True</em>, <em>enable_pass=None</em><span class="sig-paren">)</span><a class="headerlink" href="#s_update_interface_desc.script_main" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">s_update_interface_desc.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>session</em>, <em>prompt_check_mode=True</em>, <em>check_mode=True</em>, <em>enable_pass=None</em><span class="sig-paren">)</span><a class="headerlink" href="#s_update_interface_desc.script_main" title="Permalink to this definition">¶</a></dt>
 <dd><div class="line-block">
 <div class="line">SINGLE device script</div>
 <div class="line">Author: Jamie Caesar</div>
@@ -75,9 +75,9 @@ will push the configuration commands to the device and save the configuration.</
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>script</strong> (<a class="reference internal" href="securecrt_tools.html#securecrt_tools.script_types.Script" title="securecrt_tools.script_types.Script"><em>script_types.Script</em></a>) – A subclass of the sessions.Session object that represents this particular script session (either
+<li><strong>session</strong> (<a class="reference internal" href="tools-sessions.html#securecrt_tools.sessions.Session" title="securecrt_tools.sessions.Session"><em>sessions.Session</em></a>) – A subclass of the sessions.Session object that represents this particular script session (either
 SecureCRTSession or DirectSession)</li>
-<li><strong>prompt_checkmode</strong> (<em>bool</em>) – A boolean that specifies if we should prompt the user to find out if we should run in
+<li><strong>prompt_check_mode</strong> (<em>bool</em>) – A boolean that specifies if we should prompt the user to find out if we should run in
 “check mode”.  We would make this False if we were using this function in a multi-device script, so that the
 process can run continually without prompting the user at each device.</li>
 <li><strong>check_mode</strong> (<em>bool</em>) – A boolean to specify whether we should run in “check mode” (Generate what the script would do
@@ -133,13 +133,13 @@ have members found in the CDP table.</p>
 
 <dl class="function">
 <dt id="s_update_interface_desc.get_desc_table">
-<code class="descclassname">s_update_interface_desc.</code><code class="descname">get_desc_table</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#s_update_interface_desc.get_desc_table" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">s_update_interface_desc.</code><code class="descname">get_desc_table</code><span class="sig-paren">(</span><em>session</em><span class="sig-paren">)</span><a class="headerlink" href="#s_update_interface_desc.get_desc_table" title="Permalink to this definition">¶</a></dt>
 <dd><p>A function that creates a lookup dictionary that can be used to get the description of an interface.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>script</strong> (<a class="reference internal" href="securecrt_tools.html#securecrt_tools.script_types.Script" title="securecrt_tools.script_types.Script"><em>script_types.Script</em></a>) – The script object that represents this script being executed</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>session</strong> (<a class="reference internal" href="tools-sessions.html#securecrt_tools.sessions.Session" title="securecrt_tools.sessions.Session"><em>sessions.Session</em></a>) – The session object that represents this connection to a remote device</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A dictionary that allows getting the description of an interface by using the interface as the key.</td>
 </tr>

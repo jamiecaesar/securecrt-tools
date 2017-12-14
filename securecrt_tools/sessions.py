@@ -386,8 +386,10 @@ class Session:
 
 class CRTSession(Session):
     """
-    This sub-class of the Session class is used to wrap the SecureCRT API to simplify writing new scripts.  This class
-    includes some private methods thare are used to support the interaction with SecureCRT (these start with '__').
+    This sub-class of the Session class is used to wrap the SecureCRT API to simplify writing new scripts.  An instance
+    of this class represents a tab in SecureCRT and the methods in this class are used to connect to devices,
+    disconnect from devices or interact with devices that are connected within the specific SecureCRT tab that this
+    object represents.
     """
 
     def __init__(self, script, tab, from_new_tab=False, prompt_endings=None):
@@ -1217,7 +1219,7 @@ class DirectSession(Session):
     SecureCRT.  This class is intended to simulate connectivity to remote devices by prompting the user for what would
     otherwise be extracted from SecureCRT.  For example, when this class tries to get the output from a show command,
     it will instead prompt the user for a location of a file with the associated output.  This allows the scripts to
-    be run directly in an IDE for developement and troubleshooting of more complicated logic around parsing command
+    be run directly in an IDE for development and troubleshooting of more complicated logic around parsing command
     outputs.
     """
 
@@ -1249,8 +1251,8 @@ class DirectSession(Session):
 
     def connect_ssh(self, host, username, password, version=None, prompt_endings=("#", ">")):
         """
-        Connects to a device via the SSH protocol. By default, SSH2 will be tried first, but if it fails it will attempt
-        to fall back to SSH1.
+        Pretends to connect to a device via SSH.  Simply tracks that we are now connected to something within this
+        session (this method never fails).
 
         :param host: The IP address of DNS name for the device to connect
         :type host: str
@@ -1271,11 +1273,13 @@ class DirectSession(Session):
             print "Pretending to log into device {0} with username {1} using SSH{2}.".format(host, username, version)
         else:
             print "Pretending to log into device {0} with username {1} using SSH2.".format(host, username)
+        self.hostname = host
+        self.prompt = host + "#"
         self._connected = True
 
     def connect_telnet(self, host, username, password, prompt_endings=("#", ">")):
         """
-        Connects to a device via the Telnet protocol.
+        Pretends to connect to a device via the Telnet protocol, just like connect_ssh above.  Never fails.
 
         :param host: The IP address of DNS name for the device to connect
         :type host: str
@@ -1290,9 +1294,29 @@ class DirectSession(Session):
         :type prompt_endings: list
         """
         print "Pretending to log into device {0} with username {1} using TELNET.".format(host, username)
+        self.hostname = host
+        self.prompt = host + "#"
         self._connected = True
 
     def connect(self, host, username, password, protocol=None, prompt_endings=("#", ">")):
+        """
+        Pretends to connect to a device.  Simply marks the state of the session as connected.  Never fails.
+
+        :param host: The IP address of DNS name for the device to connect
+        :type host: str
+        :param username: The username to login to the device with
+        :type username: str
+        :param password: The password that goes with the provided username.  If a password is not specified, the
+                         user will be prompted for one.
+        :type password: str
+        :param protocol: A string with the desired protocol (telnet, ssh1, ssh2, ssh). If left blank it will try all
+                         starting with SSH2, then SSH1 then Telnet.  "ssh" means SSH2 then SSH1.
+        :type protocol: str
+        :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
+                               Cisco devices (">" and "#"), but may need to be changed if connecting to another
+                               type of device (for example "$" for some linux hosts).
+        :type prompt_endings: list
+        """
         if not protocol:
             print "Pretending to log into device {0} with username {1} using ANY.".format(host, username, protocol)
         else:
@@ -1301,8 +1325,7 @@ class DirectSession(Session):
 
     def disconnect(self, command="exit"):
         """
-        Disconnects the connected session by sending the "exit" command to the remote device.  If that does not make
-        the disconnect happen, attempt to force and ungraceful disconnect.
+        Pretends to disconnects the connected session.  Simply marks our session as disconnected.
 
         :param command: The command to be issued to the remote device to disconnect.  The default is 'exit'
         :type command: str
@@ -1312,12 +1335,8 @@ class DirectSession(Session):
 
     def ssh_via_jump(self, host, username, password, options="-o StrictHostKeyChecking=no"):
         """
-        From the connected session, this method issues the SSH command to connect to another box, using the main
-        connected sessions as a jump point to reach the target.  In other words, connect_ssh() would be used to connect
-        to the jump box/bastion host and then this method would be used to connect to the remote device via the jump
-        host.
-
-        If this method doesn't receive the expected prompts after issuing the credentials, an exception will be raised.
+        Pretends to connect to a device via SSH through a fictitious jump box.  Never fails unless our session isn't
+        marked as currently connected.
 
         :param host: IP address or hostname (resolvable on the jumpbox)
         :type host: str
@@ -1329,19 +1348,18 @@ class DirectSession(Session):
                         script will not be prompted to accept the remote key.
         :type options: str
         """
-        if self.prompt:
-            self.prompt_stack.insert(0,self.prompt)
-        self.prompt = "{0}#".format(host)
-        print "Now connected to: {0} (using prompt: {1})".format(host, self.prompt)
+        if self.is_connected():
+            if self.prompt:
+                self.prompt_stack.insert(0,self.prompt)
+            self.prompt = "{0}#".format(host)
+            print "Now connected to: {0} (using prompt: {1})".format(host, self.prompt)
+        else:
+            raise ConnectError("Not connected to a jumpbox")
 
     def telnet_via_jump(self, host, username, password):
         """
-        From the connected session, this method issues the telnet command to connect to another box, using the main
-        connected sessions as a jump point to reach the target.  In other words, connect_ssh() would be used to connect
-        to the jump box/bastion host and then this method would be used to connect to the remote device via the jump
-        host.
-
-        If this method doesn't receive the expected prompts after issuing the credentials, an exception will be raised.
+        Pretends to connect to a device via telnet through a fictitious jump box.  Never fails unless our session isn't
+        marked as currently connected.
 
         :param host: IP address or hostname (resolvable on the jumpbox)
         :type host: str
@@ -1350,16 +1368,17 @@ class DirectSession(Session):
         :param password: Password for logging into the remote device
         :type password: str
         """
-        if self.prompt:
-            self.prompt_stack.insert(0,self.prompt)
-        self.prompt = "{0}#".format(host)
-        print "Now connected to: {0} (using prompt: {1})".format(host, self.prompt)
+        if self.is_connected():
+            if self.prompt:
+                self.prompt_stack.insert(0,self.prompt)
+            self.prompt = "{0}#".format(host)
+            print "Now connected to: {0} (using prompt: {1})".format(host, self.prompt)
+        else:
+            raise ConnectError("Not connected to a jumpbox")
 
     def disconnect_via_jump(self, command="exit"):
         """
-        Issues a command to disconnect from the remote device, bringing us back to the jump host.  The default command
-        is "exit", but it can be changed by passing in a different "command".  If we don't see the prompt for the jump
-        host after issuing the disconnect command, an exception will be raised.
+        Pretends to disconnect from a device connect through a jump box.
 
         :param command: The command to be issued to the remote device to disconnect.  The default is 'exit'
         :type command: str
@@ -1375,7 +1394,7 @@ class DirectSession(Session):
 
     def close(self):
         """
-        A method to close the SecureCRT tab associated with this CRTSession.
+        A method to close the SecureCRT tab associated with this CRTSession.  Does nothing but print to the console.
         """
         print "Closing tab."
 
@@ -1384,8 +1403,7 @@ class DirectSession(Session):
         Performs initial setup of the session to a Cisco device by detecting parameters (prompt, hostname, network OS,
         etc) of the connected device and modifying the terminal length if configured to do so in the settings file.
 
-        If the device is not at an enable prompt and an enable password is supplied, then this method will also enter
-        enable mode on the device before proceeding.
+        Always assumes that we are already in enable mode (privilege 15)
 
         This should always be called before trying to interact with a Cisco device so that the majority of other
         methods will work correctly.  This should be one of the first calls in a script that is intended to run when
@@ -1518,11 +1536,9 @@ class DirectSession(Session):
         """
         This method accepts a list of strings, where each string is a command to be sent to the device.
 
-        This method will send "conf t", then all the commands from the list and finally send "end" to the device.
-        If an output_filenameThe results returned from entering the commands into the device are written to a file.
-
-        NOTE: This method is new and does not have any error checking for how the remote device handles the commands
-        you are trying to send.  USE IT AT YOUR OWN RISK.
+        This method will pretend to send "conf t", then all the commands from the list and finally send "end" to the
+        device. If an output_filename is specified, the (fake) results returned from entering the commands into the
+        (fake) device are written to a file.
 
         :param command_list: A list of strings, where each string is a command to be sent.  This should NOT include
                             'config t' or 'end'.  This is added automatically.
@@ -1550,7 +1566,8 @@ class DirectSession(Session):
 
     def save(self, command="copy running-config startup-config"):
         """
-        Sends a "copy running-config startup-config" command to the remote device to save the running configuration.
+        Pretends to send a "copy running-config startup-config" command to the remote device to save the running
+        configuration.  Only prints to the console.
         """
         self.logger.debug("<SAVE> Simulating Saving configuration on remote device.")
         print "Saved config."

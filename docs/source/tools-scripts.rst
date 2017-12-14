@@ -1,0 +1,32 @@
+securecrt\_tools\.scripts
+===========================
+
+.. automodule:: securecrt_tools.scripts
+
+The Script Base Class
+----------------------
+
+.. autoclass:: Script
+	:members: get_main_session, validate_dir, get_template, import_device_list
+
+
+CRTScript Class
+-------------------
+
+.. autoclass:: CRTScript
+	:members:
+	:show-inheritance:
+
+
+DirectScript Class
+---------------------
+
+.. autoclass:: DirectScript
+	:members:
+	:show-inheritance:
+
+
+Script Class Exceptions:
+-------------------------
+
+.. autoexception:: ScriptError

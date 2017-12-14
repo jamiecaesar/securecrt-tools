@@ -1,0 +1,830 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>securecrt_tools.sessions &#8212; SecureCRT Tools 2.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="securecrt_tools.settings" href="tools-settings.html" />
+    <link rel="prev" title="securecrt_tools.scripts" href="tools-scripts.html" /> 
+  </head>
+  <body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="index.html">SecureCRT Tools 2.1.0 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="tools-scripts.html" title="securecrt_tools.scripts"
+             accesskey="P">previous</a> |
+          <a href="tools-settings.html" title="securecrt_tools.settings"
+             accesskey="N">next</a> |
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-securecrt_tools.sessions">
+<span id="securecrt-tools-sessions"></span><h1>securecrt_tools.sessions<a class="headerlink" href="#module-securecrt_tools.sessions" title="Permalink to this headline">¶</a></h1>
+<p>This module includes a collection of “session” objects that represent a SecureCRT session.  These classes are intended
+as a wrapper around the SecureCRT Python API to simplify common tasks that are performed against network devices such
+as routers and switches.</p>
+<p>The base class is named “Session” is the parent for more specific session types and includes all methods that must be
+implemented by all sub-classes.</p>
+<p>The primary subclass is called “CRTSession” which is specific to interacting with the Python API for SecureCRT.
+Whenever a script is launched from SecureCRT, this class should be used to interact with SecureCRT.</p>
+<p>A second subclass called “DirectSession” is used to run scripts outside of SecureCRT, such as in an IDE.  This is useful
+for debugging because you can run your script along with the IDE debugging tools while simulating the interactions with
+SecureCRT.  The class has the same API as CRTSession so that no modifications are needed to run a script directly.  For
+example, while a CRTSession may directly pull input from a device before processing it, if the script is launched from
+an IDE, the DirectSession object will instead prompt for a filename containing the same output that would be been
+received from the remote device.  The script can then be debugged step-by-step to help the programmer better understand
+where their logic is having trouble with a particular output.</p>
+<div class="section" id="the-session-base-class">
+<h2>The Session Base Class<a class="headerlink" href="#the-session-base-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="securecrt_tools.sessions.Session">
+<em class="property">class </em><code class="descclassname">securecrt_tools.sessions.</code><code class="descname">Session</code><a class="headerlink" href="#securecrt_tools.sessions.Session" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a base class for the other Session types.  This class simply exists to enforce the required methods any
+sub-classes have to implement.  There are also a couple methods that are common to all sessions so they are defined
+under this class and automatically inherited by the sub-classes.</p>
+<dl class="method">
+<dt id="securecrt_tools.sessions.Session.create_output_filename">
+<code class="descname">create_output_filename</code><span class="sig-paren">(</span><em>desc</em>, <em>ext='.txt'</em>, <em>include_hostname=True</em>, <em>include_date=True</em>, <em>base_dir=None</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.Session.create_output_filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a filename (including absoluate path) based on details from the session.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>desc</strong> (<em>str</em>) – A short description to include in the filename (i.e. “show run”, “cdp”, etc)</li>
+<li><strong>base_dir</strong> (<em>str</em>) – (Optional) The director where this file should be saved. Default: SavePath from settings.</li>
+<li><strong>ext</strong> (<em>str</em>) – (Optional) Extension for the filename.  Default: “.txt”</li>
+<li><strong>include_date</strong> (<em>bool</em>) – (Optional) Include a timestamp in the filename.  The timestamp format is taken from the
+settings file.  Default: True</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The generated absolute path for the filename requested.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.Session.validate_os">
+<code class="descname">validate_os</code><span class="sig-paren">(</span><em>valid_os_list</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.Session.validate_os" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method checks if the remote device is running an OS in a list of valid OSes passed into the method.  If
+the OS is not in the list then an exception is raised, which can either be allowed to cause the script to exit
+or be caught in a “try, except” statement and allow the script to take another action based on the result.  If
+the remote OS is in the valid list, then nothing happens.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>valid_os_list</strong> – A list of OSs that</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="crtsession-class">
+<h2>CRTSession Class<a class="headerlink" href="#crtsession-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="securecrt_tools.sessions.CRTSession">
+<em class="property">class </em><code class="descclassname">securecrt_tools.sessions.</code><code class="descname">CRTSession</code><span class="sig-paren">(</span><em>script</em>, <em>tab</em>, <em>from_new_tab=False</em>, <em>prompt_endings=None</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#securecrt_tools.sessions.Session" title="securecrt_tools.sessions.Session"><code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.sessions.Session</span></code></a></p>
+<p>This sub-class of the Session class is used to wrap the SecureCRT API to simplify writing new scripts.  An instance
+of this class represents a tab in SecureCRT and the methods in this class are used to connect to devices,
+disconnect from devices or interact with devices that are connected within the specific SecureCRT tab that this
+object represents.</p>
+<dl class="method">
+<dt id="securecrt_tools.sessions.CRTSession.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>A method to close the SecureCRT tab associated with this CRTSession.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.CRTSession.connect">
+<code class="descname">connect</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>protocol=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempts to connect to a device by any available protocol, starting with SSH2, then SSH1, then telnet</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> (<em>str</em>) – The IP address of DNS name for the device to connect</li>
+<li><strong>username</strong> (<em>str</em>) – The username to login to the device with</li>
+<li><strong>password</strong> (<em>str</em>) – The password that goes with the provided username.  If a password is not specified, the
+user will be prompted for one.</li>
+<li><strong>protocol</strong> (<em>str</em>) – A string with the desired protocol (telnet, ssh1, ssh2, ssh). If left blank it will try all
+starting with SSH2, then SSH1 then Telnet.  “ssh” means SSH2 then SSH1.</li>
+<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
+Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
+type of device (for example “$” for some linux hosts).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.CRTSession.connect_ssh">
+<code class="descname">connect_ssh</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>version=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.connect_ssh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connects to a device via the SSH protocol. By default, SSH2 will be tried first, but if it fails it will attempt
+to fall back to SSH1.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> (<em>str</em>) – The IP address of DNS name for the device to connect</li>
+<li><strong>username</strong> (<em>str</em>) – The username to login to the device with</li>
+<li><strong>password</strong> (<em>str</em>) – The password that goes with the provided username.  If a password is not specified, the
+user will be prompted for one.</li>
+<li><strong>version</strong> (<em>int</em>) – The SSH version to connect with (1 or 2).  Default is None, which will try 2 first and fallback
+to 1 if that fails.</li>
+<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
+Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
+type of device (for example “$” for some linux hosts).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.CRTSession.connect_telnet">
+<code class="descname">connect_telnet</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.connect_telnet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connects to a device via the Telent protocol.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> (<em>str</em>) – The IP address of DNS name for the device to connect</li>
+<li><strong>username</strong> (<em>str</em>) – The username to login to the device with</li>
+<li><strong>password</strong> (<em>str</em>) – The password that goes with the provided username.  If a password is not specified, the
+user will be prompted for one.</li>
+<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
+Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
+type of device (for example “$” for some linux hosts).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.CRTSession.disconnect">
+<code class="descname">disconnect</code><span class="sig-paren">(</span><em>command='exit'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disconnects the connected session by sending the “exit” command to the remote device.  If that does not make
+the disconnect happen, attempt to force and ungraceful disconnect.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>command</strong> (<em>str</em>) – The command to be issued to the remote device to disconnect.  The default is ‘exit’</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.CRTSession.disconnect_via_jump">
+<code class="descname">disconnect_via_jump</code><span class="sig-paren">(</span><em>command='exit'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.disconnect_via_jump" title="Permalink to this definition">¶</a></dt>
+<dd><p>Issues a command to disconnect from the remote device, bringing us back to the jump host.  The default command
+is “exit”, but it can be changed by passing in a different “command”.  If we don’t see the prompt for the jump
+host after issuing the disconnect command, an exception will be raised.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>command</strong> (<em>str</em>) – The command to be issued to the remote device to disconnect.  The default is ‘exit’</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.CRTSession.end_cisco_session">
+<code class="descname">end_cisco_session</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.end_cisco_session" title="Permalink to this definition">¶</a></dt>
+<dd><p>End the session by returning the device’s terminal parameters that were modified by start_session() to their
+previous values.</p>
+<p>This should always be called before a disconnect (assuming that start_cisco_session was called after connect)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.CRTSession.get_command_output">
+<code class="descname">get_command_output</code><span class="sig-paren">(</span><em>command</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.get_command_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Captures the output from the provided command and saves the results in a variable.</p>
+<p>** NOTE ** Assigning the output directly to a variable causes problems with SecureCRT for long outputs.  It
+will gradually get slower and slower until the program freezes and crashes.  The workaround is to
+save the output directly to a file (line by line), and then read it back into a variable.  This is the
+procedure that this method uses.</p>
+<dl class="docutils">
+<dt>Keyword Arguments:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param command:</th><td class="field-body">Command string that should be sent to the device</td>
+</tr>
+<tr class="field-even field"><th class="field-name">type command:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The result from issuing the above command.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.CRTSession.is_connected">
+<code class="descname">is_connected</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.is_connected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a boolean value that describes if the session is currently connected.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the session is connected, False if not.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.CRTSession.save">
+<code class="descname">save</code><span class="sig-paren">(</span><em>command='copy running-config startup-config'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends a “copy running-config startup-config” command to the remote device to save the running configuration.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.CRTSession.send_config_commands">
+<code class="descname">send_config_commands</code><span class="sig-paren">(</span><em>command_list</em>, <em>output_filename=None</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.send_config_commands" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method accepts a list of strings, where each string is a command to be sent to the device.</p>
+<p>This method will send “conf t”, then all the commands from the list and finally send “end” to the device.
+If an output_filenameThe results returned from entering the commands into the device are written to a file.</p>
+<p>NOTE: This method is new and does not have any error checking for how the remote device handles the commands
+you are trying to send.  USE IT AT YOUR OWN RISK.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>command_list</strong> (<em>list</em>) – A list of strings, where each string is a command to be sent.  This should NOT include
+‘config t’ or ‘end’.  This is added automatically.</li>
+<li><strong>output_filename</strong> (<em>str</em>) – (Optional) If a absolute path to a file is specified, the config session output from
+applying the commands will be written to this file.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.CRTSession.ssh_via_jump">
+<code class="descname">ssh_via_jump</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>options='-o StrictHostKeyChecking=no'</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.ssh_via_jump" title="Permalink to this definition">¶</a></dt>
+<dd><p>From the connected session, this method issues the SSH command to connect to another box, using the main
+connected sessions as a jump point to reach the target.  In other words, connect_ssh() would be used to connect
+to the jump box/bastion host and then this method would be used to connect to the remote device via the jump
+host.</p>
+<p>If this method doesn’t receive the expected prompts after issuing the credentials, an exception will be raised.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> (<em>str</em>) – IP address or hostname (resolvable on the jumpbox)</li>
+<li><strong>username</strong> (<em>str</em>) – Username to log into the remote device with</li>
+<li><strong>password</strong> (<em>str</em>) – Password for logging into the remote device</li>
+<li><strong>options</strong> (<em>str</em>) – Additional “ssh” command paramters.  Default disables strict host key checking so that the
+script will not be prompted to accept the remote key.</li>
+<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
+Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
+type of device (for example “$” for some linux hosts).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.CRTSession.start_cisco_session">
+<code class="descname">start_cisco_session</code><span class="sig-paren">(</span><em>enable_pass=None</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.start_cisco_session" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs initial setup of the session to a Cisco device by detecting parameters (prompt, hostname, network OS,
+etc) of the connected device and modifying the terminal length if configured to do so in the settings file.</p>
+<p>If the device is not at an enable prompt and an enable password is supplied, then this method will also enter
+enable mode on the device before proceeding.</p>
+<p>This should always be called before trying to interact with a Cisco device so that the majority of other
+methods will work correctly.  This should be one of the first calls in a script that is intended to run when
+already connected to the device, or called right after connecting to a device with the “connect_ssh” or similar
+method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>enable_pass</strong> (<em>str</em>) – The enable password that should be sent if the device is not in enable mode.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.CRTSession.telnet_via_jump">
+<code class="descname">telnet_via_jump</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.telnet_via_jump" title="Permalink to this definition">¶</a></dt>
+<dd><p>From the connected session, this method issues the telnet command to connect to another box, using the main
+connected sessions as a jump point to reach the target.  In other words, connect_ssh() would be used to connect
+to the jump box/bastion host and then this method would be used to connect to the remote device via the jump
+host.</p>
+<p>If this method doesn’t receive the expected prompts after issuing the credentials, an exception will be raised.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> (<em>str</em>) – IP address or hostname (resolvable on the jumpbox)</li>
+<li><strong>username</strong> (<em>str</em>) – Username to log into the remote device with</li>
+<li><strong>password</strong> (<em>str</em>) – Password for logging into the remote device</li>
+<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
+Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
+type of device (for example “$” for some linux hosts).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.CRTSession.write_output_to_file">
+<code class="descname">write_output_to_file</code><span class="sig-paren">(</span><em>command</em>, <em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.write_output_to_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send the supplied command to the remote device and writes the output to a file.</p>
+<p>This function was written specifically to write output line by line because storing large outputs into a
+variable will cause SecureCRT to bog down until it freezes.  A good example is a large “show tech” output.
+This method can handle any length of output</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>command</strong> (<em>str</em>) – The command to be sent to the device</li>
+<li><strong>filename</strong> (<em>str</em>) – A string with the absolute path to the filename to be written.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="directsession-class">
+<h2>DirectSession Class<a class="headerlink" href="#directsession-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="securecrt_tools.sessions.DirectSession">
+<em class="property">class </em><code class="descclassname">securecrt_tools.sessions.</code><code class="descname">DirectSession</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#securecrt_tools.sessions.Session" title="securecrt_tools.sessions.Session"><code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.sessions.Session</span></code></a></p>
+<p>This class is used when the scripts are executed directly from a local Python installation instead of from
+SecureCRT.  This class is intended to simulate connectivity to remote devices by prompting the user for what would
+otherwise be extracted from SecureCRT.  For example, when this class tries to get the output from a show command,
+it will instead prompt the user for a location of a file with the associated output.  This allows the scripts to
+be run directly in an IDE for development and troubleshooting of more complicated logic around parsing command
+outputs.</p>
+<dl class="method">
+<dt id="securecrt_tools.sessions.DirectSession.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>A method to close the SecureCRT tab associated with this CRTSession.  Does nothing but print to the console.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.DirectSession.connect">
+<code class="descname">connect</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>protocol=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pretends to connect to a device.  Simply marks the state of the session as connected.  Never fails.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> (<em>str</em>) – The IP address of DNS name for the device to connect</li>
+<li><strong>username</strong> (<em>str</em>) – The username to login to the device with</li>
+<li><strong>password</strong> (<em>str</em>) – The password that goes with the provided username.  If a password is not specified, the
+user will be prompted for one.</li>
+<li><strong>protocol</strong> (<em>str</em>) – A string with the desired protocol (telnet, ssh1, ssh2, ssh). If left blank it will try all
+starting with SSH2, then SSH1 then Telnet.  “ssh” means SSH2 then SSH1.</li>
+<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
+Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
+type of device (for example “$” for some linux hosts).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.DirectSession.connect_ssh">
+<code class="descname">connect_ssh</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>version=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.connect_ssh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pretends to connect to a device via SSH.  Simply tracks that we are now connected to something within this
+session (this method never fails).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> (<em>str</em>) – The IP address of DNS name for the device to connect</li>
+<li><strong>username</strong> (<em>str</em>) – The username to login to the device with</li>
+<li><strong>password</strong> (<em>str</em>) – The password that goes with the provided username.  If a password is not specified, the
+user will be prompted for one.</li>
+<li><strong>version</strong> (<em>int</em>) – The SSH version to connect with (1 or 2).  Default is None, which will try 2 first and fallback
+to 1 if that fails.</li>
+<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
+Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
+type of device (for example “$” for some linux hosts).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.DirectSession.connect_telnet">
+<code class="descname">connect_telnet</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.connect_telnet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pretends to connect to a device via the Telnet protocol, just like connect_ssh above.  Never fails.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> (<em>str</em>) – The IP address of DNS name for the device to connect</li>
+<li><strong>username</strong> (<em>str</em>) – The username to login to the device with</li>
+<li><strong>password</strong> (<em>str</em>) – The password that goes with the provided username.  If a password is not specified, the
+user will be prompted for one.</li>
+<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
+Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
+type of device (for example “$” for some linux hosts).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.DirectSession.disconnect">
+<code class="descname">disconnect</code><span class="sig-paren">(</span><em>command='exit'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pretends to disconnects the connected session.  Simply marks our session as disconnected.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>command</strong> (<em>str</em>) – The command to be issued to the remote device to disconnect.  The default is ‘exit’</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.DirectSession.disconnect_via_jump">
+<code class="descname">disconnect_via_jump</code><span class="sig-paren">(</span><em>command='exit'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.disconnect_via_jump" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pretends to disconnect from a device connect through a jump box.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>command</strong> (<em>str</em>) – The command to be issued to the remote device to disconnect.  The default is ‘exit’</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.DirectSession.end_cisco_session">
+<code class="descname">end_cisco_session</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.end_cisco_session" title="Permalink to this definition">¶</a></dt>
+<dd><p>End the session by returning the device’s terminal parameters that were modified by start_session() to their
+previous values.</p>
+<p>This should always be called before a disconnect (assuming that start_cisco_session was called after connect)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.DirectSession.get_command_output">
+<code class="descname">get_command_output</code><span class="sig-paren">(</span><em>command</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.get_command_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Captures the output from the provided command and saves the results in a variable.</p>
+<p>** NOTE ** Assigning the output directly to a variable causes problems with SecureCRT for long outputs.  It
+will gradually get slower and slower until the program freezes and crashes.  The workaround is to
+save the output directly to a file (line by line), and then read it back into a variable.  This is the
+procedure that this method uses.</p>
+<dl class="docutils">
+<dt>Keyword Arguments:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param command:</th><td class="field-body">Command string that should be sent to the device</td>
+</tr>
+<tr class="field-even field"><th class="field-name">type command:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The result from issuing the above command.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.DirectSession.is_connected">
+<code class="descname">is_connected</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.is_connected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a boolean value that describes if the session is currently connected.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the session is connected, False if not.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.DirectSession.save">
+<code class="descname">save</code><span class="sig-paren">(</span><em>command='copy running-config startup-config'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pretends to send a “copy running-config startup-config” command to the remote device to save the running
+configuration.  Only prints to the console.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.DirectSession.send_config_commands">
+<code class="descname">send_config_commands</code><span class="sig-paren">(</span><em>command_list</em>, <em>output_filename=None</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.send_config_commands" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method accepts a list of strings, where each string is a command to be sent to the device.</p>
+<p>This method will pretend to send “conf t”, then all the commands from the list and finally send “end” to the
+device. If an output_filename is specified, the (fake) results returned from entering the commands into the
+(fake) device are written to a file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>command_list</strong> (<em>list</em>) – A list of strings, where each string is a command to be sent.  This should NOT include
+‘config t’ or ‘end’.  This is added automatically.</li>
+<li><strong>output_filename</strong> (<em>str</em>) – (Optional) If a absolute path to a file is specified, the config session output from
+applying the commands will be written to this file.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.DirectSession.ssh_via_jump">
+<code class="descname">ssh_via_jump</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>options='-o StrictHostKeyChecking=no'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.ssh_via_jump" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pretends to connect to a device via SSH through a fictitious jump box.  Never fails unless our session isn’t
+marked as currently connected.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> (<em>str</em>) – IP address or hostname (resolvable on the jumpbox)</li>
+<li><strong>username</strong> (<em>str</em>) – Username to log into the remote device with</li>
+<li><strong>password</strong> (<em>str</em>) – Password for logging into the remote device</li>
+<li><strong>options</strong> (<em>str</em>) – Additional “ssh” command paramters.  Default disables strict host key checking so that the
+script will not be prompted to accept the remote key.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.DirectSession.start_cisco_session">
+<code class="descname">start_cisco_session</code><span class="sig-paren">(</span><em>enable_pass=None</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.start_cisco_session" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs initial setup of the session to a Cisco device by detecting parameters (prompt, hostname, network OS,
+etc) of the connected device and modifying the terminal length if configured to do so in the settings file.</p>
+<p>Always assumes that we are already in enable mode (privilege 15)</p>
+<p>This should always be called before trying to interact with a Cisco device so that the majority of other
+methods will work correctly.  This should be one of the first calls in a script that is intended to run when
+already connected to the device, or called right after connecting to a device with the “connect_ssh” or similar
+method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>enable_pass</strong> (<em>str</em>) – The enable password that should be sent if the device is not in enable mode.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.DirectSession.telnet_via_jump">
+<code class="descname">telnet_via_jump</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.telnet_via_jump" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pretends to connect to a device via telnet through a fictitious jump box.  Never fails unless our session isn’t
+marked as currently connected.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> (<em>str</em>) – IP address or hostname (resolvable on the jumpbox)</li>
+<li><strong>username</strong> (<em>str</em>) – Username to log into the remote device with</li>
+<li><strong>password</strong> (<em>str</em>) – Password for logging into the remote device</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.sessions.DirectSession.write_output_to_file">
+<code class="descname">write_output_to_file</code><span class="sig-paren">(</span><em>command</em>, <em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.write_output_to_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send the supplied command to the remote device and writes the output to a file.</p>
+<p>This function was written specifically to write output line by line because storing large outputs into a
+variable will cause SecureCRT to bog down until it freezes.  A good example is a large “show tech” output.
+This method can handle any length of output</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>command</strong> (<em>str</em>) – The command to be sent to the device</li>
+<li><strong>filename</strong> (<em>str</em>) – A string with the absolute path to the filename to be written.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="session-class-exceptions">
+<h2>Session Class Exceptions:<a class="headerlink" href="#session-class-exceptions" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="securecrt_tools.sessions.ConnectError">
+<em class="property">exception </em><code class="descclassname">securecrt_tools.sessions.</code><code class="descname">ConnectError</code><a class="headerlink" href="#securecrt_tools.sessions.ConnectError" title="Permalink to this definition">¶</a></dt>
+<dd><p>An exception type that is raised when there are problems connecting to a device.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="securecrt_tools.sessions.InteractionError">
+<em class="property">exception </em><code class="descclassname">securecrt_tools.sessions.</code><code class="descname">InteractionError</code><a class="headerlink" href="#securecrt_tools.sessions.InteractionError" title="Permalink to this definition">¶</a></dt>
+<dd><p>An exception type used when an expected response isn’t received when interacting with a device.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="securecrt_tools.sessions.UnsupportedOSError">
+<em class="property">exception </em><code class="descclassname">securecrt_tools.sessions.</code><code class="descname">UnsupportedOSError</code><a class="headerlink" href="#securecrt_tools.sessions.UnsupportedOSError" title="Permalink to this definition">¶</a></dt>
+<dd><p>An exception type used when the remote device is running an OS that isn’t supported by the script.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="README.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README.html#important-note">Important Note</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README.html#running-the-scripts">Running The Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README.html#settings">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scripts.html">Scripts</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="writing_scripts.html">Writing Your Own Scripts</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="writing_intro.html">Introduction To Writing SecureCRT Scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="about_templates.html">About Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="textfsm_note.html">A Note on TextFSM</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="modules.html">Module Documentation</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="securecrt_tools.html">SecureCRT Tools Modules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="tools-scripts.html">securecrt_tools.scripts</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">securecrt_tools.sessions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tools-settings.html">securecrt_tools.settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tools-utilities.html">securecrt_tools.utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="3rdparty.html">Third Party Modules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="tools-scripts.html" title="securecrt_tools.scripts"
+              >previous</a> |
+            <a href="tools-settings.html" title="securecrt_tools.settings"
+              >next</a> |
+            <a href="py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+              <br/>
+              <a href="_sources/tools-sessions.rst.txt"
+                rel="nofollow">Show Source</a>
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Jamie Caesar.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.5.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

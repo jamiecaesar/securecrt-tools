@@ -1,12 +1,8 @@
 """
-This module contains classes for representing the execution of the script and wraps the underlying API calls used to
-interact with the that application itself.  This is primarily SecureCRT, but will also include a sub-class to
-simulate connecting to devices when running the scripts directly.  Running the script directly from your local python
-interpreter is used for troubleshooting the script using an IDE such as PyCharm, Spyder, Eclipse, etc.
-
-The Script class is responsible for tasks such as interacting with the user (displaying messages, prompting for input,
-etc), interacting with the file system, and modifying the application (creating new saved sessions)
-
+This module contains classes for representing the execution of a script in SecureCRT.  These attributes and methods
+defined with these classes are more "global" in nature, meaning that they focus on either the interaction with the
+application, or anything that is common to the entire script regardless of how many sessions (in tabs) are open to
+remote devices.
 """
 
 import os
@@ -14,6 +10,7 @@ import sys
 import logging
 import datetime
 import csv
+import getpass
 from abc import ABCMeta, abstractmethod
 import sessions
 from settings import SettingsImporter
@@ -34,9 +31,27 @@ class ScriptError(Exception):
 
 class Script:
     """
-    This is a base class for the application object.  This class simply exists to enforce the required methods any
-    Application sub-classes must implement.  Any methods that would operate the same, regardless of which Application
-    they are for would also be defined here and inherited by the subclasses.
+    This is a base class for the script object.  This class cannot be used directly, but is instead a blueprint that
+    enforces what any sub-classes must implement.  The most important sub-class is the CRTScript subclass which
+    represents the script being executed from SecureCRT.  The CRT Script class is designed to interact with SecureCRT
+    directly.   The other sub-class is the DirectScript, which is used to simulate interactions with SecureCRT if the
+    script is being run directly.  The purpose of DirectScript class is to allow the programmer to debug their code in
+    their favorite IDE or debugger, which cannot be done when executing the script from SecureCRT.  DirectScript allows
+    the same code to run locally without SecureCRT and the class will prompt for the information it needs to continue
+    running the main script.
+
+    Any methods that are not prepended with the @abstractmethod tag preceding the method definition will be inherited
+    and available to the sub-classes without needing to define them specifically in each sub-class.  Methods designed
+    this way would use the exact same code in all sub-classes, and so there is no reason to re-create them in each
+    subclass.
+
+    Methods defined with the @abstractmethod tag should be left empty in this class.  They are required to be
+    implemented in each sub-class.  Methods are defined this way when they are required to exist in all sub-classes
+    for consistency, but the could would be completely different depending on which class is being used.  One example
+    is the SecureCRT Message Box.  When a script is run in SecureCRT, this should use the SecureCRT API to create a
+    message box that pops up within SecureCRT.  When the script is being run directly in an IDE, we would want the same
+    information to be printed to the console.  When written this way, if a script calls the message_box() method, the
+    script will function regardless of how the script was being executed.
     """
     __metaclass__ = ABCMeta
 
@@ -58,7 +73,7 @@ class Script:
             else:
                 raise ScriptError("Settings file not found")
 
-        # Get the date and time to use in output file names
+        # Get the date and time, which is returned when creating filenames based on a session from this script.
         now = datetime.datetime.now()
         date_format = self.settings.get("Global", "date_format")
         self.datetime = now.strftime(date_format)
@@ -406,8 +421,11 @@ class Script:
 
 class CRTScript(Script):
     """
-    This sub-class of the App class is used to wrap the portion of the SecureCRT API that interacts with the main
-    application.
+    This class is a sub-class of the Script base class, and is meant to be used in any scripts that are being executed
+    from inside of SecureCRT.  This sub-class is designed to interact with the SecureCRT application itself (not with
+    tabs that have connections to remote devices) and represent a script being executed from within SecureCRT.  This
+    class inherits the methods from the Script class that are documented above, and is required to implement all of the
+    abstract classes defined in the Script class.
     """
 
     def __init__(self, crt):
@@ -420,9 +438,8 @@ class CRTScript(Script):
 
     def message_box(self, message, title="", options=0):
         """
-        Prints a message for the user.  In SecureCRT, the message is displayed in a pop-up message box.  When used in a
-        DirectSession, the message is printed to the console and the user is prompted to type the button that would be
-        selected.
+        Prints a message for the user.  In SecureCRT, the message is displayed in a pop-up message box with a variety
+        of buttons, depending on which options are chosen.   The default is just an "OK" button.
 
         This window can be customized by setting the "options" value, using the constants listed at the top of the
         sessions.py file.  One constant from each of the 3 categories can be OR'd (|) together to make a single option
@@ -444,7 +461,7 @@ class CRTScript(Script):
     def prompt_window(self, message, title="", hide_input=False):
         """
         Prompts the user for an input value.  In SecureCRT this will open a pop-up window where the user can input the
-        requested information.  In a direct session, the user will be prompted at the console for input.
+        requested information.
 
         The "hide_input" input will mask the input, so that passwords or other senstive information can be requested.
 
@@ -465,17 +482,20 @@ class CRTScript(Script):
     def file_open_dialog(self, title, button_label="Open", default_filename="", file_filter=""):
         """
         Prompts the user to select a file that will be processed by the script.  In SecureCRT this will give a pop-up
-        file selection dialog window.  For a direct session, the user will be prompted for the full path to a file.
-        See the SecureCRT built-in Help at Scripting > Script Objects Reference > Dialog Object for more details.
+        file selection dialog window, and will return the full path to the file chosen.
 
-        :param title: <String> Title for the File Open dialog window (Only displays in Windows)
-        :param button_label: <String> Label for the "Open" button
-        :param default_filename: <String> If provided a default filename, the window will open in the parent directory
+        :param title: Title for the File Open dialog window (Only displays in Windows)
+        :type title: str
+        :param button_label: Label for the "Open" button
+        :type button_label: str
+        :param default_filename: If provided a default filename, the window will open in the parent directory
             of the file, otherwise the current working directory will be the starting directory.
-        :param file_filter: <String> Specifies a filter for what type of files can be selected.  The format is:
+        :type default_filename: str
+        :param file_filter: Specifies a filter for what type of files can be selected.  The format is:
             <Name of Filter> (*.<extension>)|*.<extension>||
             For example, a filter for CSV files would be "CSV Files (*.csv)|*.csv||" or multiple filters can be used:
             "Text Files (*.txt)|*.txt|Log File (*.log)|*.log||"
+        :type file_filter: str
 
         :return: The absolute path to the file that was selected
         :rtype: str
@@ -584,8 +604,15 @@ class CRTScript(Script):
 
 class DirectScript(Script):
     """
-    This sub-class of the App class is used to wrap the portion of the SecureCRT API that interacts with the main
-    application.
+    This class is a sub-class of the Script base class, and is meant to be used in any scripts that are being executed
+    directly from a local python installation.  This sub-class is designed to simulate the interaction with SecureCRT
+    while the script is being run from a local python installation.  For example, when a script attempts to create a
+    pop-up message box in SecureCRT, this class will simply print the information to the console (or request information
+    from the user via the console).
+
+    This class inherits the methods from the Script class that are documented above, and is required to implement all
+    of the abstract classes defined in the Script class.  This way, it is a complete replacement for the CRTScript class
+    if a script is run directly.
     """
 
     def __init__(self, full_script_path):
@@ -595,9 +622,8 @@ class DirectScript(Script):
 
     def message_box(self, message, title="", options=0):
         """
-        Prints a message for the user.  In SecureCRT, the message is displayed in a pop-up message box.  When used in a
-        DirectSession, the message is printed to the console and the user is prompted to type the button that would be
-        selected.
+        Prints a message for the user.  When used in a DirectSession, the message is printed to the console and the
+        user is prompted to type the button that would be selected.
 
         This window can be customized by setting the "options" value, using the constants listed at the top of the
         sessions.py file.  One constant from each of the 3 categories can be OR'd (|) together to make a single option
@@ -653,8 +679,7 @@ class DirectScript(Script):
 
     def prompt_window(self, message, title="", hide_input=False):
         """
-        Prompts the user for an input value.  In SecureCRT this will open a pop-up window where the user can input the
-        requested information.  In a direct session, the user will be prompted at the console for input.
+        Prompts the user for an input value.  In a direct session, the user will be prompted at the console for input.
 
         The "hide_input" input will mask the input, so that passwords or other senstive information can be requested.
 
@@ -669,24 +694,32 @@ class DirectScript(Script):
         :rtype: str
         """
         self.logger.debug("<PROMPT> Creating Prompt with message: '{0}'".format(message))
-        result = raw_input("{0}: ".format(message))
-        self.logger.debug("<PROMPT> Captures prompt results: '{0}'".format(result))
+        if hide_input:
+            result = getpass.getpass(message)
+            self.logger.debug("<PROMPT> Captures hidden result (likely a password)".format(result))
+        else:
+            result = raw_input("{0}: ".format(message))
+            self.logger.debug("<PROMPT> Captures prompt results: '{0}'".format(result))
+
         return result
 
     def file_open_dialog(self, title, button_label="Open", default_filename="", file_filter=""):
         """
-        Prompts the user to select a file that will be processed by the script.  In SecureCRT this will give a pop-up
-        file selection dialog window.  For a direct session, the user will be prompted for the full path to a file.
-        See the SecureCRT built-in Help at Scripting > Script Objects Reference > Dialog Object for more details.
+        Prompts the user to select a file that will be processed by the script.  In a direct session, the user will be
+        prompted for the full path to a file.
 
-        :param title: <String> Title for the File Open dialog window (Only displays in Windows)
-        :param button_label: <String> Label for the "Open" button
-        :param default_filename: <String> If provided a default filename, the window will open in the parent directory
+        :param title: Title for the File Open dialog window (Only displays in Windows)
+        :type title: str
+        :param button_label: Label for the "Open" button
+        :type button_label: str
+        :param default_filename: If provided a default filename, the window will open in the parent directory
             of the file, otherwise the current working directory will be the starting directory.
-        :param file_filter: <String> Specifies a filter for what type of files can be selected.  The format is:
+        :type default_filename: str
+        :param file_filter: Specifies a filter for what type of files can be selected.  The format is:
             <Name of Filter> (*.<extension>)|*.<extension>||
             For example, a filter for CSV files would be "CSV Files (*.csv)|*.csv||" or multiple filters can be used:
             "Text Files (*.txt)|*.txt|Log File (*.log)|*.log||"
+        :type file_filter: str
 
         :return: The absolute path to the file that was selected
         :rtype: str
@@ -695,11 +728,29 @@ class DirectScript(Script):
         return result_filename
 
     def ssh_in_new_tab(self, host, username, password, prompt_endings=("#", ">")):
-        pass
+        """
+        Pretends to open a new tab.  Since this is being run directly and no tabs exist, the function really does
+        nothing but return a new Session object.
+
+        :param host: The IP address of DNS name for the device to connect (only for API compatibility - not used)
+        :type host: str
+        :param username: The username to login to the device with (only for API compatibility - not used)
+        :type username: str
+        :param password: The password that goes with the provided username.  If a password is not specified, the
+                         user will be prompted for one. (only for API compatibility - not used)
+        :type password: str
+        :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
+                               Cisco devices (">" and "#"), but may need to be changed if connecting to another
+                               type of device (for example "$" for some linux hosts). (only for API compatibility
+                               - not used)
+        :type prompt_endings: list
+        """
+        return sessions.DirectSession(self)
 
     def create_new_saved_session(self, session_name, ip, protocol="SSH2", folder="_imports"):
         """
-        Creates a session object that can be opened from the Connect menu in SecureCRT.
+        Pretends to create a new SecureCRT session.  Since we aren't running in SecureCRT, it does nothing except
+        print a message that a device was created.
 
         :param session_name: The name of the session
         :type session_name: str

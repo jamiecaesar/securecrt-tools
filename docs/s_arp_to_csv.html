@@ -56,7 +56,7 @@
 <span id="s-arp-to-csv"></span><h1>s_arp_to_csv<a class="headerlink" href="#module-s_arp_to_csv" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="s_arp_to_csv.script_main">
-<code class="descclassname">s_arp_to_csv.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#s_arp_to_csv.script_main" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">s_arp_to_csv.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>session</em><span class="sig-paren">)</span><a class="headerlink" href="#s_arp_to_csv.script_main" title="Permalink to this definition">¶</a></dt>
 <dd><div class="line-block">
 <div class="line">SINGLE device script</div>
 <div class="line">Author: Jamie Caesar</div>
@@ -64,12 +64,12 @@
 </div>
 <p>This script will capture the ARP table of the attached device and output the results as a CSV file.  While this
 script can be used to capture the ARP table, the primary purpose is to create the ARP associations that the
-“connected_ip.py” script can use to map which MAC and IP addresses are connected to each device.</p>
+“s_switchport_mapping.py” script can use to map which MAC and IP addresses are connected to each device.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>script</strong> (<a class="reference internal" href="securecrt_tools.html#securecrt_tools.script_types.Script" title="securecrt_tools.script_types.Script"><em>script_types.Script</em></a>) – A subclass of the sessions.Session object that represents this particular script session (either
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>session</strong> (<a class="reference internal" href="tools-sessions.html#securecrt_tools.sessions.Session" title="securecrt_tools.sessions.Session"><em>sessions.Session</em></a>) – A subclass of the sessions.Session object that represents this particular script session (either
 SecureCRTSession or DirectSession)</td>
 </tr>
 </tbody>
@@ -111,9 +111,7 @@ SecureCRTSession or DirectSession)</td>
 <li class="toctree-l2"><a class="reference internal" href="no_device_scripts.html">No Device Scripts</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">Writing Your Own Scripts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html#a-note-on-textfsm">A Note on TextFSM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html#module-documentation">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing_scripts.html">Writing Your Own Scripts</a></li>
 </ul>
 
           <div role="search">

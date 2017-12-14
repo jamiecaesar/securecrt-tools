@@ -56,7 +56,7 @@
 <span id="s-nexthop-summary"></span><h1>s_nexthop_summary<a class="headerlink" href="#module-s_nexthop_summary" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="s_nexthop_summary.script_main">
-<code class="descclassname">s_nexthop_summary.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>script</em>, <em>ask_vrf=True</em>, <em>vrf=None</em><span class="sig-paren">)</span><a class="headerlink" href="#s_nexthop_summary.script_main" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">s_nexthop_summary.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>session</em>, <em>ask_vrf=True</em>, <em>vrf=None</em><span class="sig-paren">)</span><a class="headerlink" href="#s_nexthop_summary.script_main" title="Permalink to this definition">¶</a></dt>
 <dd><div class="line-block">
 <div class="line">SINGLE device script</div>
 <div class="line">Author: Jamie Caesar</div>
@@ -70,7 +70,7 @@ networks and give a detailed breakdown of every route that goes to each next-hop
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>script</strong> (<a class="reference internal" href="securecrt_tools.html#securecrt_tools.script_types.Script" title="securecrt_tools.script_types.Script"><em>script_types.Script</em></a>) – A subclass of the sessions.Session object that represents this particular script session (either
+<li><strong>session</strong> (<a class="reference internal" href="tools-sessions.html#securecrt_tools.sessions.Session" title="securecrt_tools.sessions.Session"><em>sessions.Session</em></a>) – A subclass of the sessions.Session object that represents this particular script session (either
 SecureCRTSession or DirectSession)</li>
 <li><strong>ask_vrf</strong> (<em>bool</em>) – A boolean that specifies if we should prompt for which VRF.  The default is true, but when this
 module is called from other scripts, we may want avoid prompting and supply the VRF with the “vrf” input.</li>
@@ -176,9 +176,7 @@ input route table.</p>
 <li class="toctree-l2"><a class="reference internal" href="no_device_scripts.html">No Device Scripts</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">Writing Your Own Scripts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html#a-note-on-textfsm">A Note on TextFSM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html#module-documentation">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing_scripts.html">Writing Your Own Scripts</a></li>
 </ul>
 
           <div role="search">

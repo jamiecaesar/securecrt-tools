@@ -56,7 +56,7 @@
 <span id="s-switchport-mapping"></span><h1>s_switchport_mapping<a class="headerlink" href="#module-s_switchport_mapping" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="s_switchport_mapping.script_main">
-<code class="descclassname">s_switchport_mapping.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#s_switchport_mapping.script_main" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">s_switchport_mapping.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>session</em>, <em>gateway_hostname=''</em><span class="sig-paren">)</span><a class="headerlink" href="#s_switchport_mapping.script_main" title="Permalink to this definition">¶</a></dt>
 <dd><div class="line-block">
 <div class="line">SINGLE device script</div>
 <div class="line">Author: Jamie Caesar</div>
@@ -69,7 +69,7 @@ on the device will be output.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>script</strong> (<a class="reference internal" href="securecrt_tools.html#securecrt_tools.script_types.Script" title="securecrt_tools.script_types.Script"><em>script_types.Script</em></a>) – A subclass of the sessions.Session object that represents this particular script session (either
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>session</strong> (<a class="reference internal" href="tools-sessions.html#securecrt_tools.sessions.Session" title="securecrt_tools.sessions.Session"><em>sessions.Session</em></a>) – A subclass of the sessions.Session object that represents this particular script session (either
 SecureCRTSession or DirectSession)</td>
 </tr>
 </tbody>
@@ -78,13 +78,13 @@ SecureCRTSession or DirectSession)</td>
 
 <dl class="function">
 <dt id="s_switchport_mapping.get_int_status">
-<code class="descclassname">s_switchport_mapping.</code><code class="descname">get_int_status</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#s_switchport_mapping.get_int_status" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">s_switchport_mapping.</code><code class="descname">get_int_status</code><span class="sig-paren">(</span><em>session</em><span class="sig-paren">)</span><a class="headerlink" href="#s_switchport_mapping.get_int_status" title="Permalink to this definition">¶</a></dt>
 <dd><p>A function that captures the “show interface status” command and returns the processed output from TextFSM</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>script</strong> (<a class="reference internal" href="securecrt_tools.html#securecrt_tools.script_types.Script" title="securecrt_tools.script_types.Script"><em>script_types.Script</em></a>) – The script object that represents this script being executed</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>session</strong> (<a class="reference internal" href="tools-sessions.html#securecrt_tools.sessions.Session" title="securecrt_tools.sessions.Session"><em>sessions.Session</em></a>) – The script object that represents this script being executed</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">TextFSM output from processing the “show interface status” command</td>
 </tr>
@@ -96,14 +96,14 @@ SecureCRTSession or DirectSession)</td>
 
 <dl class="function">
 <dt id="s_switchport_mapping.get_mac_table">
-<code class="descclassname">s_switchport_mapping.</code><code class="descname">get_mac_table</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#s_switchport_mapping.get_mac_table" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">s_switchport_mapping.</code><code class="descname">get_mac_table</code><span class="sig-paren">(</span><em>session</em><span class="sig-paren">)</span><a class="headerlink" href="#s_switchport_mapping.get_mac_table" title="Permalink to this definition">¶</a></dt>
 <dd><p>A function that captures the mac address table and returns an output dictionary that can be used to look up the MAC
 address and VLAN associated with an interface.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>script</strong> (<a class="reference internal" href="securecrt_tools.html#securecrt_tools.script_types.Script" title="securecrt_tools.script_types.Script"><em>script_types.Script</em></a>) – The script object that represents this script being executed</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>session</strong> (<em>session.Session</em>) – The script object that represents this script being executed</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A dictionary that allows lookups of MAC and VLAN information for interfaces</td>
 </tr>
@@ -115,13 +115,13 @@ address and VLAN associated with an interface.</p>
 
 <dl class="function">
 <dt id="s_switchport_mapping.get_desc_table">
-<code class="descclassname">s_switchport_mapping.</code><code class="descname">get_desc_table</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#s_switchport_mapping.get_desc_table" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">s_switchport_mapping.</code><code class="descname">get_desc_table</code><span class="sig-paren">(</span><em>session</em><span class="sig-paren">)</span><a class="headerlink" href="#s_switchport_mapping.get_desc_table" title="Permalink to this definition">¶</a></dt>
 <dd><p>A function that creates a lookup dictionary that can be used to get the description of an interface.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>script</strong> (<a class="reference internal" href="securecrt_tools.html#securecrt_tools.script_types.Script" title="securecrt_tools.script_types.Script"><em>script_types.Script</em></a>) – The script object that represents this script being executed</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>session</strong> (<a class="reference internal" href="tools-sessions.html#securecrt_tools.sessions.Session" title="securecrt_tools.sessions.Session"><em>sessions.Session</em></a>) – The script object that represents this script being executed</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A dictionary that allows getting the description of an interface by using the interface as the key.</td>
 </tr>
@@ -140,7 +140,7 @@ switch being port mapped, so we can fill in the correct IP addresses for each de
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>script</strong> (<a class="reference internal" href="securecrt_tools.html#securecrt_tools.script_types.Script" title="securecrt_tools.script_types.Script"><em>script_types.Script</em></a>) – The script object that represents this script being executed</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>script</strong> (<a class="reference internal" href="tools-scripts.html#securecrt_tools.scripts.Script" title="securecrt_tools.scripts.Script"><em>scripts.Script</em></a>) – The script object that represents this script being executed</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A dictionary that can be used to lookup both the MAC and IP associated with an interface, or the IP and
 VLAN associated with a MAC address.</td>
@@ -202,9 +202,7 @@ VLAN associated with a MAC address.</td>
 <li class="toctree-l2"><a class="reference internal" href="no_device_scripts.html">No Device Scripts</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">Writing Your Own Scripts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html#a-note-on-textfsm">A Note on TextFSM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html#module-documentation">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing_scripts.html">Writing Your Own Scripts</a></li>
 </ul>
 
           <div role="search">
