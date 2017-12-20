@@ -47,4 +47,4 @@ Multiple Device Scripts
 Documentation
 =============
 
-The detailed documentation for this project can be found at `https://presidiocode.github.io/SecureCRT/ <https://presidiocode.github.io/SecureCRT/>`_.
+The detailed documentation for this project can be found at `http://jamiecaesar.github.io/securecrt-tools/ <http://jamiecaesar.github.io/securecrt-tools/>`_.
