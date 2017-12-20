@@ -54,18 +54,21 @@
             
   <div class="section" id="module-securecrt_tools.sessions">
 <span id="securecrt-tools-sessions"></span><h1>securecrt_tools.sessions<a class="headerlink" href="#module-securecrt_tools.sessions" title="Permalink to this headline">¶</a></h1>
-<p>This module includes a collection of “session” objects that represent a SecureCRT session.  These classes are intended
-as a wrapper around the SecureCRT Python API to simplify common tasks that are performed against network devices such
-as routers and switches.</p>
+<p>This module includes a collection of “session” objects that represent a session to a remote device.  To some degree, a
+session object can be thought of as a tab in SecureCRT, since you can disconnect from a device and then connect to
+others with the same session object.    These classes are intended as a wrapper around the SecureCRT Python API to
+simplify common tasks that are performed against network devices such as routers and switches.  As with the Script
+class, there is also a DebugSession class as a part of this module to allow running the code by the local python
+interpreter so that the scripts can be debugged.</p>
 <p>The base class is named “Session” is the parent for more specific session types and includes all methods that must be
 implemented by all sub-classes.</p>
 <p>The primary subclass is called “CRTSession” which is specific to interacting with the Python API for SecureCRT.
 Whenever a script is launched from SecureCRT, this class should be used to interact with SecureCRT.</p>
-<p>A second subclass called “DirectSession” is used to run scripts outside of SecureCRT, such as in an IDE.  This is useful
+<p>A second subclass called “DebugSession” is used to run scripts outside of SecureCRT, such as in an IDE.  This is useful
 for debugging because you can run your script along with the IDE debugging tools while simulating the interactions with
 SecureCRT.  The class has the same API as CRTSession so that no modifications are needed to run a script directly.  For
 example, while a CRTSession may directly pull input from a device before processing it, if the script is launched from
-an IDE, the DirectSession object will instead prompt for a filename containing the same output that would be been
+an IDE, the DebugSession object will instead prompt for a filename containing the same output that would be been
 received from the remote device.  The script can then be debugged step-by-step to help the programmer better understand
 where their logic is having trouble with a particular output.</p>
 <div class="section" id="the-session-base-class">
@@ -434,8 +437,8 @@ This method can handle any length of output</p>
 <div class="section" id="directsession-class">
 <h2>DirectSession Class<a class="headerlink" href="#directsession-class" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="securecrt_tools.sessions.DirectSession">
-<em class="property">class </em><code class="descclassname">securecrt_tools.sessions.</code><code class="descname">DirectSession</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession" title="Permalink to this definition">¶</a></dt>
+<dt id="securecrt_tools.sessions.DebugSession">
+<em class="property">class </em><code class="descclassname">securecrt_tools.sessions.</code><code class="descname">DebugSession</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#securecrt_tools.sessions.Session" title="securecrt_tools.sessions.Session"><code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.sessions.Session</span></code></a></p>
 <p>This class is used when the scripts are executed directly from a local Python installation instead of from
 SecureCRT.  This class is intended to simulate connectivity to remote devices by prompting the user for what would
@@ -444,14 +447,14 @@ it will instead prompt the user for a location of a file with the associated out
 be run directly in an IDE for development and troubleshooting of more complicated logic around parsing command
 outputs.</p>
 <dl class="method">
-<dt id="securecrt_tools.sessions.DirectSession.close">
-<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.close" title="Permalink to this definition">¶</a></dt>
+<dt id="securecrt_tools.sessions.DebugSession.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.close" title="Permalink to this definition">¶</a></dt>
 <dd><p>A method to close the SecureCRT tab associated with this CRTSession.  Does nothing but print to the console.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="securecrt_tools.sessions.DirectSession.connect">
-<code class="descname">connect</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>protocol=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.connect" title="Permalink to this definition">¶</a></dt>
+<dt id="securecrt_tools.sessions.DebugSession.connect">
+<code class="descname">connect</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>protocol=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.connect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pretends to connect to a device.  Simply marks the state of the session as connected.  Never fails.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -475,8 +478,8 @@ type of device (for example “$” for some linux hosts).</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="securecrt_tools.sessions.DirectSession.connect_ssh">
-<code class="descname">connect_ssh</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>version=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.connect_ssh" title="Permalink to this definition">¶</a></dt>
+<dt id="securecrt_tools.sessions.DebugSession.connect_ssh">
+<code class="descname">connect_ssh</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>version=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.connect_ssh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pretends to connect to a device via SSH.  Simply tracks that we are now connected to something within this
 session (this method never fails).</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -501,8 +504,8 @@ type of device (for example “$” for some linux hosts).</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="securecrt_tools.sessions.DirectSession.connect_telnet">
-<code class="descname">connect_telnet</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.connect_telnet" title="Permalink to this definition">¶</a></dt>
+<dt id="securecrt_tools.sessions.DebugSession.connect_telnet">
+<code class="descname">connect_telnet</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.connect_telnet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pretends to connect to a device via the Telnet protocol, just like connect_ssh above.  Never fails.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -524,8 +527,8 @@ type of device (for example “$” for some linux hosts).</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="securecrt_tools.sessions.DirectSession.disconnect">
-<code class="descname">disconnect</code><span class="sig-paren">(</span><em>command='exit'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.disconnect" title="Permalink to this definition">¶</a></dt>
+<dt id="securecrt_tools.sessions.DebugSession.disconnect">
+<code class="descname">disconnect</code><span class="sig-paren">(</span><em>command='exit'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.disconnect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pretends to disconnects the connected session.  Simply marks our session as disconnected.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -538,8 +541,8 @@ type of device (for example “$” for some linux hosts).</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="securecrt_tools.sessions.DirectSession.disconnect_via_jump">
-<code class="descname">disconnect_via_jump</code><span class="sig-paren">(</span><em>command='exit'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.disconnect_via_jump" title="Permalink to this definition">¶</a></dt>
+<dt id="securecrt_tools.sessions.DebugSession.disconnect_via_jump">
+<code class="descname">disconnect_via_jump</code><span class="sig-paren">(</span><em>command='exit'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.disconnect_via_jump" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pretends to disconnect from a device connect through a jump box.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -552,16 +555,16 @@ type of device (for example “$” for some linux hosts).</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="securecrt_tools.sessions.DirectSession.end_cisco_session">
-<code class="descname">end_cisco_session</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.end_cisco_session" title="Permalink to this definition">¶</a></dt>
+<dt id="securecrt_tools.sessions.DebugSession.end_cisco_session">
+<code class="descname">end_cisco_session</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.end_cisco_session" title="Permalink to this definition">¶</a></dt>
 <dd><p>End the session by returning the device’s terminal parameters that were modified by start_session() to their
 previous values.</p>
 <p>This should always be called before a disconnect (assuming that start_cisco_session was called after connect)</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="securecrt_tools.sessions.DirectSession.get_command_output">
-<code class="descname">get_command_output</code><span class="sig-paren">(</span><em>command</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.get_command_output" title="Permalink to this definition">¶</a></dt>
+<dt id="securecrt_tools.sessions.DebugSession.get_command_output">
+<code class="descname">get_command_output</code><span class="sig-paren">(</span><em>command</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.get_command_output" title="Permalink to this definition">¶</a></dt>
 <dd><p>Captures the output from the provided command and saves the results in a variable.</p>
 <p>** NOTE ** Assigning the output directly to a variable causes problems with SecureCRT for long outputs.  It
 will gradually get slower and slower until the program freezes and crashes.  The workaround is to
@@ -594,8 +597,8 @@ procedure that this method uses.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="securecrt_tools.sessions.DirectSession.is_connected">
-<code class="descname">is_connected</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.is_connected" title="Permalink to this definition">¶</a></dt>
+<dt id="securecrt_tools.sessions.DebugSession.is_connected">
+<code class="descname">is_connected</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.is_connected" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a boolean value that describes if the session is currently connected.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -610,15 +613,15 @@ procedure that this method uses.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="securecrt_tools.sessions.DirectSession.save">
-<code class="descname">save</code><span class="sig-paren">(</span><em>command='copy running-config startup-config'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.save" title="Permalink to this definition">¶</a></dt>
+<dt id="securecrt_tools.sessions.DebugSession.save">
+<code class="descname">save</code><span class="sig-paren">(</span><em>command='copy running-config startup-config'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pretends to send a “copy running-config startup-config” command to the remote device to save the running
 configuration.  Only prints to the console.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="securecrt_tools.sessions.DirectSession.send_config_commands">
-<code class="descname">send_config_commands</code><span class="sig-paren">(</span><em>command_list</em>, <em>output_filename=None</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.send_config_commands" title="Permalink to this definition">¶</a></dt>
+<dt id="securecrt_tools.sessions.DebugSession.send_config_commands">
+<code class="descname">send_config_commands</code><span class="sig-paren">(</span><em>command_list</em>, <em>output_filename=None</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.send_config_commands" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method accepts a list of strings, where each string is a command to be sent to the device.</p>
 <p>This method will pretend to send “conf t”, then all the commands from the list and finally send “end” to the
 device. If an output_filename is specified, the (fake) results returned from entering the commands into the
@@ -640,8 +643,8 @@ applying the commands will be written to this file.</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="securecrt_tools.sessions.DirectSession.ssh_via_jump">
-<code class="descname">ssh_via_jump</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>options='-o StrictHostKeyChecking=no'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.ssh_via_jump" title="Permalink to this definition">¶</a></dt>
+<dt id="securecrt_tools.sessions.DebugSession.ssh_via_jump">
+<code class="descname">ssh_via_jump</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>options='-o StrictHostKeyChecking=no'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.ssh_via_jump" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pretends to connect to a device via SSH through a fictitious jump box.  Never fails unless our session isn’t
 marked as currently connected.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -662,8 +665,8 @@ script will not be prompted to accept the remote key.</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="securecrt_tools.sessions.DirectSession.start_cisco_session">
-<code class="descname">start_cisco_session</code><span class="sig-paren">(</span><em>enable_pass=None</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.start_cisco_session" title="Permalink to this definition">¶</a></dt>
+<dt id="securecrt_tools.sessions.DebugSession.start_cisco_session">
+<code class="descname">start_cisco_session</code><span class="sig-paren">(</span><em>enable_pass=None</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.start_cisco_session" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs initial setup of the session to a Cisco device by detecting parameters (prompt, hostname, network OS,
 etc) of the connected device and modifying the terminal length if configured to do so in the settings file.</p>
 <p>Always assumes that we are already in enable mode (privilege 15)</p>
@@ -682,8 +685,8 @@ method.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="securecrt_tools.sessions.DirectSession.telnet_via_jump">
-<code class="descname">telnet_via_jump</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.telnet_via_jump" title="Permalink to this definition">¶</a></dt>
+<dt id="securecrt_tools.sessions.DebugSession.telnet_via_jump">
+<code class="descname">telnet_via_jump</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.telnet_via_jump" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pretends to connect to a device via telnet through a fictitious jump box.  Never fails unless our session isn’t
 marked as currently connected.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -702,8 +705,8 @@ marked as currently connected.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="securecrt_tools.sessions.DirectSession.write_output_to_file">
-<code class="descname">write_output_to_file</code><span class="sig-paren">(</span><em>command</em>, <em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DirectSession.write_output_to_file" title="Permalink to this definition">¶</a></dt>
+<dt id="securecrt_tools.sessions.DebugSession.write_output_to_file">
+<code class="descname">write_output_to_file</code><span class="sig-paren">(</span><em>command</em>, <em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.write_output_to_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send the supplied command to the remote device and writes the output to a file.</p>
 <p>This function was written specifically to write output line by line because storing large outputs into a
 variable will cause SecureCRT to bog down until it freezes.  A good example is a large “show tech” output.

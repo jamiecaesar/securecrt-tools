@@ -121,5 +121,5 @@ if __name__ == "__builtin__":
 
 # If the script is being run directly, use the simulation class
 elif __name__ == "__main__":
-    direct_script = scripts.DirectScript(os.path.realpath(__file__))
+    direct_script = scripts.DebugScript(os.path.realpath(__file__))
     script_main(direct_script)

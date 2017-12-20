@@ -21,7 +21,7 @@ CRTSession Class
 DirectSession Class
 ---------------------
 
-.. autoclass:: DirectSession
+.. autoclass:: DebugSession
 	:members:
 	:show-inheritance:
 

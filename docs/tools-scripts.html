@@ -54,7 +54,7 @@
             
   <div class="section" id="module-securecrt_tools.scripts">
 <span id="securecrt-tools-scripts"></span><h1>securecrt_tools.scripts<a class="headerlink" href="#module-securecrt_tools.scripts" title="Permalink to this headline">¶</a></h1>
-<p>This module contains classes for representing the execution of a script in SecureCRT.  These attributes and methods
+<p>This module contains classes for representing the execution of a script in SecureCRT.  The attributes and methods
 defined with these classes are more “global” in nature, meaning that they focus on either the interaction with the
 application, or anything that is common to the entire script regardless of how many sessions (in tabs) are open to
 remote devices.</p>
@@ -64,24 +64,36 @@ remote devices.</p>
 <dt id="securecrt_tools.scripts.Script">
 <em class="property">class </em><code class="descclassname">securecrt_tools.scripts.</code><code class="descname">Script</code><span class="sig-paren">(</span><em>script_path</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.Script" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is a base class for the script object.  This class cannot be used directly, but is instead a blueprint that
-enforces what any sub-classes must implement.  The most important sub-class is the CRTScript subclass which
-represents the script being executed from SecureCRT.  The CRT Script class is designed to interact with SecureCRT
-directly.   The other sub-class is the DirectScript, which is used to simulate interactions with SecureCRT if the
-script is being run directly.  The purpose of DirectScript class is to allow the programmer to debug their code in
-their favorite IDE or debugger, which cannot be done when executing the script from SecureCRT.  DirectScript allows
-the same code to run locally without SecureCRT and the class will prompt for the information it needs to continue
-running the main script.</p>
+enforces what any sub-classes must implement.  The reason for using this design (base class with sub-classes) is
+to allow the script to be run in different contexts without needing to change the code, as long as the correct
+sub-class is being used.</p>
+<p>For example, the most important sub-class is the CRTScript subclass which is used when the script is executed from
+SecureCRT.  This class is written to interact with SecureCRT’s Python API to be able to control the applications.
+If the script author wants to display something to the user, they can use the message_box() method to use
+SecureCRT’s pop-up message box (crt.Dialog.MessageBox() call).  The other sub-class (currently) is the DebugScript
+sub-class, which was created to allow easier debugging of a script’s logic by letting you execute the script using
+a local python installation – ideally in your IDE of choice. This would allow you to use the fully debugging
+features of the IDE which are otherwise not available when executing a script inside SecureCRT.  When the
+message_box() is called on the DebugScript sub-class, the message will be printed to the console.</p>
+<p>This sub-class design can also allow for additional classes to be created in the future – perhaps one that uses
+Netmiko to connect to the remote devices.   In this way, if a Netmiko sub-class was created, then all of the same
+scripts can be executed without needing to change them, because the Netmiko class would be required to implement
+all of the same methods that are defined in the base class (just like CRTScript and DebugScript)</p>
+<p>DebugScript class is to allow the programmer to debug their code in their favorite IDE or debugger, which cannot
+be done when executing the script from SecureCRT (in which case you are forced to either use debug messages or write
+outputs to a messagebox.  DebugScript allows the same code to run locally without SecureCRT and the class will
+prompt for the information it needs to continue running the main script.</p>
 <p>Any methods that are not prepended with the &#64;abstractmethod tag preceding the method definition will be inherited
 and available to the sub-classes without needing to define them specifically in each sub-class.  Methods designed
 this way would use the exact same code in all sub-classes, and so there is no reason to re-create them in each
 subclass.</p>
 <p>Methods defined with the &#64;abstractmethod tag should be left empty in this class.  They are required to be
 implemented in each sub-class.  Methods are defined this way when they are required to exist in all sub-classes
-for consistency, but the could would be completely different depending on which class is being used.  One example
-is the SecureCRT Message Box.  When a script is run in SecureCRT, this should use the SecureCRT API to create a
-message box that pops up within SecureCRT.  When the script is being run directly in an IDE, we would want the same
-information to be printed to the console.  When written this way, if a script calls the message_box() method, the
-script will function regardless of how the script was being executed.</p>
+for consistency, but the code would be written completely different depending on which class is being used.  One
+example is the message_box method below.  Under the CRTScript class, this method uses the SecureCRT API to print
+messages and format the text box that should pop up to the user, but in the DebugScript class this method only
+prints the message to the console.  In this way, a call to this method will work either way the script is called
+as long as the correct Script sub-class is being used (and the template are already written to do this).</p>
 <dl class="method">
 <dt id="securecrt_tools.scripts.Script.get_main_session">
 <code class="descname">get_main_session</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.Script.get_main_session" title="Permalink to this definition">¶</a></dt>
@@ -311,8 +323,8 @@ type of device (for example “$” for some linux hosts).</li>
 <div class="section" id="directscript-class">
 <h2>DirectScript Class<a class="headerlink" href="#directscript-class" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="securecrt_tools.scripts.DirectScript">
-<em class="property">class </em><code class="descclassname">securecrt_tools.scripts.</code><code class="descname">DirectScript</code><span class="sig-paren">(</span><em>full_script_path</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DirectScript" title="Permalink to this definition">¶</a></dt>
+<dt id="securecrt_tools.scripts.DebugScript">
+<em class="property">class </em><code class="descclassname">securecrt_tools.scripts.</code><code class="descname">DebugScript</code><span class="sig-paren">(</span><em>full_script_path</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DebugScript" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#securecrt_tools.scripts.Script" title="securecrt_tools.scripts.Script"><code class="xref py py-class docutils literal"><span class="pre">securecrt_tools.scripts.Script</span></code></a></p>
 <p>This class is a sub-class of the Script base class, and is meant to be used in any scripts that are being executed
 directly from a local python installation.  This sub-class is designed to simulate the interaction with SecureCRT
@@ -323,8 +335,8 @@ from the user via the console).</p>
 of the abstract classes defined in the Script class.  This way, it is a complete replacement for the CRTScript class
 if a script is run directly.</p>
 <dl class="method">
-<dt id="securecrt_tools.scripts.DirectScript.create_new_saved_session">
-<code class="descname">create_new_saved_session</code><span class="sig-paren">(</span><em>session_name</em>, <em>ip</em>, <em>protocol='SSH2'</em>, <em>folder='_imports'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DirectScript.create_new_saved_session" title="Permalink to this definition">¶</a></dt>
+<dt id="securecrt_tools.scripts.DebugScript.create_new_saved_session">
+<code class="descname">create_new_saved_session</code><span class="sig-paren">(</span><em>session_name</em>, <em>ip</em>, <em>protocol='SSH2'</em>, <em>folder='_imports'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DebugScript.create_new_saved_session" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pretends to create a new SecureCRT session.  Since we aren’t running in SecureCRT, it does nothing except
 print a message that a device was created.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -344,8 +356,8 @@ print a message that a device was created.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="securecrt_tools.scripts.DirectScript.file_open_dialog">
-<code class="descname">file_open_dialog</code><span class="sig-paren">(</span><em>title</em>, <em>button_label='Open'</em>, <em>default_filename=''</em>, <em>file_filter=''</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DirectScript.file_open_dialog" title="Permalink to this definition">¶</a></dt>
+<dt id="securecrt_tools.scripts.DebugScript.file_open_dialog">
+<code class="descname">file_open_dialog</code><span class="sig-paren">(</span><em>title</em>, <em>button_label='Open'</em>, <em>default_filename=''</em>, <em>file_filter=''</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DebugScript.file_open_dialog" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prompts the user to select a file that will be processed by the script.  In a direct session, the user will be
 prompted for the full path to a file.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -375,8 +387,8 @@ For example, a filter for CSV files would be “CSV Files (<em>.csv)|</em>.csv||
 </dd></dl>
 
 <dl class="method">
-<dt id="securecrt_tools.scripts.DirectScript.message_box">
-<code class="descname">message_box</code><span class="sig-paren">(</span><em>message</em>, <em>title=''</em>, <em>options=0</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DirectScript.message_box" title="Permalink to this definition">¶</a></dt>
+<dt id="securecrt_tools.scripts.DebugScript.message_box">
+<code class="descname">message_box</code><span class="sig-paren">(</span><em>message</em>, <em>title=''</em>, <em>options=0</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DebugScript.message_box" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints a message for the user.  When used in a DirectSession, the message is printed to the console and the
 user is prompted to type the button that would be selected.</p>
 <p>This window can be customized by setting the “options” value, using the constants listed at the top of the
@@ -404,8 +416,8 @@ value that will format the message box.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="securecrt_tools.scripts.DirectScript.prompt_window">
-<code class="descname">prompt_window</code><span class="sig-paren">(</span><em>message</em>, <em>title=''</em>, <em>hide_input=False</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DirectScript.prompt_window" title="Permalink to this definition">¶</a></dt>
+<dt id="securecrt_tools.scripts.DebugScript.prompt_window">
+<code class="descname">prompt_window</code><span class="sig-paren">(</span><em>message</em>, <em>title=''</em>, <em>hide_input=False</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DebugScript.prompt_window" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prompts the user for an input value.  In a direct session, the user will be prompted at the console for input.</p>
 <p>The “hide_input” input will mask the input, so that passwords or other senstive information can be requested.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -430,8 +442,8 @@ value that will format the message box.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="securecrt_tools.scripts.DirectScript.ssh_in_new_tab">
-<code class="descname">ssh_in_new_tab</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DirectScript.ssh_in_new_tab" title="Permalink to this definition">¶</a></dt>
+<dt id="securecrt_tools.scripts.DebugScript.ssh_in_new_tab">
+<code class="descname">ssh_in_new_tab</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DebugScript.ssh_in_new_tab" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pretends to open a new tab.  Since this is being run directly and no tabs exist, the function really does
 nothing but return a new Session object.</p>
 <table class="docutils field-list" frame="void" rules="none">

@@ -201,7 +201,7 @@ if __name__ == "__builtin__":
 # If the script is being run directly, use the simulation class
 elif __name__ == "__main__":
     # Initialize script object
-    direct_script = scripts.DirectScript(os.path.realpath(__file__))
+    direct_script = scripts.DebugScript(os.path.realpath(__file__))
     # Run script's main logic against the script object
     script_main(direct_script)
     # Shutdown logging after

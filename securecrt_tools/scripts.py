@@ -1,5 +1,5 @@
 """
-This module contains classes for representing the execution of a script in SecureCRT.  These attributes and methods
+This module contains classes for representing the execution of a script in SecureCRT.  The attributes and methods
 defined with these classes are more "global" in nature, meaning that they focus on either the interaction with the
 application, or anything that is common to the entire script regardless of how many sessions (in tabs) are open to
 remote devices.
@@ -32,13 +32,28 @@ class ScriptError(Exception):
 class Script:
     """
     This is a base class for the script object.  This class cannot be used directly, but is instead a blueprint that
-    enforces what any sub-classes must implement.  The most important sub-class is the CRTScript subclass which
-    represents the script being executed from SecureCRT.  The CRT Script class is designed to interact with SecureCRT
-    directly.   The other sub-class is the DirectScript, which is used to simulate interactions with SecureCRT if the
-    script is being run directly.  The purpose of DirectScript class is to allow the programmer to debug their code in
-    their favorite IDE or debugger, which cannot be done when executing the script from SecureCRT.  DirectScript allows
-    the same code to run locally without SecureCRT and the class will prompt for the information it needs to continue
-    running the main script.
+    enforces what any sub-classes must implement.  The reason for using this design (base class with sub-classes) is
+    to allow the script to be run in different contexts without needing to change the code, as long as the correct
+    sub-class is being used.
+
+    For example, the most important sub-class is the CRTScript subclass which is used when the script is executed from
+    SecureCRT.  This class is written to interact with SecureCRT's Python API to be able to control the applications.
+    If the script author wants to display something to the user, they can use the message_box() method to use
+    SecureCRT's pop-up message box (crt.Dialog.MessageBox() call).  The other sub-class (currently) is the DebugScript
+    sub-class, which was created to allow easier debugging of a script's logic by letting you execute the script using
+    a local python installation -- ideally in your IDE of choice. This would allow you to use the fully debugging
+    features of the IDE which are otherwise not available when executing a script inside SecureCRT.  When the
+    message_box() is called on the DebugScript sub-class, the message will be printed to the console.
+
+    This sub-class design can also allow for additional classes to be created in the future -- perhaps one that uses
+    Netmiko to connect to the remote devices.   In this way, if a Netmiko sub-class was created, then all of the same
+    scripts can be executed without needing to change them, because the Netmiko class would be required to implement
+    all of the same methods that are defined in the base class (just like CRTScript and DebugScript)
+
+    DebugScript class is to allow the programmer to debug their code in their favorite IDE or debugger, which cannot
+    be done when executing the script from SecureCRT (in which case you are forced to either use debug messages or write
+    outputs to a messagebox.  DebugScript allows the same code to run locally without SecureCRT and the class will
+    prompt for the information it needs to continue running the main script.
 
     Any methods that are not prepended with the @abstractmethod tag preceding the method definition will be inherited
     and available to the sub-classes without needing to define them specifically in each sub-class.  Methods designed
@@ -47,11 +62,11 @@ class Script:
 
     Methods defined with the @abstractmethod tag should be left empty in this class.  They are required to be
     implemented in each sub-class.  Methods are defined this way when they are required to exist in all sub-classes
-    for consistency, but the could would be completely different depending on which class is being used.  One example
-    is the SecureCRT Message Box.  When a script is run in SecureCRT, this should use the SecureCRT API to create a
-    message box that pops up within SecureCRT.  When the script is being run directly in an IDE, we would want the same
-    information to be printed to the console.  When written this way, if a script calls the message_box() method, the
-    script will function regardless of how the script was being executed.
+    for consistency, but the code would be written completely different depending on which class is being used.  One
+    example is the message_box method below.  Under the CRTScript class, this method uses the SecureCRT API to print
+    messages and format the text box that should pop up to the user, but in the DebugScript class this method only
+    prints the message to the console.  In this way, a call to this method will work either way the script is called
+    as long as the correct Script sub-class is being used (and the template are already written to do this).
     """
     __metaclass__ = ABCMeta
 
@@ -602,7 +617,7 @@ class CRTScript(Script):
         new_session.Save(session_path)
 
 
-class DirectScript(Script):
+class DebugScript(Script):
     """
     This class is a sub-class of the Script base class, and is meant to be used in any scripts that are being executed
     directly from a local python installation.  This sub-class is designed to simulate the interaction with SecureCRT
@@ -616,9 +631,9 @@ class DirectScript(Script):
     """
 
     def __init__(self, full_script_path):
-        super(DirectScript, self).__init__(full_script_path)
+        super(DebugScript, self).__init__(full_script_path)
         self.logger.debug("<INIT> Building DirectExecution Object")
-        self.main_session = sessions.DirectSession(self)
+        self.main_session = sessions.DebugSession(self)
 
     def message_box(self, message, title="", options=0):
         """
@@ -745,7 +760,7 @@ class DirectScript(Script):
                                - not used)
         :type prompt_endings: list
         """
-        return sessions.DirectSession(self)
+        return sessions.DebugSession(self)
 
     def create_new_saved_session(self, session_name, ip, protocol="SSH2", folder="_imports"):
         """

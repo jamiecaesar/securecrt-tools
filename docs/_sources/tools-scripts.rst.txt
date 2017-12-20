@@ -21,7 +21,7 @@ CRTScript Class
 DirectScript Class
 ---------------------
 
-.. autoclass:: DirectScript
+.. autoclass:: DebugScript
 	:members:
 	:show-inheritance:
 

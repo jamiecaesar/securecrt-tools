@@ -1,7 +1,10 @@
 """
-This module includes a collection of "session" objects that represent a SecureCRT session.  These classes are intended
-as a wrapper around the SecureCRT Python API to simplify common tasks that are performed against network devices such
-as routers and switches.
+This module includes a collection of "session" objects that represent a session to a remote device.  To some degree, a
+session object can be thought of as a tab in SecureCRT, since you can disconnect from a device and then connect to
+others with the same session object.    These classes are intended as a wrapper around the SecureCRT Python API to
+simplify common tasks that are performed against network devices such as routers and switches.  As with the Script
+class, there is also a DebugSession class as a part of this module to allow running the code by the local python
+interpreter so that the scripts can be debugged.
 
 The base class is named "Session" is the parent for more specific session types and includes all methods that must be
 implemented by all sub-classes.
@@ -9,11 +12,11 @@ implemented by all sub-classes.
 The primary subclass is called "CRTSession" which is specific to interacting with the Python API for SecureCRT.
 Whenever a script is launched from SecureCRT, this class should be used to interact with SecureCRT.
 
-A second subclass called "DirectSession" is used to run scripts outside of SecureCRT, such as in an IDE.  This is useful
+A second subclass called "DebugSession" is used to run scripts outside of SecureCRT, such as in an IDE.  This is useful
 for debugging because you can run your script along with the IDE debugging tools while simulating the interactions with
 SecureCRT.  The class has the same API as CRTSession so that no modifications are needed to run a script directly.  For
 example, while a CRTSession may directly pull input from a device before processing it, if the script is launched from
-an IDE, the DirectSession object will instead prompt for a filename containing the same output that would be been
+an IDE, the DebugSession object will instead prompt for a filename containing the same output that would be been
 received from the remote device.  The script can then be debugged step-by-step to help the programmer better understand
 where their logic is having trouble with a particular output.
 
@@ -1213,7 +1216,7 @@ class CRTSession(Session):
         self.logger.debug("<SAVE> Save results: {0}".format(save_results))
 
 
-class DirectSession(Session):
+class DebugSession(Session):
     """
     This class is used when the scripts are executed directly from a local Python installation instead of from
     SecureCRT.  This class is intended to simulate connectivity to remote devices by prompting the user for what would
@@ -1224,7 +1227,7 @@ class DirectSession(Session):
     """
 
     def __init__(self, script):
-        super(DirectSession, self).__init__()
+        super(DebugSession, self).__init__()
         self.logger.debug("<INIT> Building Direct Session Object")
         self.script = script
 
