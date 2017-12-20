@@ -1,0 +1,4 @@
+Hostname,Protocol,Username,Password,Enable
+10.0.0.1,telnet,test,,python
+10.0.0.2,,pythonlab,,
+10.0.0.3,ssh,pythonlab,,
