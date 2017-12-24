@@ -1,0 +1,7 @@
+Value Required,Filldown INTERFACE (\S+)
+Value Required DESC (.*)
+
+Start
+  # Look for an "interface" before checking for description line
+  ^interface ${INTERFACE}
+  ^\s+description ${DESC} -> Record
