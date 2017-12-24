@@ -403,7 +403,7 @@ class CRTSession(Session):
         self.tab = tab
         self.screen = tab.Screen
         self.session = tab.Session
-        self.response_timeout = 10
+        self.response_timeout = 20
         self.jump_endings = None
         self.session_set_sync = False
 
