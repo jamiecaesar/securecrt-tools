@@ -316,7 +316,7 @@ class Script:
 
         # Give stats on how many devices were found and prompt user before going forward with connections.
         validate_message = "{0} devices found in CSV.\n" \
-                           "{0} lines in CSV skipped.\n" \
+                           "{1} lines in CSV skipped.\n" \
                            "\n" \
                            "Do you want to proceed?".format(len(temp_device_list), skipped_lines)
         message_box_design = ICON_QUESTION | BUTTON_CANCEL | DEFBUTTON2
