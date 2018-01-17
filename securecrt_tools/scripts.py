@@ -174,7 +174,7 @@ class Script:
         if os.path.isfile(path):
             return path
         else:
-            raise IOError("The template name {0} does not exist.")
+            raise IOError("The template name {0} does not exist.".format(name))
 
     def import_device_list(self):
         """
