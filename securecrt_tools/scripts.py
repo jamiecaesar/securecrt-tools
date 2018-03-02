@@ -276,7 +276,7 @@ class Script:
 
         default_enable = None
         if no_enable:
-            self.logger.debug("<IMPORT_DEVICES> Devices without enable passwords found.  Prompting fopr password.")
+            self.logger.debug("<IMPORT_DEVICES> Devices without enable passwords found.  Prompting for password.")
             enable_msg = "Devices were found without enable passwords listed.  Do you want to enter an enable password?"
             result = self.message_box(enable_msg, "No Enable PW", BUTTON_YESNO | ICON_QUESTION)
             if result == IDYES:
@@ -297,7 +297,9 @@ class Script:
 
             # Fill in password information
             password = line[3]
-            if not password:
+            if password:
+                dev_info['password'] = password
+            else:
                 try:
                     dev_info['password'] = credentials[username]
                 except KeyError:
