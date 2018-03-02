@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Multiple Device Scripts &#8212; SecureCRT Tools 2.1.0 documentation</title>
+    <title>m_save_output &#8212; SecureCRT Tools 2.1.0 documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -23,8 +23,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="m_cdp_to_csv" href="m_cdp_to_csv.html" />
-    <link rel="prev" title="s_vlan_to_csv" href="s_vlan_to_csv.html" /> 
+    <link rel="next" title="m_update_interface_desc" href="m_update_interface_desc.html" />
+    <link rel="prev" title="m_cdp_to_csv" href="m_cdp_to_csv.html" /> 
   </head>
   <body>
     <div class="header-wrapper" role="banner">
@@ -32,9 +32,9 @@
         <div class="headertitle"><a
           href="index.html">SecureCRT Tools 2.1.0 documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
-          <a href="s_vlan_to_csv.html" title="s_vlan_to_csv"
-             accesskey="P">previous</a> |
           <a href="m_cdp_to_csv.html" title="m_cdp_to_csv"
+             accesskey="P">previous</a> |
+          <a href="m_update_interface_desc.html" title="m_update_interface_desc"
              accesskey="N">next</a> |
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |
@@ -52,16 +52,40 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="multiple-device-scripts">
-<h1>Multiple Device Scripts<a class="headerlink" href="#multiple-device-scripts" title="Permalink to this headline">¶</a></h1>
-<p>Multiple Device Scripts are scripts that are designed to be executed while NOT attached to a remote device.   The script will prompt for an input CSV containing all of the hosts and other required details (credentials, jumpbox, etc) to be able to connect all of the devices in the list automatically.   The logic of the script will be performed on each device, one at a time.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="m_cdp_to_csv.html">m_cdp_to_csv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="m_save_output.html">m_save_output</a></li>
-<li class="toctree-l1"><a class="reference internal" href="m_update_interface_desc.html">m_update_interface_desc</a></li>
-</ul>
+  <div class="section" id="module-m_save_output">
+<span id="m-save-output"></span><h1>m_save_output<a class="headerlink" href="#module-m_save_output" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="m_save_output.script_main">
+<code class="descclassname">m_save_output.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#m_save_output.script_main" title="Permalink to this definition">¶</a></dt>
+<dd><div class="line-block">
+<div class="line">MULTIPLE device script</div>
+<div class="line">Author: Jamie Caesar</div>
+<div class="line">Email: <a class="reference external" href="mailto:jcaesar&#37;&#52;&#48;presidio&#46;com">jcaesar<span>&#64;</span>presidio<span>&#46;</span>com</a></div>
 </div>
+<p>This script will prompt for a CSV list of devices, then will prompt for a command to run on each device in the list.
+The output from each device will be saved to a file.  The path where the file is saved is specified in the
+settings.ini file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>script</strong> (<a class="reference internal" href="tools-scripts.html#securecrt_tools.scripts.Script" title="securecrt_tools.scripts.Script"><em>scripts.Script</em></a>) – A subclass of the scripts.Script object that represents the execution of this particular script
+(either CRTScript or DirectScript)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="m_save_output.per_device_work">
+<code class="descclassname">m_save_output.</code><code class="descname">per_device_work</code><span class="sig-paren">(</span><em>session</em>, <em>enable_pass</em>, <em>send_cmd</em><span class="sig-paren">)</span><a class="headerlink" href="#m_save_output.per_device_work" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function contains the code that should be executed on each device that this script connects to.  It is called
+after establishing a connection to each device in the loop above.</p>
+<p>You can either put your own code here, or if there is a single-device version of a script that performs the correct
+task, it can be imported and called here, essentially making this script connect to all the devices in the chosen
+CSV file and then running a single-device script on each of them.</p>
+</dd></dl>
+
 </div>
 
 
@@ -79,9 +103,9 @@
 <li class="toctree-l1"><a class="reference internal" href="README.html#settings">Settings</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="scripts.html">Scripts</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="single_device_scripts.html">Single Device Scripts</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Multiple Device Scripts</a><ul>
+<li class="toctree-l2 current"><a class="reference internal" href="multi_device_scripts.html">Multiple Device Scripts</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="m_cdp_to_csv.html">m_cdp_to_csv</a></li>
-<li class="toctree-l3"><a class="reference internal" href="m_save_output.html">m_save_output</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">m_save_output</a></li>
 <li class="toctree-l3"><a class="reference internal" href="m_update_interface_desc.html">m_update_interface_desc</a></li>
 </ul>
 </li>
@@ -109,9 +133,9 @@
       <div class="footer">
         <div class="left">
           <div role="navigation" aria-label="related navigaton">
-            <a href="s_vlan_to_csv.html" title="s_vlan_to_csv"
-              >previous</a> |
             <a href="m_cdp_to_csv.html" title="m_cdp_to_csv"
+              >previous</a> |
+            <a href="m_update_interface_desc.html" title="m_update_interface_desc"
               >next</a> |
             <a href="py-modindex.html" title="Python Module Index"
               >modules</a> |
@@ -120,7 +144,7 @@
           </div>
           <div role="note" aria-label="source link">
               <br/>
-              <a href="_sources/multi_device_scripts.rst.txt"
+              <a href="_sources/m_save_output.rst.txt"
                 rel="nofollow">Show Source</a>
           </div>
         </div>

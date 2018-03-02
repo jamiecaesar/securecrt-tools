@@ -30,11 +30,12 @@ logger.debug("Starting execution of {0}".format(script_name))
 def script_main(script):
     """
     | MULTIPLE device script
-    | Author: XXXXXXXX
-    | Email: XXXXXXX@domain.com
+    | Author: Jamie Caesar
+    | Email: jcaesar@presidio.com
 
-    PUT A DESCRIPTION OF THIS SCRIPT HERE.  WHAT IT DOES, ETC.
-    This script checks that it will NOT be run in a connected tab.
+    This script will prompt for a CSV list of devices, then will prompt for a command to run on each device in the list.
+    The output from each device will be saved to a file.  The path where the file is saved is specified in the
+    settings.ini file.
 
     :param script: A subclass of the scripts.Script object that represents the execution of this particular script
                    (either CRTScript or DirectScript)
@@ -53,26 +54,11 @@ def script_main(script):
     if not device_list:
         return
 
-    check_mode = True
-    # #########################################  START CHECK MODE SECTION  ###########################################
-    # Ask if this should be a test run (generate configs only) or full run (push updates to devices)
-    # Comment out or remove the entire CHECK MODE SECTION if you don't want to prompt for check mode
-    check_mode_message = "Do you want to run this script in check mode? (Only generate configs)\n" \
-                         "\n" \
-                         "Yes = Connect to device and write change scripts to a file ONLY\n" \
-                         "No = Connect to device and PUSH configuration changes"
-    message_box_design = ICON_QUESTION | BUTTON_YESNOCANCEL
-    logger.debug("Prompting the user to run in check mode.")
-    result = script.message_box(check_mode_message, "Run in Check Mode?", message_box_design)
-    if result == IDYES:
-        logger.debug("<M_SCRIPT> Received 'True' for Check Mode.")
-        check_mode = True
-    elif result == IDNO:
-        logger.debug("<M_SCRIPT> Received 'False' for Check Mode.")
-        check_mode = False
-    else:
+    send_cmd = script.prompt_window("Enter the command to capture on each device.")
+    logger.debug("Received command: '{0}'".format(send_cmd))
+
+    if send_cmd == "":
         return
-    # ########################################### END CHECK MODE SECTION  ############################################
 
     # ##########################################  START JUMP BOX SECTION  ############################################
     # Check settings if we should use a jumpbox.  If so, prompt for password (and possibly missing values)
@@ -121,7 +107,7 @@ def script_main(script):
                         session.connect_ssh(jumpbox, j_username, j_password, prompt_endings=[j_ending])
                         jump_connected = True
                     session.ssh_via_jump(hostname, username, password)
-                    per_device_work(session, check_mode, enable)
+                    per_device_work(session, enable, send_cmd)
                     session.disconnect_via_jump()
                 except (sessions.ConnectError, sessions.InteractionError) as e:
                     with open(failed_log, 'a') as logfile:
@@ -134,7 +120,7 @@ def script_main(script):
                         session.connect_ssh(jumpbox, j_username, j_password, prompt_endings=[j_ending])
                         jump_connected = True
                     session.telnet_via_jump(hostname, username, password)
-                    per_device_work(session, check_mode, enable)
+                    per_device_work(session, enable, send_cmd)
                     session.disconnect_via_jump()
                 except (sessions.ConnectError, sessions.InteractionError) as e:
                     with open(failed_log, 'a') as logfile:
@@ -145,7 +131,7 @@ def script_main(script):
             logger.debug("<M_SCRIPT> Connecting to {0}.".format(hostname))
             try:
                 session.connect(hostname, username, password, protocol=protocol)
-                per_device_work(session, check_mode, enable)
+                per_device_work(session, enable, send_cmd)
                 session.disconnect()
             except sessions.ConnectError as e:
                 with open(failed_log, 'a') as logfile:
@@ -161,7 +147,7 @@ def script_main(script):
     # #########################################  END DEVICE CONNECT LOOP  ############################################
 
 
-def per_device_work(session, check_mode, enable_pass):
+def per_device_work(session, enable_pass, send_cmd):
     """
     This function contains the code that should be executed on each device that this script connects to.  It is called
     after establishing a connection to each device in the loop above.
@@ -170,10 +156,15 @@ def per_device_work(session, check_mode, enable_pass):
     task, it can be imported and called here, essentially making this script connect to all the devices in the chosen
     CSV file and then running a single-device script on each of them.
     """
-    session.start_cisco_session()
-    #
-    # Your Code Here
-    #
+    session.start_cisco_session(enable_pass=enable_pass)
+
+    # Generate filename used for output files.
+    full_file_name = session.create_output_filename(send_cmd)
+
+    # Get the output of our command and save it to the filename specified
+    session.write_output_to_file(send_cmd, full_file_name)
+
+    # End cisco session
     session.end_cisco_session()
 
 
