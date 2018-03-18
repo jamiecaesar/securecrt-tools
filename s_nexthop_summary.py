@@ -62,7 +62,7 @@ def script_main(session, ask_vrf=True, vrf=None):
     # If we have a VRF, modify our commands and hostname to reflect it.  If not, pull the default route table.
     if selected_vrf:
         send_cmd = "show ip route vrf {0}".format(selected_vrf)
-        script.hostname = script.hostname + "-VRF-{0}".format(selected_vrf)
+        session.hostname = session.hostname + "-VRF-{0}".format(selected_vrf)
         logger.debug("Received VRF: {0}".format(selected_vrf))
     else:
         send_cmd = "show ip route"
