@@ -819,6 +819,8 @@ class CRTSession(Session):
 
         # Get prompt (and thus hostname) from device
         self.prompt = self.__get_prompt()
+        if "(" in self.prompt:
+            raise InteractionError("Please re-run this script when not in configuration mode.")
         self.__enter_enable(enable_pass, prompt_for_enable)
         self.hostname = self.prompt[:-1]
         self.logger.debug("<START> Set Hostname: {0}".format(self.hostname))
