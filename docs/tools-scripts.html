@@ -136,8 +136,10 @@ simultaneously via a script.</p>
 <code class="descname">import_device_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.Script.import_device_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function will prompt for a device list CSV file to import, returns a list containing all of the
 devices that were in the CSV file and their associated credentials.  The CSV file must be of the format, and
-include a header row of [‘Hostname’, ‘Protocol’, ‘Username’, ‘Password’, ‘Enable’, ‘Via-Jumpbox’].  An example
+include a header row of [‘Hostname’, ‘Protocol’, ‘Username’, ‘Password’, ‘Enable’, ‘Proxy Session’].  An example
 device list CSV file is at ‘template/sample_device_list.csv’</p>
+<p>The ‘Proxy Session’ options is looking for a SecureCRT session name that can be used to proxy this connection
+through.  This sets the ‘Firewall’ option under a SecureCRT session to perform this connection proxy.</p>
 <p>Some additional information about missing items from a line in the CSV:
 - If the hostname field is missing, the line will be skipped.
 - If the protocol field is empty, the script will try SSH2, then SSH1, then Telnet.

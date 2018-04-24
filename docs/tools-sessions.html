@@ -144,7 +144,7 @@ object represents.</p>
 
 <dl class="method">
 <dt id="securecrt_tools.sessions.CRTSession.connect">
-<code class="descname">connect</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>protocol=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.connect" title="Permalink to this definition">¶</a></dt>
+<code class="descname">connect</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>protocol=None</em>, <em>proxy=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.connect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Attempts to connect to a device by any available protocol, starting with SSH2, then SSH1, then telnet</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -157,6 +157,9 @@ object represents.</p>
 user will be prompted for one.</li>
 <li><strong>protocol</strong> (<em>str</em>) – A string with the desired protocol (telnet, ssh1, ssh2, ssh). If left blank it will try all
 starting with SSH2, then SSH1 then Telnet.  “ssh” means SSH2 then SSH1.</li>
+<li><strong>proxy</strong> (<em>str</em>) – The name of a SecureCRT session object that can be used as a jumpbox to proxy the SSH connection
+through.  This is the same as selecting a session under the “Firewall” selection under the SSH
+settings screen for a SecureCRT session.</li>
 <li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
 Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
 type of device (for example “$” for some linux hosts).</li>
@@ -169,7 +172,7 @@ type of device (for example “$” for some linux hosts).</li>
 
 <dl class="method">
 <dt id="securecrt_tools.sessions.CRTSession.connect_ssh">
-<code class="descname">connect_ssh</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>version=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.connect_ssh" title="Permalink to this definition">¶</a></dt>
+<code class="descname">connect_ssh</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>version=None</em>, <em>proxy=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.connect_ssh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connects to a device via the SSH protocol. By default, SSH2 will be tried first, but if it fails it will attempt
 to fall back to SSH1.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -183,6 +186,9 @@ to fall back to SSH1.</p>
 user will be prompted for one.</li>
 <li><strong>version</strong> (<em>int</em>) – The SSH version to connect with (1 or 2).  Default is None, which will try 2 first and fallback
 to 1 if that fails.</li>
+<li><strong>proxy</strong> (<em>str</em>) – The name of a SecureCRT session object that can be used as a jumpbox to proxy the SSH connection
+through.  This is the same as selecting a session under the “Firewall” selection under the SSH
+settings screen for a SecureCRT session.</li>
 <li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
 Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
 type of device (for example “$” for some linux hosts).</li>
@@ -195,7 +201,7 @@ type of device (for example “$” for some linux hosts).</li>
 
 <dl class="method">
 <dt id="securecrt_tools.sessions.CRTSession.connect_telnet">
-<code class="descname">connect_telnet</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.connect_telnet" title="Permalink to this definition">¶</a></dt>
+<code class="descname">connect_telnet</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>proxy=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.connect_telnet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connects to a device via the Telent protocol.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -206,6 +212,9 @@ type of device (for example “$” for some linux hosts).</li>
 <li><strong>username</strong> (<em>str</em>) – The username to login to the device with</li>
 <li><strong>password</strong> (<em>str</em>) – The password that goes with the provided username.  If a password is not specified, the
 user will be prompted for one.</li>
+<li><strong>proxy</strong> (<em>str</em>) – The name of a SecureCRT session object that can be used as a jumpbox to proxy the SSH connection
+through.  This is the same as selecting a session under the “Firewall” selection under the SSH
+settings screen for a SecureCRT session.</li>
 <li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
 Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
 type of device (for example “$” for some linux hosts).</li>
@@ -454,7 +463,7 @@ outputs.</p>
 
 <dl class="method">
 <dt id="securecrt_tools.sessions.DebugSession.connect">
-<code class="descname">connect</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>protocol=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.connect" title="Permalink to this definition">¶</a></dt>
+<code class="descname">connect</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>protocol=None</em>, <em>proxy=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.connect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pretends to connect to a device.  Simply marks the state of the session as connected.  Never fails.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -467,6 +476,9 @@ outputs.</p>
 user will be prompted for one.</li>
 <li><strong>protocol</strong> (<em>str</em>) – A string with the desired protocol (telnet, ssh1, ssh2, ssh). If left blank it will try all
 starting with SSH2, then SSH1 then Telnet.  “ssh” means SSH2 then SSH1.</li>
+<li><strong>proxy</strong> (<em>str</em>) – The name of a SecureCRT session object that can be used as a jumpbox to proxy the SSH connection
+through.  This is the same as selecting a session under the “Firewall” selection under the SSH
+settings screen for a SecureCRT session.</li>
 <li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
 Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
 type of device (for example “$” for some linux hosts).</li>
@@ -479,7 +491,7 @@ type of device (for example “$” for some linux hosts).</li>
 
 <dl class="method">
 <dt id="securecrt_tools.sessions.DebugSession.connect_ssh">
-<code class="descname">connect_ssh</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>version=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.connect_ssh" title="Permalink to this definition">¶</a></dt>
+<code class="descname">connect_ssh</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>version=None</em>, <em>proxy=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.connect_ssh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pretends to connect to a device via SSH.  Simply tracks that we are now connected to something within this
 session (this method never fails).</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -493,6 +505,9 @@ session (this method never fails).</p>
 user will be prompted for one.</li>
 <li><strong>version</strong> (<em>int</em>) – The SSH version to connect with (1 or 2).  Default is None, which will try 2 first and fallback
 to 1 if that fails.</li>
+<li><strong>proxy</strong> (<em>str</em>) – The name of a SecureCRT session object that can be used as a jumpbox to proxy the SSH connection
+through.  This is the same as selecting a session under the “Firewall” selection under the SSH
+settings screen for a SecureCRT session.</li>
 <li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
 Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
 type of device (for example “$” for some linux hosts).</li>
@@ -505,7 +520,7 @@ type of device (for example “$” for some linux hosts).</li>
 
 <dl class="method">
 <dt id="securecrt_tools.sessions.DebugSession.connect_telnet">
-<code class="descname">connect_telnet</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.connect_telnet" title="Permalink to this definition">¶</a></dt>
+<code class="descname">connect_telnet</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>proxy=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.connect_telnet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pretends to connect to a device via the Telnet protocol, just like connect_ssh above.  Never fails.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -516,6 +531,9 @@ type of device (for example “$” for some linux hosts).</li>
 <li><strong>username</strong> (<em>str</em>) – The username to login to the device with</li>
 <li><strong>password</strong> (<em>str</em>) – The password that goes with the provided username.  If a password is not specified, the
 user will be prompted for one.</li>
+<li><strong>proxy</strong> (<em>str</em>) – The name of a SecureCRT session object that can be used as a jumpbox to proxy the SSH connection
+through.  This is the same as selecting a session under the “Firewall” selection under the SSH
+settings screen for a SecureCRT session.</li>
 <li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
 Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
 type of device (for example “$” for some linux hosts).</li>

@@ -98,16 +98,18 @@
 <h2>Global Settings<a class="headerlink" href="#global-settings" title="Permalink to this headline">¶</a></h2>
 <p>Global settings that are used by all scripts are under the <cite>Global</cite> heading in the <cite>settings.ini</cite> file.  The following options are available in the global settings file:</p>
 <ul class="simple">
-<li>‘output_dir’: This is the path where you want the output from scripts to be saved.  <em>NOTE</em> For Windows systems, either use forward slashes (/) or double backslash (\) to represent a single backslash.  If a single backslash is used, Python may interpret it as an escape character.</li>
-<li>‘date_format’: Default is ‘%Y-%m-%d-%H-%M-%S’.  This string specifies how the date stamp in output filenames is formatted.
+<li>‘<strong>output_dir</strong>’: This is the path where you want the output from scripts to be saved.  <em>NOTE</em> For Windows systems, either use forward slashes (/) or double backslash (\) to represent a single backslash.  If a single backslash is used, Python may interpret it as an escape character.</li>
+<li>‘<strong>date_format</strong>’: Default is ‘%Y-%m-%d-%H-%M-%S’.  This string specifies how the date stamp in output filenames is formatted.
 - %Y - 4-digit Year
 - %m - numeric month
 - %d - day of the month
 - %H - Hours
 - %M - Minutes
 - %S - Seconds</li>
-<li>‘modify_term’: True or False.  When True, the script will attempt to modify the terminal length and width to 0 so that output flows continuously.  When the output is complete the script will return the length and width to their original values.   If False, it will not change the values, but instead auto-advance when a “More” prompt is encountered.</li>
-<li>‘debug_mode’: True or False.  If True, a log file will be written that contains debug messages from the script execution.  This can be helpful for troubleshooting scripts that are failing.  The debug files will be saved in a <cite>debugs</cite> directory under your configured output directory.</li>
+<li>‘<strong>modify_term</strong>’: True or False.  When True, the script will attempt to modify the terminal length and width to 0 so that output flows continuously.  When the output is complete the script will return the length and width to their original values.   If False, it will not change the values, but instead auto-advance when a “More” prompt is encountered.</li>
+<li>‘<strong>debug_mode</strong>’: True or False.  If True, a log file will be written that contains debug messages from the script execution.  This can be helpful for troubleshooting scripts that are failing.  The debug files will be saved in a <cite>debugs</cite> directory under your configured output directory.</li>
+<li>‘<strong>use_proxy</strong>’: True or False.  If True, use the <cite>proxy_session</cite> option below to specify which SecureCRT Session to use as a proxy for any connections made by multi-device scripts (the ones that initiate connections to devices).  This uses the <cite>Firewall</cite> option found in the settings of a SecureCRT session, which lets you select another session object to use to proxy the connection via SSH tunneling.</li>
+<li>‘<strong>proxy_session</strong>’: The name of the SecureCRT session that should be used to proxy the connection.  This <strong>MUST</strong> be a session that uses SSH2.  Use the forward slash (/) to specify folders in the path to the session, i.e. <cite>proxy_session = Site 1/Core/Core_1</cite>.</li>
 </ul>
 </div>
 <div class="section" id="script-specific-settings">

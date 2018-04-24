@@ -44,6 +44,33 @@ Multiple Device Scripts
 
 3) The script will connect to each device and execute the script logic.  The script will process one device at a time in the same tab.  While this it the case because SecureCRT does not support multi-threading within scripts, you can manually multi-thread by breaking your devices file into multiple files and lauching the same script in multiple tabs with differnet device files.
 
+Settings
+========
+All settings files are stored in the `settings/settings.ini` file from the root of the scripts directory.
+
+Global Settings
+***************
+
+Global settings that are used by all scripts are under the `Global` heading in the `settings.ini` file.  The following options are available in the global settings file:
+
+* '**output_dir**': This is the path where you want the output from scripts to be saved.  *NOTE* For Windows systems, either use forward slashes (/) or double backslash (\\) to represent a single backslash.  If a single backslash is used, Python may interpret it as an escape character.
+* '**date_format**': Default is '%Y-%m-%d-%H-%M-%S'.  This string specifies how the date stamp in output filenames is formatted.
+  - %Y - 4-digit Year
+  - %m - numeric month
+  - %d - day of the month
+  - %H - Hours
+  - %M - Minutes
+  - %S - Seconds
+* '**modify_term**': True or False.  When True, the script will attempt to modify the terminal length and width to 0 so that output flows continuously.  When the output is complete the script will return the length and width to their original values.   If False, it will not change the values, but instead auto-advance when a "More" prompt is encountered.
+* '**debug_mode**': True or False.  If True, a log file will be written that contains debug messages from the script execution.  This can be helpful for troubleshooting scripts that are failing.  The debug files will be saved in a `debugs` directory under your configured output directory.
+* '**use_proxy**': True or False.  If True, use the `proxy_session` option below to specify which SecureCRT Session to use as a proxy for any connections made by multi-device scripts (the ones that initiate connections to devices).  This uses the `Firewall` option found in the settings of a SecureCRT session, which lets you select another session object to use to proxy the connection via SSH tunneling. 
+* '**proxy_session**': The name of the SecureCRT session that should be used to proxy the connection.  This **MUST** be a session that uses SSH2.  Use the forward slash (/) to specify folders in the path to the session, i.e. `proxy_session = Site 1/Core/Core_1`.
+
+Script-Specific Settings
+************************
+
+Some scripts have local settings files that only apply to that script.  If such a setting is needed, the setting will be saved under a heading named for the script in the `settings.ini` file.  Details about the settings should be in the docstring for that particular script file.
+
 Documentation
 =============
 
