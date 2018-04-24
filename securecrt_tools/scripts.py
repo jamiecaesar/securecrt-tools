@@ -180,8 +180,11 @@ class Script:
         """
         This function will prompt for a device list CSV file to import, returns a list containing all of the
         devices that were in the CSV file and their associated credentials.  The CSV file must be of the format, and
-        include a header row of ['Hostname', 'Protocol', 'Username', 'Password', 'Enable', 'Via-Jumpbox'].  An example
+        include a header row of ['Hostname', 'Protocol', 'Username', 'Password', 'Enable', 'Proxy Session'].  An example
         device list CSV file is at 'template/sample_device_list.csv'
+
+        The 'Proxy Session' options is looking for a SecureCRT session name that can be used to proxy this connection
+        through.  This sets the 'Firewall' option under a SecureCRT session to perform this connection proxy.
 
         Some additional information about missing items from a line in the CSV:
         - If the hostname field is missing, the line will be skipped.
@@ -221,7 +224,7 @@ class Script:
 
             # Get header line and validate it is correct.
             header = next(device_csv, None)
-            if header != ['Hostname', 'Protocol', 'Username', 'Password', 'Enable']:
+            if header != ['Hostname', 'Protocol', 'Username', 'Password', 'Enable', 'Proxy Session']:
                 raise ScriptError("CSV file does not have a valid header row.")
 
             # Loop through all lines of the CSV, and decide if any information is missing.
@@ -231,6 +234,7 @@ class Script:
                 username = line[2].strip()
                 password = line[3].strip()
                 enable = line[4].strip()
+                proxy = line[5].strip()
 
                 if not hostname:
                     self.logger.debug("<IMPORT_DEVICES> Skipping CSV line {0} because no hostname exists.".format(line))
@@ -266,7 +270,7 @@ class Script:
                 if not enable:
                     no_enable = True
 
-                temp_device_list.append([hostname, protocol, username, password, enable])
+                temp_device_list.append([hostname, protocol, username, password, enable, proxy])
 
         # Prompt for missing information
         for username in no_password:
@@ -312,6 +316,10 @@ class Script:
             if not enable and default_enable:
                 enable = default_enable
             dev_info['enable'] = enable
+
+            # Fill in proxy information
+            proxy = line[5]
+            dev_info['proxy'] = proxy
 
             # Add this device to our dictionary:
             device_list.append(dev_info)
