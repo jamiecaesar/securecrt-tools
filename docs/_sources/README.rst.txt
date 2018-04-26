@@ -63,8 +63,8 @@ Global settings that are used by all scripts are under the `Global` heading in t
   - %S - Seconds
 * '**modify_term**': True or False.  When True, the script will attempt to modify the terminal length and width to 0 so that output flows continuously.  When the output is complete the script will return the length and width to their original values.   If False, it will not change the values, but instead auto-advance when a "More" prompt is encountered.
 * '**debug_mode**': True or False.  If True, a log file will be written that contains debug messages from the script execution.  This can be helpful for troubleshooting scripts that are failing.  The debug files will be saved in a `debugs` directory under your configured output directory.
-* '**use_proxy**': True or False.  If True, use the `proxy_session` option below to specify which SecureCRT Session to use as a proxy for any connections made by multi-device scripts (the ones that initiate connections to devices).  This uses the `Firewall` option found in the settings of a SecureCRT session, which lets you select another session object to use to proxy the connection via SSH tunneling. 
-* '**proxy_session**': The name of the SecureCRT session that should be used to proxy the connection.  This **MUST** be a session that uses SSH2.  Use the forward slash (/) to specify folders in the path to the session, i.e. `proxy_session = Site 1/Core/Core_1`.
+* '**use_proxy**': True or False.  If True, scripts that initiate connections (multi-device scripts) will use the `proxy_session` option below to specify which SecureCRT Session to use as a SOCKS proxy.  When enabled, this option uses the `Firewall` setting in the SecureCRT sessions settings to specify the device to proxy the connection through.
+* '**proxy_session**': The name of the SecureCRT session that should be used to proxy connections.  This **MUST** be a session that uses SSH2.  Use the forward slash (/) to specify folders in the path to the session, i.e. `proxy_session = Site 1/Core/S1_Core1`.
 
 Script-Specific Settings
 ************************
