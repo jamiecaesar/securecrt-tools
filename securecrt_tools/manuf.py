@@ -24,12 +24,17 @@ import re
 import sys
 import io
 
+allow_update = True
 try:
     from urllib2 import urlopen
     from urllib2 import URLError
 except ImportError:
-    from urllib.request import urlopen
-    from urllib.error import URLError
+    try:
+        from urllib.request import urlopen
+        from urllib.error import URLError
+    except ImportError:
+        allow_update = False
+        pass
 
 try:
     from StringIO import StringIO
@@ -86,7 +91,10 @@ class MacParser(object):
         # Build mask -> result dict
         for line in manuf_file:
             com = line.split("#", 1)
-            arr = com[0].split()
+            if com[0].strip():
+                arr = com[0].strip().split('\t')
+            else:
+                arr = ''
 
             if len(arr) < 1:
                 continue
@@ -102,8 +110,8 @@ class MacParser(object):
                 if mask_spec > mask:
                     mask = mask_spec
 
-            if len(com) > 1:
-                result = Vendor(manuf=arr[1], comment=com[1].strip())
+            if len(arr) > 2:
+                result = Vendor(manuf=arr[1], comment=arr[2].strip())
             else:
                 result = Vendor(manuf=arr[1], comment=None)
 
@@ -260,6 +268,11 @@ def main():
     argparser.add_argument("mac_address", nargs='?', help="MAC address to check")
 
     args = argparser.parse_args()
+
+    #Override requested update if imports fail
+    if not allow_update:
+        args.update = False
+
     if args.manuf:
         parser = MacParser(manuf_name=args.manuf, update=args.update)
     else:

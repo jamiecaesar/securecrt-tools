@@ -27,7 +27,7 @@ except ImportError:
 
 # Import the manuf module for MAC to Vendor lookups
 try:
-    import securecrt_tools.manuf as manuf
+    from securecrt_tools import manuf
     mac_lookup = True
 except ImportError:
     mac_lookup = False
@@ -40,7 +40,7 @@ logger.debug("Starting execution of {0}".format(script_name))
 
 # ################################################   SCRIPT LOGIC   ###################################################
 
-def script_main(session, gateway_hostname=""):
+def script_main(session):
     """
     | SINGLE device script
     | Author: Jamie Caesar
@@ -73,6 +73,12 @@ def script_main(session, gateway_hostname=""):
 
     arp_lookup = get_arp_info(script)
 
+    # Read in MAC manufacturer database, if everything imported properly
+    if mac_lookup:
+        mac_lookup_table = manuf.MacParser(script_dir + "/securecrt_tools/manuf")
+    else:
+        mac_lookup_table = None
+
     output = []
     for intf_entry in int_table:
         intf = intf_entry[0]
@@ -98,7 +104,7 @@ def script_main(session, gateway_hostname=""):
                 for entry in arp_list:
                     mac, ip = entry
                     if mac and mac_lookup:
-                        mac_vendor = mac_to_vendor(mac)
+                        mac_vendor = mac_to_vendor(mac_lookup_table, mac)
                     if dns_lookup and ip:
                         try:
                             fqdn, _, _, = socket.gethostbyaddr(ip)
@@ -122,7 +128,7 @@ def script_main(session, gateway_hostname=""):
                         ip, arp_vlan = entry
                         if vlan == arp_vlan:
                             if mac and mac_lookup:
-                                mac_vendor = mac_to_vendor(mac)
+                                mac_vendor = mac_to_vendor(mac_lookup_table, mac)
                             if dns_lookup and ip:
                                 try:
                                     fqdn, _, _, = socket.gethostbyaddr(ip)
@@ -318,14 +324,13 @@ def get_arp_info(script):
     return arp_lookup
 
 
-def mac_to_vendor(mac):
+def mac_to_vendor(mac_lookup_table, mac):
     """Lookup MAC Vendor Info
 
     :param mac: MAC address to Lookup Vendor Info on
     :return: MAC Vendor
     """
-    p = manuf.MacParser(script_dir + "/securecrt_tools/manuf")
-    mac_manuf, mac_comment = p.get_all(mac)
+    mac_manuf, mac_comment = mac_lookup_table.get_all(mac)
     if mac_comment:
         return mac_comment
     else:
