@@ -127,18 +127,15 @@ def script_main(session):
                     for entry in arp_lookup[mac]:
                         ip, arp_vlan = entry
                         if vlan == arp_vlan:
-                            if mac and mac_lookup:
-                                mac_vendor = mac_to_vendor(mac_lookup_table, mac)
                             if dns_lookup and ip:
                                 try:
                                     fqdn, _, _, = socket.gethostbyaddr(ip)
                                 except socket.herror:
                                     pass
-                            output_line = [intf, state, mac, mac_vendor, fqdn, ip, vlan, desc]
-                            output.append(output_line)
-                else:
-                    output_line = [intf, state, mac, mac_vendor, fqdn, ip, vlan, desc]
-                    output.append(output_line)
+                if mac and mac_lookup:
+                    mac_vendor = mac_to_vendor(mac_lookup_table, mac)
+                output_line = [intf, state, mac, mac_vendor, fqdn, ip, vlan, desc]
+                output.append(output_line)
 
         else:
             output_line = [intf, state, None, None, None, None, None, desc]
