@@ -1,0 +1,11 @@
+Value Required VLAN (VLAN\d+)
+Value ROOTID (\d+ \w{4}\.\w{4}\.\w{4})
+Value ROOTCOST (\d+)
+Value HELLOTIME (\d+)
+Value MAXAGE (\d+)
+Value FWDDLY (\d+)
+Value INTERFACE (.*)
+
+Start
+  ^${VLAN}\s+${ROOTID}\s+${ROOTCOST}\s+${HELLOTIME}\s+${MAXAGE}\s+${FWDDLY}\s+${INTERFACE} -> Record
+  ^${VLAN}\s+${ROOTID}\s+${ROOTCOST}\s+${HELLOTIME}\s+${MAXAGE}\s+${FWDDLY} -> Record
