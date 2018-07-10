@@ -240,6 +240,27 @@ def normalize_protocol(raw_protocol):
         return raw_protocol
 
 
+def expand_number_range(num_string):
+    """
+    A function that will accept a text number range (such as 1,3,5-7) and convert it into a list of integers such as
+    [1, 3, 5, 6, 7]
+
+    :param num_string: <str> A string that is in the format of a number range (e.g. 1,3,5-7)
+    :return: <list> A list of all integers in that range (e.g. [1,3,5,6,7])
+    """
+    output_list = []
+    for item in num_string.split(','):
+        if "-" in item:
+            if item.count('-') != 1:
+                raise ValueError("Invalid range: '{0]'".format(item))
+            else:
+                start, end = map(int, item.split('-'))
+                output_list.extend(range(start, end+1))
+        else:
+            output_list.append(int(item))
+    return output_list
+
+
 def human_sort_key(s):
     """
     A key function to sort alpha-numerically, not by string
