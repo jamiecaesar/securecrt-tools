@@ -124,9 +124,7 @@ def per_device_work(session, selected_vrf, add_header):
     This function contains the code that should be executed on each device that this script connects to.  It is called
     after establishing a connection to each device in the loop above.
 
-    You can either put your own code here, or if there is a single-device version of a script that performs the correct
-    task, it can be imported and called here, essentially making this script connect to all the devices in the chosen
-    CSV file and then running a single-device script on each of them.
+    This function gathers the ARP table information and returns it (in list format) to the calling program.
     """
     script = session.script
     session.start_cisco_session()
