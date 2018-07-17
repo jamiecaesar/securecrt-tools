@@ -109,6 +109,7 @@ class Session:
         clean_desc = clean_desc.replace(":", "-")
         clean_desc = clean_desc.replace("\\", "")
         clean_desc = clean_desc.replace("| ", "")
+        clean_desc = clean_desc.replace("*", "all")
         # Just in case the trailing space from the above replacement was missing.
         clean_desc = clean_desc.replace("|", "")
 

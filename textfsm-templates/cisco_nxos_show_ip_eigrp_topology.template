@@ -1,0 +1,26 @@
+Value Required,Filldown AS (\d+)
+Value Required,Filldown RID (\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3})
+Value Filldown VRF ([\w-]+)
+Value Filldown CODE (P|A|U|Q|R|r|s)
+Value Required,Filldown NETWORK (\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3})
+Value Required,Filldown MASK (\d{1,2})
+Value Filldown FD (\w+)
+Value Filldown TAG (\d+)
+Value Required NEXTHOP ([\w.]+)
+Value METRIC (\w+)
+Value REPORTED (\w+)
+Value NEXTHOP_IF ([A-Z][\w\-\.:/]+)
+
+Start
+  # Forward Match Style:  When we detect the start of a VLAN line, write what has been saved already (if anything)
+  ^IP-EIGRP Topology -> Continue.Record
+  ^IP-EIGRP Topology -> Continue.Clearall
+  ^IP-EIGRP Topology Table for AS\(${AS}\)\/ID\(${RID}\) VRF ${VRF}
+  ^IP-EIGRP Topology Table for AS\(${AS}\)\/ID\(${RID}\)
+  ^${CODE}\s+${NETWORK}\/${MASK}, \d+ successors, FD is ${FD}(, tag is ${TAG})?
+  # Standard EIGRP format
+  ^\s+via ${NEXTHOP} \(${METRIC}\/${REPORTED}\), ${NEXTHOP_IF} -> Record
+  # Rstatic format
+  ^\s+via ${NEXTHOP} \(${METRIC}\/${REPORTED}\) -> Record
+  # Connected Format
+  ^\s+via ${NEXTHOP}, ${NEXTHOP_IF} -> Record
