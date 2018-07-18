@@ -8,6 +8,8 @@ Multiple Device Scripts are scripts that are designed to be executed while NOT a
    :maxdepth: 1
 
    m_cdp_to_csv
+   m_find_macs_by_vlans
+   m_merged_arp_to_csv
    m_save_output
    m_update_interface_desc
 

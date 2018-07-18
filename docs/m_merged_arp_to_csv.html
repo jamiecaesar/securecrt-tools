@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Multiple Device Scripts &#8212; SecureCRT Tools 2.1.0 documentation</title>
+    <title>m_merged_arp_to_csv &#8212; SecureCRT Tools 2.1.0 documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -23,8 +23,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="m_cdp_to_csv" href="m_cdp_to_csv.html" />
-    <link rel="prev" title="s_vlan_to_csv" href="s_vlan_to_csv.html" /> 
+    <link rel="next" title="m_save_output" href="m_save_output.html" />
+    <link rel="prev" title="m_find_macs_by_vlans" href="m_find_macs_by_vlans.html" /> 
   </head>
   <body>
     <div class="header-wrapper" role="banner">
@@ -32,9 +32,9 @@
         <div class="headertitle"><a
           href="index.html">SecureCRT Tools 2.1.0 documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
-          <a href="s_vlan_to_csv.html" title="s_vlan_to_csv"
+          <a href="m_find_macs_by_vlans.html" title="m_find_macs_by_vlans"
              accesskey="P">previous</a> |
-          <a href="m_cdp_to_csv.html" title="m_cdp_to_csv"
+          <a href="m_save_output.html" title="m_save_output"
              accesskey="N">next</a> |
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |
@@ -52,18 +52,49 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="multiple-device-scripts">
-<h1>Multiple Device Scripts<a class="headerlink" href="#multiple-device-scripts" title="Permalink to this headline">¶</a></h1>
-<p>Multiple Device Scripts are scripts that are designed to be executed while NOT attached to a remote device.   The script will prompt for an input CSV containing all of the hosts and other required details (credentials, jumpbox, etc) to be able to connect all of the devices in the list automatically.   The logic of the script will be performed on each device, one at a time.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="m_cdp_to_csv.html">m_cdp_to_csv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="m_find_macs_by_vlans.html">m_find_macs_by_vlans</a></li>
-<li class="toctree-l1"><a class="reference internal" href="m_merged_arp_to_csv.html">m_merged_arp_to_csv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="m_save_output.html">m_save_output</a></li>
-<li class="toctree-l1"><a class="reference internal" href="m_update_interface_desc.html">m_update_interface_desc</a></li>
-</ul>
+  <div class="section" id="module-m_merged_arp_to_csv">
+<span id="m-merged-arp-to-csv"></span><h1>m_merged_arp_to_csv<a class="headerlink" href="#module-m_merged_arp_to_csv" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="m_merged_arp_to_csv.script_main">
+<code class="descclassname">m_merged_arp_to_csv.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#m_merged_arp_to_csv.script_main" title="Permalink to this definition">¶</a></dt>
+<dd><div class="line-block">
+<div class="line">MULTIPLE device script</div>
+<div class="line">Author: Jamie Caesar</div>
+<div class="line">Email: <a class="reference external" href="mailto:jcaesar&#37;&#52;&#48;presidio&#46;com">jcaesar<span>&#64;</span>presidio<span>&#46;</span>com</a></div>
 </div>
+<p>This script will pull the ARP tables from multiple devices and combine their data into a single ARP CSV file.</p>
+<p>The main intention for this script is to be used with the ‘s_switchport_mapping’ script, which will prompt for an
+ARP table CSV file to list IPs connected to switch ports.  This script is intended to speed up the collection of
+ARP data in cases such as:</p>
+<p>1) There are 2 core switches running a first hop redundancy protocol (HSRP, GLBP, etc) and both devices are
+actively passing traffic so we need both ARP tables</p>
+<p>2) The switch has VLANs that are being used in multiple upstream VRFs (not all with SVIs on the same devices) so
+the ARP tables from many devices may be needed to fully map the switch.</p>
+<dl class="docutils">
+<dt>NOTE: Since this script merges the ARP tables of multiple devices which may have duplicate entries, the interface</dt>
+<dd>is NOT written to the output file like it is with the single device version of this script.</dd>
+</dl>
+<p>This script checks that it will NOT be run in a connected tab.  This script initiates the connection to all devices
+based on the input of the device CSV file that the script requests.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>script</strong> (<a class="reference internal" href="tools-scripts.html#securecrt_tools.scripts.Script" title="securecrt_tools.scripts.Script"><em>scripts.Script</em></a>) – A subclass of the scripts.Script object that represents the execution of this particular script
+(either CRTScript or DirectScript)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="m_merged_arp_to_csv.per_device_work">
+<code class="descclassname">m_merged_arp_to_csv.</code><code class="descname">per_device_work</code><span class="sig-paren">(</span><em>session</em>, <em>selected_vrf</em>, <em>add_header</em><span class="sig-paren">)</span><a class="headerlink" href="#m_merged_arp_to_csv.per_device_work" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function contains the code that should be executed on each device that this script connects to.  It is called
+after establishing a connection to each device in the loop above.</p>
+<p>This function gathers the ARP table information and returns it (in list format) to the calling program.</p>
+</dd></dl>
+
 </div>
 
 
@@ -81,10 +112,10 @@
 <li class="toctree-l1"><a class="reference internal" href="README.html#settings">Settings</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="scripts.html">Scripts</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="single_device_scripts.html">Single Device Scripts</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Multiple Device Scripts</a><ul>
+<li class="toctree-l2 current"><a class="reference internal" href="multi_device_scripts.html">Multiple Device Scripts</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="m_cdp_to_csv.html">m_cdp_to_csv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="m_find_macs_by_vlans.html">m_find_macs_by_vlans</a></li>
-<li class="toctree-l3"><a class="reference internal" href="m_merged_arp_to_csv.html">m_merged_arp_to_csv</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">m_merged_arp_to_csv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="m_save_output.html">m_save_output</a></li>
 <li class="toctree-l3"><a class="reference internal" href="m_update_interface_desc.html">m_update_interface_desc</a></li>
 </ul>
@@ -113,9 +144,9 @@
       <div class="footer">
         <div class="left">
           <div role="navigation" aria-label="related navigaton">
-            <a href="s_vlan_to_csv.html" title="s_vlan_to_csv"
+            <a href="m_find_macs_by_vlans.html" title="m_find_macs_by_vlans"
               >previous</a> |
-            <a href="m_cdp_to_csv.html" title="m_cdp_to_csv"
+            <a href="m_save_output.html" title="m_save_output"
               >next</a> |
             <a href="py-modindex.html" title="Python Module Index"
               >modules</a> |
@@ -124,7 +155,7 @@
           </div>
           <div role="note" aria-label="source link">
               <br/>
-              <a href="_sources/multi_device_scripts.rst.txt"
+              <a href="_sources/m_merged_arp_to_csv.rst.txt"
                 rel="nofollow">Show Source</a>
           </div>
         </div>

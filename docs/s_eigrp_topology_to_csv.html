@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Single Device Scripts &#8212; SecureCRT Tools 2.1.0 documentation</title>
+    <title>s_eigrp_topology_to_csv &#8212; SecureCRT Tools 2.1.0 documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -23,8 +23,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="s_arp_to_csv" href="s_arp_to_csv.html" />
-    <link rel="prev" title="Scripts" href="scripts.html" /> 
+    <link rel="next" title="s_interface_stats" href="s_interface_stats.html" />
+    <link rel="prev" title="s_eigrp_topology_summary" href="s_eigrp_topology_summary.html" /> 
   </head>
   <body>
     <div class="header-wrapper" role="banner">
@@ -32,9 +32,9 @@
         <div class="headertitle"><a
           href="index.html">SecureCRT Tools 2.1.0 documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
-          <a href="scripts.html" title="Scripts"
+          <a href="s_eigrp_topology_summary.html" title="s_eigrp_topology_summary"
              accesskey="P">previous</a> |
-          <a href="s_arp_to_csv.html" title="s_arp_to_csv"
+          <a href="s_interface_stats.html" title="s_interface_stats"
              accesskey="N">next</a> |
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |
@@ -52,28 +52,34 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="single-device-scripts">
-<h1>Single Device Scripts<a class="headerlink" href="#single-device-scripts" title="Permalink to this headline">¶</a></h1>
-<p>Single Device Scripts are scripts that are designed to be lauched in a SecureCRT tab that is already connected to a remote device.  These scripts will make necessary terminal changes, perform their task, and return the terminal back to the original state so that the user can continue working after the script executes.</p>
-<p>These scripts can also be imported into Multi-Device scripts to reduce the amount of copying and pasting of code that is required to make a multi-device version.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="s_arp_to_csv.html">s_arp_to_csv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_cdp_to_csv.html">s_cdp_to_csv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_create_sessions_from_cdp.html">s_create_sessions_from_cdp</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_document_device.html">s_document_device</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_eigrp_topology_summary.html">s_eigrp_topology_summary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_eigrp_topology_to_csv.html">s_eigrp_topology_to_csv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_interface_stats.html">s_interface_stats</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_mac_to_csv.html">s_mac_to_csv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_nexthop_summary.html">s_nexthop_summary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_save_output.html">s_save_output</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_save_running.html">s_save_running</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_switchport_mapping.html">s_switchport_mapping</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_update_interface_desc.html">s_update_interface_desc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_vlan_to_csv.html">s_vlan_to_csv</a></li>
-</ul>
+  <div class="section" id="s-eigrp-topology-to-csv">
+<h1>s_eigrp_topology_to_csv<a class="headerlink" href="#s-eigrp-topology-to-csv" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-s_eigrp_topology_to_csv"></span><dl class="function">
+<dt id="s_eigrp_topology_to_csv.script_main">
+<code class="descclassname">s_eigrp_topology_to_csv.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>session</em>, <em>ask_vrf=True</em>, <em>vrf=None</em><span class="sig-paren">)</span><a class="headerlink" href="#s_eigrp_topology_to_csv.script_main" title="Permalink to this definition">¶</a></dt>
+<dd><div class="line-block">
+<div class="line">SINGLE device script</div>
+<div class="line">Author: Jamie Caesar</div>
+<div class="line">Email: <a class="reference external" href="mailto:jcaesar&#37;&#52;&#48;presidio&#46;com">jcaesar<span>&#64;</span>presidio<span>&#46;</span>com</a></div>
 </div>
+<p>This script will grab the EIGRP topology table from a Cisco IOS or NXOS device and export it as a CSV file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>session</strong> (<a class="reference internal" href="tools-sessions.html#securecrt_tools.sessions.Session" title="securecrt_tools.sessions.Session"><em>sessions.Session</em></a>) – A subclass of the sessions.Session object that represents this particular script session (either
+SecureCRTSession or DirectSession)</li>
+<li><strong>ask_vrf</strong> (<em>bool</em>) – A boolean that specifies if we should prompt for which VRF.  The default is true, but when this
+module is called from other scripts, we may want avoid prompting and supply the VRF with the “vrf” input.</li>
+<li><strong>vrf</strong> (<em>str</em>) – The VRF that we should get the route table from.  This is used only when ask_vrf is False.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 
 
@@ -90,13 +96,13 @@
 <li class="toctree-l1"><a class="reference internal" href="README.html#running-the-scripts">Running The Scripts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="README.html#settings">Settings</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="scripts.html">Scripts</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Single Device Scripts</a><ul>
+<li class="toctree-l2 current"><a class="reference internal" href="single_device_scripts.html">Single Device Scripts</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="s_arp_to_csv.html">s_arp_to_csv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_cdp_to_csv.html">s_cdp_to_csv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_create_sessions_from_cdp.html">s_create_sessions_from_cdp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_document_device.html">s_document_device</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_eigrp_topology_summary.html">s_eigrp_topology_summary</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_eigrp_topology_to_csv.html">s_eigrp_topology_to_csv</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">s_eigrp_topology_to_csv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_interface_stats.html">s_interface_stats</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_mac_to_csv.html">s_mac_to_csv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_nexthop_summary.html">s_nexthop_summary</a></li>
@@ -132,9 +138,9 @@
       <div class="footer">
         <div class="left">
           <div role="navigation" aria-label="related navigaton">
-            <a href="scripts.html" title="Scripts"
+            <a href="s_eigrp_topology_summary.html" title="s_eigrp_topology_summary"
               >previous</a> |
-            <a href="s_arp_to_csv.html" title="s_arp_to_csv"
+            <a href="s_interface_stats.html" title="s_interface_stats"
               >next</a> |
             <a href="py-modindex.html" title="Python Module Index"
               >modules</a> |
@@ -143,7 +149,7 @@
           </div>
           <div role="note" aria-label="source link">
               <br/>
-              <a href="_sources/single_device_scripts.rst.txt"
+              <a href="_sources/s_eigrp_topology_to_csv.rst.txt"
                 rel="nofollow">Show Source</a>
           </div>
         </div>

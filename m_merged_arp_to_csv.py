@@ -33,12 +33,20 @@ def script_main(script):
     | Author: Jamie Caesar
     | Email: jcaesar@presidio.com
 
-    This script will pull the ARP tables from multiple devices and combine their data into a single ARP table.  This may
-    be useful when there are 2 core devices that are running in some sort of active/active configuration, or when you
-    need a merged ARP table from multiple devices and VRFs to fully map every device attached to a particular switch.
+    This script will pull the ARP tables from multiple devices and combine their data into a single ARP CSV file.
+
+    The main intention for this script is to be used with the 's_switchport_mapping' script, which will prompt for an
+    ARP table CSV file to list IPs connected to switch ports.  This script is intended to speed up the collection of
+    ARP data in cases such as:
+
+    1) There are 2 core switches running a first hop redundancy protocol (HSRP, GLBP, etc) and both devices are
+    actively passing traffic so we need both ARP tables
+
+    2) The switch has VLANs that are being used in multiple upstream VRFs (not all with SVIs on the same devices) so
+    the ARP tables from many devices may be needed to fully map the switch.
 
     NOTE: Since this script merges the ARP tables of multiple devices which may have duplicate entries, the interface
-          parameter is NOT written to the output file.
+          is NOT written to the output file like it is with the single device version of this script.
 
     This script checks that it will NOT be run in a connected tab.  This script initiates the connection to all devices
     based on the input of the device CSV file that the script requests.

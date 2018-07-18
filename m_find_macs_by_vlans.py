@@ -34,9 +34,10 @@ def script_main(script):
     | Author: Jamie Caesar
     | Email: jcaesar@presidio.com
 
-    This script will provide a list of all the switches that have MAC addresses in their table for the specified VLANs
+    This script will provide a list of all the switches that have locally connected MAC addresses in their mac address
+    table for a range of VLANs.
 
-    When running this script, it will prompt for a CSV file with all of the devices that this scripts should connect to.
+    After launching the script, it will prompt for a CSV file with all of the devices the script should connect to.
     It will also prompt for a range of VLANs that it should look for MAC addresses
     This script checks that it will NOT be run in a connected tab.
 
