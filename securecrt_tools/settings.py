@@ -38,11 +38,13 @@ class SettingsImporter:
         :return: A boolean describing if the user's settings file is valid
         :rtype: bool
         """
-        # Compare all sections and options between defaults and settings.ini.  If anything from default is missing,
-        # return False
-        if set(self.defaults.sections()) == set(self.config.sections()):
+        # Verify that all of the default sections exist in the user's INI file.  Do this by converting the default and
+        # custom section lists to sets, and check that the defaults is a subset of custom.
+        if set(self.defaults.sections()).issubset(set(self.config.sections())):
+            # All default sections exist.  Now for each default section, make sure the default settings exist in the
+            # custom setting using the same method as for sections.
             for section in self.defaults.sections():
-                if not set(self.defaults.options(section)) == set(self.config.options(section)):
+                if not set(self.defaults.options(section)).issubset(set(self.config.options(section))):
                     return False
         else:
             return False
@@ -54,29 +56,13 @@ class SettingsImporter:
         values to the new file.  Adds anything in defaults that isn't in the user's settings to the settings.ini file.
         This does not remove any additions that may have been added to the user's configuration file.
         """
-        self.reset_to_defaults()
-        temp_settings = ConfigParser.RawConfigParser()
-        temp_settings.read(self.settings_file)
-        for section in temp_settings.sections():
-            if section not in self.config.sections():
-                continue
-            for option in temp_settings.options(section):
-                try:
-                    value = self.config.get(section, option)
-                    temp_settings.set(section, option, value)
-                except ConfigParser.NoOptionError:
-                    pass
+        for section in self.defaults.sections():
+            for option in self.defaults.options(section):
+                if option not in self.config.options(section):
+                    value = self.defaults.get(section, option)
+                    self.config.set(section, option, value)
         with open(self.settings_file, 'w') as settings_updates:
-            temp_settings.write(settings_updates)
-        self.config = ConfigParser.RawConfigParser()
-        self.config.read(self.settings_file)
-
-    def reset_to_defaults(self):
-        """
-        A method to overwrite the user's configuration file with the default values.
-        """
-        with open(self.settings_file, 'w') as settings_updates:
-            self.defaults.write(settings_updates)
+            self.config.write(settings_updates)
 
     def get(self, section, setting):
         """
