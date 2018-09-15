@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="s_interface_stats" href="s_interface_stats.html" />
+    <link rel="next" title="s_eigrp_topology_summary" href="s_eigrp_topology_summary.html" />
     <link rel="prev" title="s_create_sessions_from_cdp" href="s_create_sessions_from_cdp.html" /> 
   </head>
   <body>
@@ -34,7 +34,7 @@
         <div class="rel" role="navigation" aria-label="related navigation">
           <a href="s_create_sessions_from_cdp.html" title="s_create_sessions_from_cdp"
              accesskey="P">previous</a> |
-          <a href="s_interface_stats.html" title="s_interface_stats"
+          <a href="s_eigrp_topology_summary.html" title="s_eigrp_topology_summary"
              accesskey="N">next</a> |
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |
@@ -64,19 +64,38 @@
 </div>
 <p>This script will grab the output for a list of commands from the connected device.  The list of commands is taken
 from the ‘settings/settings.ini’ file.  There is a separate list for each supported network operating system (IOS,
-NXOS and ASA).</p>
+NXOS and ASA) and by default the list that matches the network operating system of the connected device will be
+used.</p>
+<p>Custom lists of commands are supported.  These lists can be added manually to the [document_device] section of the
+‘settings/settings.ini’ file.  To be able to choose one of these lists when running the script, the
+‘prompt_for_custom_lists’ setting needs to be changed to ‘True’ in the settings.ini file.  Once this option is
+enabled, the script will prompt for the name of the list that you want to use.  If the input is left blank then
+the default behavior (based on network OS) will choose the list.</p>
 <div class="line-block">
 <div class="line">Script Settings (found in settings/settings.ini):</div>
+<div class="line">show_instructions - When True, displays a pop-up upon launching the script explaining where to modify the list of</div>
+<div class="line-block">
+<div class="line">commands sent to devices.  This window also prompts the user if they want to continue seeing this message.  If</div>
+<div class="line">not, the script changes this setting to False.</div>
+</div>
 <div class="line">folder_per_device - If True, Creates a folder for each device, based on the hostname, and saves all files inside</div>
 <div class="line-block">
-<div class="line">that folder.  If False, it saves all the files directly into the output folder from the global settings.</div>
+<div class="line">that folder WITHOUT the hostname in the output file names.  If False, it saves all the files directly into the</div>
+<div class="line">output folder from the global settings and includes the hostname in each individual filename.</div>
+</div>
+<div class="line">prompt_for_custom_lists - When set to True, the script will prompt the user to type the name of a list of</div>
+<div class="line-block">
+<div class="line">commands to use with the connected device.  This list name must be found as an option in the [document_device]</div>
+<div class="line">section of the settings.ini file.  The format is the same as the default network OS lists, ‘ios’, ‘nxos’, etc.</div>
 </div>
 <div class="line">ios - The list of commands that will be run on IOS devices</div>
 <div class="line">nxos - The list of commands that will be run on NXOS devices</div>
 <div class="line">asa - The list of commands that will be run on ASA devices</div>
 </div>
-<p>The outputs will be saved in a folder named after the hostname of the device, with each output file being saved
-inside that directory.</p>
+<p>Any additional options found in this section would be custom added by the user and are expected to be lists of
+commands for use with the ‘prompt_for_custom_lists’ setting.</p>
+<p>By default, The outputs will be saved in a folder named after the hostname of the device, with each output file
+being saved inside that directory.  This behavior can be changed in the settings above.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -109,6 +128,8 @@ SecureCRTSession or DirectSession)</td>
 <li class="toctree-l3"><a class="reference internal" href="s_cdp_to_csv.html">s_cdp_to_csv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_create_sessions_from_cdp.html">s_create_sessions_from_cdp</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">s_document_device</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s_eigrp_topology_summary.html">s_eigrp_topology_summary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s_eigrp_topology_to_csv.html">s_eigrp_topology_to_csv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_interface_stats.html">s_interface_stats</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_mac_to_csv.html">s_mac_to_csv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_nexthop_summary.html">s_nexthop_summary</a></li>
@@ -146,7 +167,7 @@ SecureCRTSession or DirectSession)</td>
           <div role="navigation" aria-label="related navigaton">
             <a href="s_create_sessions_from_cdp.html" title="s_create_sessions_from_cdp"
               >previous</a> |
-            <a href="s_interface_stats.html" title="s_interface_stats"
+            <a href="s_eigrp_topology_summary.html" title="s_eigrp_topology_summary"
               >next</a> |
             <a href="py-modindex.html" title="Python Module Index"
               >modules</a> |

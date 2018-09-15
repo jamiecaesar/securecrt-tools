@@ -4,6 +4,7 @@
 import os
 import sys
 import logging
+from ConfigParser import NoOptionError
 
 # Add script directory to the PYTHONPATH so we can import our modules (only if run from SecureCRT)
 if 'crt' in globals():
@@ -15,6 +16,7 @@ else:
 
 # Now we can import our custom modules
 from securecrt_tools import scripts
+from securecrt_tools.message_box_const import ICON_QUESTION, BUTTON_YESNO, IDYES, IDNO
 
 # Create global logger so we can write debug messages from any function (if debug mode setting is enabled in settings).
 logger = logging.getLogger("securecrt")
@@ -31,17 +33,34 @@ def script_main(session):
 
     This script will grab the output for a list of commands from the connected device.  The list of commands is taken
     from the 'settings/settings.ini' file.  There is a separate list for each supported network operating system (IOS,
-    NXOS and ASA).
+    NXOS and ASA) and by default the list that matches the network operating system of the connected device will be
+    used.
+
+    Custom lists of commands are supported.  These lists can be added manually to the [document_device] section of the
+    'settings/settings.ini' file.  To be able to choose one of these lists when running the script, the
+    'prompt_for_custom_lists' setting needs to be changed to 'True' in the settings.ini file.  Once this option is
+    enabled, the script will prompt for the name of the list that you want to use.  If the input is left blank then
+    the default behavior (based on network OS) will choose the list.
 
     | Script Settings (found in settings/settings.ini):
+    | show_instructions - When True, displays a pop-up upon launching the script explaining where to modify the list of
+    |   commands sent to devices.  This window also prompts the user if they want to continue seeing this message.  If
+    |   not, the script changes this setting to False.
     | folder_per_device - If True, Creates a folder for each device, based on the hostname, and saves all files inside
-    |   that folder.  If False, it saves all the files directly into the output folder from the global settings.
+    |   that folder WITHOUT the hostname in the output file names.  If False, it saves all the files directly into the
+    |   output folder from the global settings and includes the hostname in each individual filename.
+    | prompt_for_custom_lists - When set to True, the script will prompt the user to type the name of a list of
+    |   commands to use with the connected device.  This list name must be found as an option in the [document_device]
+    |   section of the settings.ini file.  The format is the same as the default network OS lists, 'ios', 'nxos', etc.
     | ios - The list of commands that will be run on IOS devices
     | nxos - The list of commands that will be run on NXOS devices
     | asa - The list of commands that will be run on ASA devices
 
-    The outputs will be saved in a folder named after the hostname of the device, with each output file being saved
-    inside that directory.
+    Any additional options found in this section would be custom added by the user and are expected to be lists of
+    commands for use with the 'prompt_for_custom_lists' setting.
+
+    By default, The outputs will be saved in a folder named after the hostname of the device, with each output file
+    being saved inside that directory.  This behavior can be changed in the settings above.
 
     :param session: A subclass of the sessions.Session object that represents this particular script session (either
                 SecureCRTSession or DirectSession)
@@ -57,7 +76,36 @@ def script_main(session):
     # Validate device is running a supported OS
     session.validate_os(["IOS", "NXOS", "ASA"])
 
-    command_list = script.settings.getlist("document_device", session.os)
+    # Display instructions message, unless settings prevent it
+    show_instructions = script.settings.getboolean("document_device", "show_instructions")
+    if show_instructions:
+        response = script.message_box("The list of commands sent to the device can be edited in the 'settings/settings."
+                                      "ini' file in the main securecrt-tools directory.\nSee the documentation for this"
+                                      " script for more details.\n\nDo you want to stop seeing this message?",
+                                      "Instructions", ICON_QUESTION + BUTTON_YESNO)
+        if response == IDYES:
+            script.settings.update("document_device", "show_instructions", False)
+
+    # Check if settings allow for custom lists, and if so prompt for the list to use -- if not, just use the list for
+    # the OS of the device connected
+    custom_allowed = script.settings.getboolean("document_device", "prompt_for_custom_lists")
+    if custom_allowed:
+        list_name = script.prompt_window("Enter the name of the command list you want to use.\n\nThese lists are found "
+                                         "in the [document_device] section of your settings.ini file\n",
+                                         "Enter command list")
+        if list_name:
+            try:
+                command_list = script.settings.getlist("document_device", list_name)
+            except NoOptionError:
+                script.message_box("The list {0} was not found in [document_device] section of the settings.ini file."
+                                   .format(list_name))
+                return
+        else:
+            command_list = script.settings.getlist("document_device", session.os)
+    else:
+        # Not using custom lists, so just get the list for the OS
+        command_list = script.settings.getlist("document_device", session.os)
+
     folder_per_device = script.settings.getboolean("document_device", "folder_per_device")
 
     if folder_per_device:
@@ -68,7 +116,7 @@ def script_main(session):
     for command in command_list:
         # Generate filename used for output files.
         full_file_name = session.create_output_filename(command, include_hostname=not folder_per_device,
-                                                       base_dir=output_dir)
+                                                        base_dir=output_dir)
         # Get the output of our command and save it to the filename specified
         session.write_output_to_file(command, full_file_name)
 
