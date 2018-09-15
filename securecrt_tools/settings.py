@@ -12,9 +12,9 @@ class SettingsImporter:
         # Load Defaults
         default_settings_filename = "default_settings.ini"
         settings_dir = os.path.dirname(__file__)
-        default_filename = os.path.join(settings_dir, default_settings_filename)
+        self.default_filename = os.path.join(settings_dir, default_settings_filename)
         self.defaults = ConfigParser.RawConfigParser()
-        self.defaults.read(default_filename)
+        self.defaults.read(self.default_filename)
 
         # Load custom settings
         self.config = ConfigParser.RawConfigParser()
@@ -30,6 +30,7 @@ class SettingsImporter:
         self.config.read(self.settings_file)
         if not self.validate_settings():
             self.correct_settings()
+            self.config.read(self.settings_file)
 
     def validate_settings(self):
         """
@@ -56,13 +57,24 @@ class SettingsImporter:
         values to the new file.  Adds anything in defaults that isn't in the user's settings to the settings.ini file.
         This does not remove any additions that may have been added to the user's configuration file.
         """
-        for section in self.defaults.sections():
-            for option in self.defaults.options(section):
-                if option not in self.config.options(section):
-                    value = self.defaults.get(section, option)
-                    self.config.set(section, option, value)
-        with open(self.settings_file, 'w') as settings_updates:
-            self.config.write(settings_updates)
+        # Create a new collection of settings, based on the defaults
+        new_settings = ConfigParser.RawConfigParser()
+        new_settings.read(self.default_filename)
+
+        # Loop through all the current settings and add values to the new settings as needed.
+        for section in self.config.sections():
+            # Check if section exists in new settings.  If not, create it.
+            if section not in new_settings.sections():
+                new_settings.add_section(section)
+
+            # Check each existing option in the section and write it to the new settings.
+            for option in self.config.options(section):
+                value = self.config.get(section, option)
+                new_settings.set(section, option, value)
+
+        # Write our new collection of settings to the user's custom settings.ini file.
+        with open(self.settings_file, 'w') as my_new_settings:
+            new_settings.write(my_new_settings)
 
     def get(self, section, setting):
         """
