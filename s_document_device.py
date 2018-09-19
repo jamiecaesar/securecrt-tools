@@ -26,7 +26,7 @@ logger.debug("Starting execution of {0}".format(script_name))
 
 # ################################################   SCRIPT LOGIC   ###################################################
 
-def document(session, command_list, output_dir, include_hostname):
+def document(session, command_list_name, folder_per_device, prompt_create_dirs=True):
     """
     This function captures the output of the provided commands and writes them to files.  This is separated into a
     separate function so it can be called by both the single-device and multi-device version of this script.
@@ -39,17 +39,42 @@ def document(session, command_list, output_dir, include_hostname):
     :type command_list: list
     :param output_dir: The full path to the directory where the output files are written.
     :type output_dir: str
-    :param include_hostname: A boolean that if true will include the connected device's hostname in the output filename
-    :type include_hostname: bool
+    :param folder_per_device: A boolean that if true will create a separate folder for each device
+    :type folder_per_device: bool
     :return:
     """
+    script = session.script
+
+    # Get command list for this device.  This is done here instead of the main script so this function can be used by
+    # the multi-device version of this script.
+    if command_list_name:
+        try:
+            command_list = script.settings.getlist("document_device", command_list_name)
+        except NoOptionError:
+            script.message_box("The list {0} was not found in [document_device] section of the settings.ini file."
+                               .format(command_list_name))
+            return
+    else:
+        try:
+            # Not using custom lists, so just get the list for the OS
+            command_list = script.settings.getlist("document_device", session.os)
+        except NoOptionError:
+            script.message_box("The list {0} was not found in [document_device] section of the settings.ini file."
+                               .format(session.os))
+            return
+
+    if folder_per_device:
+        output_dir = os.path.join(script.output_dir, session.hostname)
+    else:
+        output_dir = script.output_dir
+
     # Loop through each command and write the contents to a file.
     for command in command_list:
         # Generate filename used for output files.
-        full_file_name = session.create_output_filename(command, include_hostname=include_hostname,
+        full_file_name = session.create_output_filename(command, include_hostname=not folder_per_device,
                                                         base_dir=output_dir)
         # Get the output of our command and save it to the filename specified
-        session.write_output_to_file(command, full_file_name)
+        session.write_output_to_file(command, full_file_name, prompt_to_create=prompt_create_dirs)
 
         # If we captured nothing, or an error then delete the file
         utilities.remove_empty_or_invalid_file(full_file_name)
@@ -120,32 +145,17 @@ def script_main(session):
     # the OS of the device connected
     custom_allowed = script.settings.getboolean("document_device", "prompt_for_custom_lists")
     if custom_allowed:
-        list_name = script.prompt_window("Enter the name of the command list you want to use.\n\nThese lists are found "
+        command_list_name = script.prompt_window("Enter the name of the command list you want to use.\n\nThese lists are found "
                                          "in the [document_device] section of your settings.ini file\n",
                                          "Enter command list")
-        if list_name:
-            try:
-                command_list = script.settings.getlist("document_device", list_name)
-            except NoOptionError:
-                script.message_box("The list {0} was not found in [document_device] section of the settings.ini file."
-                                   .format(list_name))
-                return
-        else:
-            command_list = script.settings.getlist("document_device", session.os)
     else:
-        # Not using custom lists, so just get the list for the OS
-        command_list = script.settings.getlist("document_device", session.os)
+        command_list_name = None
 
     folder_per_device = script.settings.getboolean("document_device", "folder_per_device")
 
-    if folder_per_device:
-        output_dir = os.path.join(script.output_dir, session.hostname)
-    else:
-        output_dir = script.output_dir
-
-    # Document scripts according to settings captures above.  If we want folder_per_device, don't include hostname in
+    # Document scripts according to settings captured above.  If we want folder_per_device, don't include hostname in
     # the filename and vice versa.
-    document(session, command_list, output_dir, include_hostname=not folder_per_device)
+    document(session, command_list_name, folder_per_device)
 
     # Return terminal parameters back to the original state.
     session.end_cisco_session()
