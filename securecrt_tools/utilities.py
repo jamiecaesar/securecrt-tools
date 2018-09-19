@@ -11,6 +11,7 @@
 import csv
 import re
 import logging
+import os
 
 import securecrt_tools.textfsm as textfsm
 
@@ -273,6 +274,34 @@ def human_sort_key(s):
     :return:
     """
     return [int(c) if c.isdigit() else c for c in re.split('([0-9]+)', s)]
+
+
+def remove_empty_or_invalid_file(l_filename):
+    """
+    Check if file is empty or if we captured an error in the command.  If so, delete the file.
+
+    :param l_filename: Name of file to check
+    """
+    # If file isn't empty (greater than 3 bytes)
+    # Some of these file only save one CRLF, and so we can't match on 0
+    # bytes
+    file_size = os.path.getsize(l_filename)
+    if file_size > 500:
+        pass
+    elif file_size > 3:
+        # Open the file we just created.
+        new_file = open(l_filename, "r")
+        # If the file only contains invalid command error, delete it.
+        for line in new_file:
+            if "% invalid" in line.lower() or "% incomplete" in line.lower():
+                new_file.close()
+                os.remove(l_filename)
+                break
+        else:
+            new_file.close()
+    # If the file is empty, delete it
+    else:
+        os.remove(l_filename)
 
 
 

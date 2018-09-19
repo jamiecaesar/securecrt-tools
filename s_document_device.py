@@ -16,6 +16,7 @@ else:
 
 # Now we can import our custom modules
 from securecrt_tools import scripts
+from securecrt_tools import utilities
 from securecrt_tools.message_box_const import ICON_QUESTION, BUTTON_YESNO, IDYES, IDNO
 
 # Create global logger so we can write debug messages from any function (if debug mode setting is enabled in settings).
@@ -24,6 +25,35 @@ logger.debug("Starting execution of {0}".format(script_name))
 
 
 # ################################################   SCRIPT LOGIC   ###################################################
+
+def document(session, command_list, output_dir, include_hostname):
+    """
+    This function captures the output of the provided commands and writes them to files.  This is separated into a
+    separate function so it can be called by both the single-device and multi-device version of this script.
+
+    :param session: A subclass of the sessions.Session object that represents this particular script session (either
+            SecureCRTSession or DirectSession)
+    :type session: sessions.Session
+    :param command_list: A list of commands that will be sent to the connected device.  Each output will be saved to a
+            different file.
+    :type command_list: list
+    :param output_dir: The full path to the directory where the output files are written.
+    :type output_dir: str
+    :param include_hostname: A boolean that if true will include the connected device's hostname in the output filename
+    :type include_hostname: bool
+    :return:
+    """
+    # Loop through each command and write the contents to a file.
+    for command in command_list:
+        # Generate filename used for output files.
+        full_file_name = session.create_output_filename(command, include_hostname=include_hostname,
+                                                        base_dir=output_dir)
+        # Get the output of our command and save it to the filename specified
+        session.write_output_to_file(command, full_file_name)
+
+        # If we captured nothing, or an error then delete the file
+        utilities.remove_empty_or_invalid_file(full_file_name)
+
 
 def script_main(session):
     """
@@ -113,12 +143,9 @@ def script_main(session):
     else:
         output_dir = script.output_dir
 
-    for command in command_list:
-        # Generate filename used for output files.
-        full_file_name = session.create_output_filename(command, include_hostname=not folder_per_device,
-                                                        base_dir=output_dir)
-        # Get the output of our command and save it to the filename specified
-        session.write_output_to_file(command, full_file_name)
+    # Document scripts according to settings captures above.  If we want folder_per_device, don't include hostname in
+    # the filename and vice versa.
+    document(session, command_list, output_dir, include_hostname=not folder_per_device)
 
     # Return terminal parameters back to the original state.
     session.end_cisco_session()
