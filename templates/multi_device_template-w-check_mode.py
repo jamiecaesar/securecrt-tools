@@ -53,6 +53,27 @@ def script_main(script):
     if not device_list:
         return
 
+    check_mode = True
+    # #########################################  START CHECK MODE SECTION  ###########################################
+    # Ask if this should be a test run (generate configs only) or full run (push updates to devices)
+    # Comment out or remove the entire CHECK MODE SECTION if you don't want to prompt for check mode
+    check_mode_message = "Do you want to run this script in check mode? (Only generate configs)\n" \
+                         "\n" \
+                         "Yes = Connect to device and write change scripts to a file ONLY\n" \
+                         "No = Connect to device and PUSH configuration changes"
+    message_box_design = ICON_QUESTION | BUTTON_YESNOCANCEL
+    logger.debug("Prompting the user to run in check mode.")
+    result = script.message_box(check_mode_message, "Run in Check Mode?", message_box_design)
+    if result == IDYES:
+        logger.debug("<M_SCRIPT> Received 'True' for Check Mode.")
+        check_mode = True
+    elif result == IDNO:
+        logger.debug("<M_SCRIPT> Received 'False' for Check Mode.")
+        check_mode = False
+    else:
+        return
+    # ########################################### END CHECK MODE SECTION  ############################################
+
     # Check settings if we should use a proxy/jumpbox
     use_proxy = script.settings.getboolean("Global", "use_proxy")
     default_proxy_session = script.settings.get("Global", "proxy_session")
@@ -76,7 +97,7 @@ def script_main(script):
         logger.debug("<M_SCRIPT> Connecting to {0}.".format(hostname))
         try:
             session.connect(hostname, username, password, protocol=protocol, proxy=proxy)
-            per_device_work(session, enable)
+            per_device_work(session, check_mode, enable)
             session.disconnect()
         except sessions.ConnectError as e:
             with open(failed_log, 'a') as logfile:
@@ -88,7 +109,7 @@ def script_main(script):
     # #########################################  END DEVICE CONNECT LOOP  ############################################
 
 
-def per_device_work(session, enable_pass):
+def per_device_work(session, check_mode, enable_pass):
     """
     This function contains the code that should be executed on each device that this script connects to.  It is called
     after establishing a connection to each device in the loop above.
