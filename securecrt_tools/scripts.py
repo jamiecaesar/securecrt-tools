@@ -129,7 +129,7 @@ class Script:
         """
         return self.main_session
 
-    def validate_dir(self, path):
+    def validate_dir(self, path, prompt_to_create=True):
         """
         Verifies that the path to the supplied directory exists.  If not, prompt the user to create it.
 
@@ -147,17 +147,23 @@ class Script:
 
         # Check if directory exists.  If not, prompt to create it.
         if not os.path.exists(os.path.normpath(path)):
-            self.logger.debug("<VALIDATE_PATH> Supplied directory path does not exist. Prompting User.")
-            message_str = "The path: '{0}' does not exist.  Do you want to create it?.".format(path)
-            result = self.message_box(message_str, "Create Directory?", ICON_QUESTION | BUTTON_YESNO | DEFBUTTON2)
+            if prompt_to_create:
+                self.logger.debug("<VALIDATE_PATH> Supplied directory path does not exist. Prompting User.")
+                message_str = "The path: '{0}' does not exist.  Do you want to create it?.".format(path)
+                result = self.message_box(message_str, "Create Directory?", ICON_QUESTION | BUTTON_YESNO | DEFBUTTON2)
 
-            if result == IDYES:
-                self.logger.debug("<VALIDATE_PATH> User chose to create directory.".format(path))
-                os.makedirs(path)
+                if result == IDYES:
+                    self.logger.debug("<VALIDATE_PATH> User chose to create directory.".format(path))
+                    os.makedirs(path)
+                else:
+                    self.logger.debug("<VALIDATE_PATH> User chose NOT to create directory.  Raising exception")
+                    error_str = 'Required directory {0} does not exist.'.format(path)
+                    raise IOError(error_str)
             else:
-                self.logger.debug("<VALIDATE_PATH> User chose NOT to create directory.  Raising exception")
-                error_str = 'Required directory {0} does not exist.'.format(path)
-                raise IOError(error_str)
+                self.logger.debug("<VALIDATE_PATH> Supplied directory path does not exist. Prompting User OVERRIDDEN")
+                self.logger.debug("<VALIDATE_PATH> Creating directory.".format(path))
+                os.makedirs(path)
+
         self.logger.debug("<VALIDATE_PATH> Path is Valid.")
 
     def get_template(self, name):
@@ -225,7 +231,8 @@ class Script:
             # Get header line and validate it is correct.
             header = next(device_csv, None)
             if header != ['Hostname', 'Protocol', 'Username', 'Password', 'Enable', 'Proxy Session']:
-                raise ScriptError("CSV file does not have a valid header row.")
+                raise ScriptError("CSV file does not have a valid header row.\n"
+                                  "Please see templates/sample_device_list.csv for an example.")
 
             # Loop through all lines of the CSV, and decide if any information is missing.
             for line in device_csv:

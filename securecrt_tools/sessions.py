@@ -338,7 +338,7 @@ class Session:
         pass
 
     @abstractmethod
-    def write_output_to_file(self, command, filename):
+    def write_output_to_file(self, command, filename, prompt_to_create=True):
         """
         Send the supplied command to the remote device and writes the output to a file.
 
@@ -1095,7 +1095,7 @@ class CRTSession(Session):
 
         return result.strip('\r\n')
 
-    def write_output_to_file(self, command, filename):
+    def write_output_to_file(self, command, filename, prompt_to_create=True):
         """
         Send the supplied command to the remote device and writes the output to a file.
 
@@ -1110,7 +1110,7 @@ class CRTSession(Session):
         """
         self.logger.debug("<WRITE_FILE> Call to write_output_to_file with command: {0}, filename: {0}"
                           .format(command, filename))
-        self.script.validate_dir(os.path.dirname(filename))
+        self.script.validate_dir(os.path.dirname(filename), prompt_to_create=prompt_to_create)
         self.logger.debug("<WRITE_FILE> Using filename: {0}".format(filename))
 
         # RegEx to match the whitespace and backspace commands after --More-- prompt
@@ -1516,7 +1516,7 @@ class DebugSession(Session):
         self.os = None
         self.logger.debug("<END> Deleting Discovered OS.")
 
-    def write_output_to_file(self, command, filename):
+    def write_output_to_file(self, command, filename, prompt_to_create=True):
         """
         Send the supplied command to the remote device and writes the output to a file.
 
@@ -1542,7 +1542,7 @@ class DebugSession(Session):
 
         self.logger.debug("<WRITE OUTPUT> Call to write_output_to_file with command: {0}, filename: {1}"
                           .format(command, filename))
-        self.script.validate_dir(os.path.dirname(filename))
+        self.script.validate_dir(os.path.dirname(filename), prompt_to_create=prompt_to_create)
         self.logger.debug("<WRITE OUTPUT> Using filename: {0}".format(filename))
 
         # Write the output to the specified file
