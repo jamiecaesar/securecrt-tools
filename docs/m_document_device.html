@@ -71,6 +71,11 @@ be used.</p>
 ‘prompt_for_custom_lists’ setting needs to be changed to ‘True’ in the settings.ini file.  Once this option is
 enabled, the script will prompt for the name of the list that you want to use.  If the input is left blank then
 the default behavior (based on network OS) will choose the list.</p>
+<p>NOTE:
+The Custom list can be set on a PER DEVICE basis if a column names “Command List” (case sensitive) is added to the
+device list CSV file that is selected when running this script.  If the “Command List” column is missing or the
+field is left blank for a device then the list will be chosen using the default behavior (i.e. use the list
+specified when running the script, or based on the network OS of each device).</p>
 <div class="line-block">
 <div class="line">Script Settings (found in settings/settings.ini):</div>
 <div class="line">show_instructions - When True, displays a pop-up upon launching the script explaining where to modify the list of</div>

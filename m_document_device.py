@@ -45,6 +45,12 @@ def script_main(script):
     enabled, the script will prompt for the name of the list that you want to use.  If the input is left blank then
     the default behavior (based on network OS) will choose the list.
 
+    NOTE:
+    The Custom list can be set on a PER DEVICE basis if a column names "Command List" (case sensitive) is added to the
+    device list CSV file that is selected when running this script.  If the "Command List" column is missing or the
+    field is left blank for a device then the list will be chosen using the default behavior (i.e. use the list
+    specified when running the script, or based on the network OS of each device).
+
     | Script Settings (found in settings/settings.ini):
     | show_instructions - When True, displays a pop-up upon launching the script explaining where to modify the list of
     |   commands sent to devices.  This window also prompts the user if they want to continue seeing this message.  If
@@ -100,12 +106,12 @@ def script_main(script):
     # the OS of the device connected
     custom_allowed = script.settings.getboolean("document_device", "prompt_for_custom_lists")
     if custom_allowed:
-        command_list_name = script.prompt_window(
+        default_command_list = script.prompt_window(
             "Enter the name of the command list you want to use.\n\nThese lists are found "
             "in the [document_device] section of your settings.ini file\n",
             "Enter command list")
     else:
-        command_list_name = None
+        default_command_list = None
 
     folder_per_device = script.settings.getboolean("document_device", "folder_per_device")
 
@@ -124,6 +130,13 @@ def script_main(script):
             proxy = device['Proxy Session']
         except KeyError:
             proxy = None
+        try:
+            if device['Command List']:
+                command_list = device['Command List']
+            else:
+                command_list = default_command_list
+        except KeyError:
+            command_list = default_command_list
 
         if not proxy and use_proxy:
             proxy = default_proxy_session
@@ -131,7 +144,7 @@ def script_main(script):
         logger.debug("<M_SCRIPT> Connecting to {0}.".format(hostname))
         try:
             session.connect(hostname, username, password, protocol=protocol, proxy=proxy)
-            per_device_work(session, command_list_name, folder_per_device)
+            per_device_work(session, command_list, folder_per_device)
             session.disconnect()
         except sessions.ConnectError as e:
             with open(failed_log, 'a') as logfile:
