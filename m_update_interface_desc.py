@@ -101,7 +101,10 @@ def script_main(script):
         username = device['Username']
         password = device['Password']
         enable = device['Enable']
-        proxy = device['Proxy Session']
+        try:
+            proxy = device['Proxy Session']
+        except KeyError:
+            proxy = None
 
         if not proxy and use_proxy:
             proxy = default_proxy_session
