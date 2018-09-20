@@ -286,22 +286,18 @@ def remove_empty_or_invalid_file(l_filename):
     # Some of these file only save one CRLF, and so we can't match on 0
     # bytes
     file_size = os.path.getsize(l_filename)
-    if file_size > 500:
-        pass
-    elif file_size > 3:
+    if 100 > file_size > 3:
         # Open the file we just created.
-        new_file = open(l_filename, "r")
+        with open(l_filename, "r") as new_file:
+            lines = new_file.readlines()[0:3]
         # If the file only contains invalid command error, delete it.
-        for line in new_file:
-            if "% invalid" in line.lower() or "% incomplete" in line.lower():
+        for line in lines:
+            if re.match(r"^\W+\^|^%\W+invalid|^%\W+incomplete|^invalid", line, flags=re.I):
                 new_file.close()
                 os.remove(l_filename)
                 break
         else:
             new_file.close()
     # If the file is empty, delete it
-    else:
+    elif file_size <= 3:
         os.remove(l_filename)
-
-
-
