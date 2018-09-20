@@ -70,12 +70,12 @@ def script_main(script):
     # ########################################  START DEVICE CONNECT LOOP  ###########################################
 
     for device in device_list:
-        hostname = device['hostname']
-        protocol = device['protocol']
-        username = device['username']
-        password = device['password']
-        enable = device['enable']
-        proxy = device['proxy']
+        hostname = device['Hostname']
+        protocol = device['Protocol']
+        username = device['Username']
+        password = device['Password']
+        enable = device['Enable']
+        proxy = device['Proxy Session']
 
         if not proxy and use_proxy:
             proxy = default_proxy_session

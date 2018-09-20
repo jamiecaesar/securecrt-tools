@@ -62,12 +62,12 @@ def script_main(script):
     failed_log = session.create_output_filename("{0}-LOG".format(script_name.split(".")[0]), include_hostname=False)
 
     for device in device_list:
-        hostname = device['hostname']
-        protocol = device['protocol']
-        username = device['username']
-        password = device['password']
-        enable = device['enable']
-        proxy = device['proxy']
+        hostname = device['Hostname']
+        protocol = device['Protocol']
+        username = device['Username']
+        password = device['Password']
+        enable = device['Enable']
+        proxy = device['Proxy Session']
 
         if not proxy and use_proxy:
             proxy = default_proxy_session
