@@ -55,6 +55,32 @@
   <div class="section" id="module-s_document_device">
 <span id="s-document-device"></span><h1>s_document_device<a class="headerlink" href="#module-s_document_device" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
+<dt id="s_document_device.document">
+<code class="descclassname">s_document_device.</code><code class="descname">document</code><span class="sig-paren">(</span><em>session</em>, <em>command_list_name</em>, <em>folder_per_device</em>, <em>prompt_create_dirs=True</em><span class="sig-paren">)</span><a class="headerlink" href="#s_document_device.document" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function captures the output of the provided commands and writes them to files.  This is separated into a
+separate function so it can be called by both the single-device and multi-device version of this script.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>session</strong> (<a class="reference internal" href="tools-sessions.html#securecrt_tools.sessions.Session" title="securecrt_tools.sessions.Session"><em>sessions.Session</em></a>) – A subclass of the sessions.Session object that represents this particular script session (either
+SecureCRTSession or DirectSession)</li>
+<li><strong>command_list</strong> (<em>list</em>) – A list of commands that will be sent to the connected device.  Each output will be saved to a
+different file.</li>
+<li><strong>output_dir</strong> (<em>str</em>) – The full path to the directory where the output files are written.</li>
+<li><strong>folder_per_device</strong> (<em>bool</em>) – A boolean that if true will create a separate folder for each device</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="s_document_device.script_main">
 <code class="descclassname">s_document_device.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>session</em><span class="sig-paren">)</span><a class="headerlink" href="#s_document_device.script_main" title="Permalink to this definition">¶</a></dt>
 <dd><div class="line-block">

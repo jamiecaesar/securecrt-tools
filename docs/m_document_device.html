@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>m_save_output &#8212; SecureCRT Tools 2.1.0 documentation</title>
+    <title>m_document_device &#8212; SecureCRT Tools 2.1.0 documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -23,8 +23,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="m_update_interface_desc" href="m_update_interface_desc.html" />
-    <link rel="prev" title="m_merged_arp_to_csv" href="m_merged_arp_to_csv.html" /> 
+    <link rel="next" title="m_find_macs_by_vlans" href="m_find_macs_by_vlans.html" />
+    <link rel="prev" title="m_cdp_to_csv" href="m_cdp_to_csv.html" /> 
   </head>
   <body>
     <div class="header-wrapper" role="banner">
@@ -32,9 +32,9 @@
         <div class="headertitle"><a
           href="index.html">SecureCRT Tools 2.1.0 documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
-          <a href="m_merged_arp_to_csv.html" title="m_merged_arp_to_csv"
+          <a href="m_cdp_to_csv.html" title="m_cdp_to_csv"
              accesskey="P">previous</a> |
-          <a href="m_update_interface_desc.html" title="m_update_interface_desc"
+          <a href="m_find_macs_by_vlans.html" title="m_find_macs_by_vlans"
              accesskey="N">next</a> |
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |
@@ -52,38 +52,68 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-m_save_output">
-<span id="m-save-output"></span><h1>m_save_output<a class="headerlink" href="#module-m_save_output" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-m_document_device">
+<span id="m-document-device"></span><h1>m_document_device<a class="headerlink" href="#module-m_document_device" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
-<dt id="m_save_output.script_main">
-<code class="descclassname">m_save_output.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#m_save_output.script_main" title="Permalink to this definition">¶</a></dt>
+<dt id="m_document_device.script_main">
+<code class="descclassname">m_document_device.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#m_document_device.script_main" title="Permalink to this definition">¶</a></dt>
 <dd><div class="line-block">
 <div class="line">MULTIPLE device script</div>
 <div class="line">Author: Jamie Caesar</div>
 <div class="line">Email: <a class="reference external" href="mailto:jcaesar&#37;&#52;&#48;presidio&#46;com">jcaesar<span>&#64;</span>presidio<span>&#46;</span>com</a></div>
 </div>
-<p>This script will prompt for a CSV list of devices, then will prompt for a command to run on each device in the list.
-The output from each device will be saved to a file.  The path where the file is saved is specified in the
-settings.ini file.</p>
+<p>This script will grab the output for a list of commands from the provided list of devices.  The list of commands is
+taken from the ‘settings/settings.ini’ file.  There is a separate list for each supported network operating system
+(IOS, NXOS and ASA) and by default the list that matches the network operating system of the connected device will
+be used.</p>
+<p>Custom lists of commands are supported.  These lists can be added manually to the [document_device] section of the
+‘settings/settings.ini’ file.  To be able to choose one of these lists when running the script, the
+‘prompt_for_custom_lists’ setting needs to be changed to ‘True’ in the settings.ini file.  Once this option is
+enabled, the script will prompt for the name of the list that you want to use.  If the input is left blank then
+the default behavior (based on network OS) will choose the list.</p>
+<div class="line-block">
+<div class="line">Script Settings (found in settings/settings.ini):</div>
+<div class="line">show_instructions - When True, displays a pop-up upon launching the script explaining where to modify the list of</div>
+<div class="line-block">
+<div class="line">commands sent to devices.  This window also prompts the user if they want to continue seeing this message.  If</div>
+<div class="line">not, the script changes this setting to False.</div>
+</div>
+<div class="line">folder_per_device - If True, Creates a folder for each device, based on the hostname, and saves all files inside</div>
+<div class="line-block">
+<div class="line">that folder WITHOUT the hostname in the output file names.  If False, it saves all the files directly into the</div>
+<div class="line">output folder from the global settings and includes the hostname in each individual filename.</div>
+</div>
+<div class="line">prompt_for_custom_lists - When set to True, the script will prompt the user to type the name of a list of</div>
+<div class="line-block">
+<div class="line">commands to use with the connected device.  This list name must be found as an option in the [document_device]</div>
+<div class="line">section of the settings.ini file.  The format is the same as the default network OS lists, ‘ios’, ‘nxos’, etc.</div>
+</div>
+<div class="line">ios - The list of commands that will be run on IOS devices</div>
+<div class="line">nxos - The list of commands that will be run on NXOS devices</div>
+<div class="line">asa - The list of commands that will be run on ASA devices</div>
+</div>
+<p>Any additional options found in this section would be custom added by the user and are expected to be lists of
+commands for use with the ‘prompt_for_custom_lists’ setting.</p>
+<p>By default, The outputs will be saved in a folder named after the hostname of the device, with each output file
+being saved inside that directory.  This behavior can be changed in the settings above.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>script</strong> (<a class="reference internal" href="tools-scripts.html#securecrt_tools.scripts.Script" title="securecrt_tools.scripts.Script"><em>scripts.Script</em></a>) – A subclass of the scripts.Script object that represents the execution of this particular script
-(either CRTScript or DirectScript)</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>session</strong> (<a class="reference internal" href="tools-sessions.html#securecrt_tools.sessions.Session" title="securecrt_tools.sessions.Session"><em>sessions.Session</em></a>) – A subclass of the sessions.Session object that represents this particular script session (either
+SecureCRTSession or DirectSession)</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="m_save_output.per_device_work">
-<code class="descclassname">m_save_output.</code><code class="descname">per_device_work</code><span class="sig-paren">(</span><em>session</em>, <em>enable_pass</em>, <em>send_cmd</em><span class="sig-paren">)</span><a class="headerlink" href="#m_save_output.per_device_work" title="Permalink to this definition">¶</a></dt>
+<dt id="m_document_device.per_device_work">
+<code class="descclassname">m_document_device.</code><code class="descname">per_device_work</code><span class="sig-paren">(</span><em>session</em>, <em>command_list_name</em>, <em>folder_per_device</em><span class="sig-paren">)</span><a class="headerlink" href="#m_document_device.per_device_work" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function contains the code that should be executed on each device that this script connects to.  It is called
 after establishing a connection to each device in the loop above.</p>
-<p>You can either put your own code here, or if there is a single-device version of a script that performs the correct
-task, it can be imported and called here, essentially making this script connect to all the devices in the chosen
-CSV file and then running a single-device script on each of them.</p>
+<p>This function simply calls the imported “document()” function from the s_document_device script on each device
+connected to.</p>
 </dd></dl>
 
 </div>
@@ -105,10 +135,10 @@ CSV file and then running a single-device script on each of them.</p>
 <li class="toctree-l2"><a class="reference internal" href="single_device_scripts.html">Single Device Scripts</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="multi_device_scripts.html">Multiple Device Scripts</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="m_cdp_to_csv.html">m_cdp_to_csv</a></li>
-<li class="toctree-l3"><a class="reference internal" href="m_document_device.html">m_document_device</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">m_document_device</a></li>
 <li class="toctree-l3"><a class="reference internal" href="m_find_macs_by_vlans.html">m_find_macs_by_vlans</a></li>
 <li class="toctree-l3"><a class="reference internal" href="m_merged_arp_to_csv.html">m_merged_arp_to_csv</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">m_save_output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="m_save_output.html">m_save_output</a></li>
 <li class="toctree-l3"><a class="reference internal" href="m_update_interface_desc.html">m_update_interface_desc</a></li>
 </ul>
 </li>
@@ -136,9 +166,9 @@ CSV file and then running a single-device script on each of them.</p>
       <div class="footer">
         <div class="left">
           <div role="navigation" aria-label="related navigaton">
-            <a href="m_merged_arp_to_csv.html" title="m_merged_arp_to_csv"
+            <a href="m_cdp_to_csv.html" title="m_cdp_to_csv"
               >previous</a> |
-            <a href="m_update_interface_desc.html" title="m_update_interface_desc"
+            <a href="m_find_macs_by_vlans.html" title="m_find_macs_by_vlans"
               >next</a> |
             <a href="py-modindex.html" title="Python Module Index"
               >modules</a> |
@@ -147,7 +177,7 @@ CSV file and then running a single-device script on each of them.</p>
           </div>
           <div role="note" aria-label="source link">
               <br/>
-              <a href="_sources/m_save_output.rst.txt"
+              <a href="_sources/m_document_device.rst.txt"
                 rel="nofollow">Show Source</a>
           </div>
         </div>

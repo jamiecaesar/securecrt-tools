@@ -145,9 +145,8 @@ def per_device_work(session, command_list_name, folder_per_device):
     This function contains the code that should be executed on each device that this script connects to.  It is called
     after establishing a connection to each device in the loop above.
 
-    You can either put your own code here, or if there is a single-device version of a script that performs the correct
-    task, it can be imported and called here, essentially making this script connect to all the devices in the chosen
-    CSV file and then running a single-device script on each of them.
+    This function simply calls the imported "document()" function from the s_document_device script on each device
+    connected to.
     """
     session.start_cisco_session()
 

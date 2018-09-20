@@ -421,7 +421,7 @@ type of device (for example “$” for some linux hosts).</li>
 
 <dl class="method">
 <dt id="securecrt_tools.sessions.CRTSession.write_output_to_file">
-<code class="descname">write_output_to_file</code><span class="sig-paren">(</span><em>command</em>, <em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.write_output_to_file" title="Permalink to this definition">¶</a></dt>
+<code class="descname">write_output_to_file</code><span class="sig-paren">(</span><em>command</em>, <em>filename</em>, <em>prompt_to_create=True</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.write_output_to_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send the supplied command to the remote device and writes the output to a file.</p>
 <p>This function was written specifically to write output line by line because storing large outputs into a
 variable will cause SecureCRT to bog down until it freezes.  A good example is a large “show tech” output.
@@ -724,7 +724,7 @@ marked as currently connected.</p>
 
 <dl class="method">
 <dt id="securecrt_tools.sessions.DebugSession.write_output_to_file">
-<code class="descname">write_output_to_file</code><span class="sig-paren">(</span><em>command</em>, <em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.write_output_to_file" title="Permalink to this definition">¶</a></dt>
+<code class="descname">write_output_to_file</code><span class="sig-paren">(</span><em>command</em>, <em>filename</em>, <em>prompt_to_create=True</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.write_output_to_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send the supplied command to the remote device and writes the output to a file.</p>
 <p>This function was written specifically to write output line by line because storing large outputs into a
 variable will cause SecureCRT to bog down until it freezes.  A good example is a large “show tech” output.
