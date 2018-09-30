@@ -4,8 +4,8 @@ This repository contains a collection of SecureCRT scripts that automate various
 
 These scripts should work on any version of SecureCRT that supports python.  If you find that a script won't work on your machine, please post an issue to let us know!
 
-Important Note
-==============
+Important Note For Users of Older Versions
+==========================================
 The settings files for these scripts have been changed from using JSON files to the Python built-in ConfigParse module.  In addition instead of each script uses indivdiual settings having its own JSON file, now that settings are saved in the common "settings.ini" file under a separate heading for that script.  **There is no code to migrate your settings from the old JSON format to the INI format, so please check your settings and remove the old JSON files**
 
 In addition to the new format for the settings, the newer version of these scripts now have support for initiating connections via Telnet and SSH to remote devices, as well as connecting via a jump/bastion host.  In addition there are methods for pushing configuration changes to devices that were not available previously.
@@ -70,6 +70,14 @@ Script-Specific Settings
 ************************
 
 Some scripts have local settings files that only apply to that script.  If such a setting is needed, the setting will be saved under a heading named for the script in the `settings.ini` file.  Details about the settings should be in the docstring for that particular script file.
+
+Contributing
+============
+While I've tried to create an assortment of scripts that would be useful to many of the people using this respository, I would love for people to contribute to this repository by adding script and other improvements via pull request.  While I've created many of the scripts here to handle things that I've found useful, I'm sure there are plenty of great ideas for scripts that I haven't thought of. 
+
+If you have a need for a script but do not feel confident that you can write one yourself, please post the idea in the issues log and perhaps someone else will find the time to write it.  Ultimately the best way to learn both Python and how to use this module to write your own scripts is by coming up with something you want to build and just keep working at it.  Blank script templates are provided to help with this process and all of the existing scripts can be used as examples or modified to suit your needs.  Since there are currently very few contributors to this repository the fastest way to get a new script to do what you need is to try to write it yourself and reach out for feedback and help. I can't guarantee that anyone will have the time to build a suggested script, but I'd still love to have those ideas posted.
+
+To help support involvement from others in the community, I've tried to write documentation about both the high-level design/logic of the modules and scripts, as well as detailed documentation about all of the functions/methods in the modules.  This include docstrings and comments within the code to make it as easy as possible for people new to this repository to understand what it is doing.  Please reach out with any feedback you have on the documentation so it can be continuously improved, even for simple typos and grammar errors that you find (or better yet, create a pull request to fix the file as practice using git and github!)
 
 Documentation
 =============

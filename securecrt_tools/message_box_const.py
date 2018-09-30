@@ -2,8 +2,13 @@
 #
 # These constants can be used for MessageBox creation.
 #
-# One item from each category can be OR'd ( | ) together to combine a single value to represent the layout of a
-# SecureCRT message box.
+# One item from each category can be OR'd ( | ) or added ( + ) together to combine a single value to represent the
+# layout of a SecureCRT message box.  For example, if you want a message box that displays a question mark icon,
+# prompts with a Yes and No button and No should be the default answer you can pass
+# "ICON_QUESTION + BUTTON_YESNO + DEFBUTTON2" into the message_box() function as the third input parameter.
+#
+# NOTE:  To reference these names in your scripts, make sure to import them into your script file using:
+#        "from securecrt_tools.message_box_const import *"
 #
 # CATEGORY 1 - DISPLAY ICON
 ICON_STOP = 16                 # display the ERROR/STOP icon.

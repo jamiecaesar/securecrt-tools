@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="About Templates" href="about_templates.html" />
+    <link rel="next" title="A Note on TextFSM" href="textfsm_note.html" />
     <link rel="prev" title="Writing Your Own Scripts" href="writing_scripts.html" /> 
   </head>
   <body>
@@ -34,7 +34,7 @@
         <div class="rel" role="navigation" aria-label="related navigation">
           <a href="writing_scripts.html" title="Writing Your Own Scripts"
              accesskey="P">previous</a> |
-          <a href="about_templates.html" title="About Templates"
+          <a href="textfsm_note.html" title="A Note on TextFSM"
              accesskey="N">next</a> |
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |
@@ -54,13 +54,39 @@
             
   <div class="section" id="introduction-to-writing-securecrt-scripts">
 <h1>Introduction To Writing SecureCRT Scripts<a class="headerlink" href="#introduction-to-writing-securecrt-scripts" title="Permalink to this headline">¶</a></h1>
-<p>For those who have a need to either modify the existing scripts or write completely new ones for specific use cases (I expect that will be the majority), this section has documentation on the classes used to build the scripts in this repository.</p>
-<p>The purpose of building the below classes is to encapsulate many of the common tasks that will be performed on any device so that those methods can simply be called, instead of requiring each person to either copy and paste a lot of blocks of code, or understand the intricate details of interacting with a remote device through SecureCRT.  While that may be required for certain use cases, the goal is that a vast majority of the interaction can be handled using the existing methods documented below.</p>
-<p>Before creating a new script, look at the <cite>templates/</cite> directory, which contains boilerplate starting points for new scripts.  The sections where code is meant to be added has been marked with comments saying “ADD YOUR CODE HERE”.  Unless there are reasons not to, the recommndation is to start with the skeleton code in the “templates” directory, for either single-device or multi-device scripts.  The reason for this is becasue SecureCRT is bundled with its own Python implementation that we do not have access to customize.  For example, the template scripts add the directory from where a script is being launched to the PYTHONPATH environment variable so we can import non-standard modules into our scripts.  SecureCRT’s Python interpreter will not have access to any locally installed modules, so we are forced to put those files in our scripts directory so that we can access them from there, after modifying the PYTHONPATH.  Also, the templates include additional code that acts differently if the script is being launced from SecureCRT or directly in a local python interpreter.  This was done to allow the programmer to debug their code with a favorite tool, which otherwise wouldn’t be available if the script can only be executed from within SecureCRT.</p>
-<p>There are 2 categories of modules shown below:
+<p>For those who have a need to either modify the existing scripts or write completely new ones for specific tasks (I expect that will be the majority), this section contains documentation on the classes used to simplify script creation.</p>
+<p>The purpose of building the below classes is to encapsulate many of the common tasks that will be performed on any device so that those methods can simply be called, instead of requiring each person to either copy and paste a lot of blocks of code, or understand the intricate details of interacting with a remote device through SecureCRT.  While that may be required in certain cases, the goal is that a vast majority of the interaction can be handled using the existing methods documented below.</p>
+<p>#### Script Templates
+When creating a new script it is <strong>highly recommended</strong> to look at the <cite>templates/</cite> directory in this repository, which contains boilerplate starting points for new scripts.  The sections where code is meant to be added has been marked with comments saying “ADD YOUR CODE HERE”.  Unless you have a good reason not to, it is recommended to start with these templates because they already handle a few extra steps required to use the full functionality of the securecrt_tools module.  For example, some of the things handled by the starter template are:
+* Since SecureCRT uses its own Python interpreter that is bundled with the application, some special logic had to be added to support importing both securecrt_tools and the third porty modules used in some scripts.
+* The logging facility is initialized
+* Some code to make the script run either when run from SecureCRT or in a debug (simulation) mode when run directly with your local Python installation/IDE.  This is explained further below.</p>
+<p>#### Module Types
+There are 2 categories of modules shown below:
 1) The modules written to handle the interaction between these scripts and the remote devices (via SecureCRT), and
 2) 3rd Party modules that are used within some of the scripts to help process our device outputs better.</p>
-<p>The 3rd Party modules are included because someone has already done the work to create modules that perform specific funtions, so there is no reason we shouldn’t take advantage of that instead of writing our own (and probably more buggy) implementations.  For better or worse, SecureCRT includes it’s own Python environment within the application, which means we cannot install new modules like we can for a local installation of Python.  Instead we have to include the source code in this repository for the 3rd party modules so we can use them.</p>
+<p>##### SecureCRT Tools Modules
+The code used to interact with SecureCRT is kept in the <cite>securecrt_tools</cite> module folder.  This folder contains both the securecrt_tools and 3rd party modules in addition to a small number of other files.  The files that are a part of securecrt_tools are:
+* scripts.py
+* sessions.py
+* utilities.py
+* settings.py
+* message_box_const.py</p>
+<p>These files break up the code into groupings based on function so that the repository has a better organizational structure.  The purpose of the files is explained below, while the documentation of all methods/functions defined in these files is in a later section.</p>
+<p><cite>scripts.py</cite> -  This file contains the code that interacts with the SecureCRT application itself.  It has the code for doing things like creating message boxes, file selector windows, importing a CSV with a list of devices that should each be connected to, etc.  Anything that requires interaction with the SecureCRT API but isn’t related to a specific connection to a remote device is kept here.</p>
+<p><cite>sessions.py</cite> - This file contains the code that interacts with a device via SecureCRT.  There are methods in this file for connecting to devices, finding the prompt of a device, sending data to a remote device, capturing command output to a variable, writing the output of a command to a file, disconnecting from a device, etc.</p>
+<p><cite>utilities.py</cite> - This file contains utility functions that are independent of SecureCRT and so are kept in a separate file.  This file contains functions that do things such as parsing TextFSM output into either a list or dictionary format, writing a 2-dimensional list to a CSV file, sorting text in “human” format (‘1,2,10,11’ instead of ‘1,10,11,2’), etc.</p>
+<p><cite>settings.py</cite> - This file contains the code used to handle the settings.ini file.  Functions in this file perform tasks such as reading settings from the INI file, creating the file if it exists, adding missing variables that are required for operation of these scripts, etc.</p>
+<p><cite>message_box_const.py</cite> - This file, while related to SecureCRT, holds information used in the formatting of message boxes and prompts.  These SecureCRT constructs accept an optional number in the function call that dictates the layout of the box (what buttons are available, what icon is in the box, etc).  There is a specific number assigned to each option and I have created a list of constants that are assigned the appropriate number.  This allows you define the format of the message box by adding together the constants you want into an appropriate value.  An example of how to use these constants is in the comments of the file.</p>
+<p>###### Debug (Simulation Mode)
+The debug mode was added to speed development and troubleshooting of script logic that doesn’t involve SecureCRT’s API, such as testing/debugging parsing of the output from a device.  When the script is run directly from your local Python 2.x install, then  instead of trying to send (for example) <cite>show cdp neighbor</cite> to a device, it will prompt you to specify a file that contains the output for <cite>show cdp neighbor</cite>, so that you can step through the program logic with a debugging tool.  When trying to debug from within SecureCRT you are limited to either logging or printing debug info to the screen with a Message Box (which are both available if you prefer)</p>
+<p>This is done by using the class system in Python.  For those who understand Object-Oriented Programming and Classes work, both the Script and Session objects have an abstract base class (e.g. <cite>class Session</cite>) as well as a sub-class for use with SecureCRT (e.g. <cite>class CRTSession(Session)</cite>) and a subclass for use with your local Python install (e.g. <cite>class DebugSession(Session)</cite>). There is code at the end of all the provided scripts that will use the <cite>CRTSession</cite> sub-class if the script is called from SecureCRT and use the <cite>DebugSession</cite> sub-class when the script is run from the local Python install.  This allows us to simulate running the script against a device from our local Python installation, generally by either prompting the user for a file input when the script would gather output from a remote device, or printing to the console instead of creating message boxes on the screen.</p>
+<p>For those less familiar with OOP and Classes, the <cite>Session</cite> abstract base class defines what methods/functions are required to be defined for any class that is a sub-class of <cite>Session</cite>.  For example, the <cite>get_command_output()</cite> is defined under the <cite>Session</cite> base class and required to be implemented in both the <cite>CRTSession</cite> class and the <cite>DebugSession</cite> class.  In the <cite>Session</cite> base class there <strong>is not any code</strong> for that method.  It is simply defined with nothing but a <cite>pass</cite> statement in it.  Each sub-class implements this method differently, though.  The <cite>CRTSession</cite> class is meant to be used when SecureCRT is launching the script, so it has code that will send the provided command to the device and capture the output returned and save it into a variable.  The <cite>DebugSession</cite> class is meant to be used when the script is run by the local Python interpreter and so we do not have the ability to actually connect to a remote device.  Instead, the <cite>DebugSession</cite> class prompts the user for a filename on the console, and then opens that file and saves the contacts into the variable.  In this way, we are simulating a connection to a remote device and can now test our parsing logic on that output without needing to connect to the remote device (except to initially capture a real output to a file to test against).</p>
+<p>Because the script file has the code (if you used the provided templates, at least) that detects which program is executing it (SecureCRT or Python directly) and selects the appropriate class type to use, you can write your scripts once with the same method names (e.g. <cite>get_command_output()</cite> and it will execute differently but appropriately for the way it is being executed.</p>
+<p>##### 3rd Party Modules
+The 3rd Party modules are included because someone has already done the work to create modules that perform specific funtions, so there is no reason we shouldn’t take advantage of that instead of writing our own (and probably more buggy) implementations.  For better or worse, SecureCRT includes it’s own Python environment within the application, which means we cannot install new modules like we can for a local installation of Python.  Instead we have to include the source code in this repository for the 3rd party modules so we can access them.  The most commonly used 3rd party modules in these scripts are:
+* <cite>TextFSM</cite> - A module that lets you build a template using regular expression to parse semi-structured (i.e. meant for human readability) outputs to collect only the information you want.
+* <cite>ipaddress module</cite> - A module that lets you create IP address and IP network objects and contains many methods to comparing and displaying IP information.</p>
 </div>
 
 
@@ -79,7 +105,6 @@
 <li class="toctree-l1"><a class="reference internal" href="scripts.html">Scripts</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="writing_scripts.html">Writing Your Own Scripts</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Introduction To Writing SecureCRT Scripts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="about_templates.html">About Templates</a></li>
 <li class="toctree-l2"><a class="reference internal" href="textfsm_note.html">A Note on TextFSM</a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules.html">Module Documentation</a></li>
 </ul>
@@ -106,7 +131,7 @@
           <div role="navigation" aria-label="related navigaton">
             <a href="writing_scripts.html" title="Writing Your Own Scripts"
               >previous</a> |
-            <a href="about_templates.html" title="About Templates"
+            <a href="textfsm_note.html" title="A Note on TextFSM"
               >next</a> |
             <a href="py-modindex.html" title="Python Module Index"
               >modules</a> |
