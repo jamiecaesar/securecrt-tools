@@ -17,22 +17,24 @@ If you are looking for previous versions of the scripts, they can be found in th
 Running The Scripts
 ===================
 There are 2 types of scripts in this repository:
+
 1) Scripts that interact with a single device, AFTER you have logged in manually (starts with 's\_'), and
+
 2) Scripts that interat with multiple devices, where the script performs the login action (starts with 'm\_')
 
-The run any of these scripts, you need to download the entire repo to your computer.  You can either clone the repository or download an archive to extact on your machine.
+The run any of these scripts, you need to download the entire repository to your computer.  You can either clone the repository or download an archive (.zip) to extact on your machine.  You can place the directory anywhere on your machine that is convenient, but the directory structure of the repository must stay the same (i.e. all scripts must be executed from the repository directory.  They will not work if either outside of the repository directory or from a sub-directory inside of it).
 
 Single Device Scripts
 *********************
 To run SINGLE device scripts, do the following:
 
-1) **AFTER** connecting to a device in SecureCRT, go to the *Scripts* menu and select "Run"
+1) **AFTER** connecting and logging into a device with SecureCRT, go to the *Scripts* menu and select "Run"
 
 2) Choose the script you want to run (that starts with 's\_')
 
 3) The script looks for your `settings.ini` file. If this file doesn't exist (and it won't the first time you run one of these scripts) the script will create the file.
 
-4) If the script produces an output, it will be saved in the directory specified in the `settings/settings.ini` file.  If this diretory does not exist, you will be prompted to create it.  You can modify this path to choose where the scripts save outputs.
+4) If the script produces an output, it will be saved in the directory specified in the `settings/settings.ini` file.  If this diretory does not exist, you will be prompted to create it.  You can modify this path in the `settings.ini` file to change where the scripts save the output they produce.
 
 The output files are automatically named based on the hostname of the device connected to.   This name is taken from the prompt of the device, so these scripts will work whether you are directly connected, or connected via a jumpbox or other intermediate device.
 
@@ -78,6 +80,3 @@ While I've tried to create an assortment of scripts that would be useful to many
 If you have a need for a script but do not feel confident that you can write one yourself, please post the idea in the issues log and perhaps someone else will find the time to write it.  Ultimately the best way to learn both Python and how to use this module to write your own scripts is by coming up with something you want to build and just keep working at it.  Blank script templates are provided to help with this process and all of the existing scripts can be used as examples or modified to suit your needs.  Since there are currently very few contributors to this repository the fastest way to get a new script to do what you need is to try to write it yourself and reach out for feedback and help. I can't guarantee that anyone will have the time to build a suggested script, but I'd still love to have those ideas posted.
 
 To help support involvement from others in the community, I've tried to write documentation about both the high-level design/logic of the modules and scripts, as well as detailed documentation about all of the functions/methods in the modules.  This include docstrings and comments within the code to make it as easy as possible for people new to this repository to understand what it is doing.  Please reach out with any feedback you have on the documentation so it can be continuously improved, even for simple typos and grammar errors that you find (or better yet, create a pull request to fix the file as practice using git and github!)
-
-
-
