@@ -81,13 +81,15 @@ class Session:
 
         :param desc: A short description to include in the filename (i.e. "show run", "cdp", etc)
         :type desc: str
-        :param base_dir: (Optional) The director where this file should be saved. Default: SavePath from settings.
-        :type base_dir: str
         :param ext: (Optional) Extension for the filename.  Default: ".txt"
         :type ext: str
+        :param include_hostname: (Optional) If true, includes the device hostname in the filename.
+        :type include_hostname: bool
         :param include_date: (Optional) Include a timestamp in the filename.  The timestamp format is taken from the
             settings file.  Default: True
         :type include_date: bool
+        :param base_dir: (Optional) The directory where this file should be saved. Default: output_dir from settings.ini
+        :type base_dir: str
 
         :return: The generated absolute path for the filename requested.
         :rtype: str

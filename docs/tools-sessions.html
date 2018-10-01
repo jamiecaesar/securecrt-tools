@@ -89,10 +89,11 @@ under this class and automatically inherited by the sub-classes.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>desc</strong> (<em>str</em>) – A short description to include in the filename (i.e. “show run”, “cdp”, etc)</li>
-<li><strong>base_dir</strong> (<em>str</em>) – (Optional) The director where this file should be saved. Default: SavePath from settings.</li>
 <li><strong>ext</strong> (<em>str</em>) – (Optional) Extension for the filename.  Default: “.txt”</li>
+<li><strong>include_hostname</strong> (<em>bool</em>) – (Optional) If true, includes the device hostname in the filename.</li>
 <li><strong>include_date</strong> (<em>bool</em>) – (Optional) Include a timestamp in the filename.  The timestamp format is taken from the
 settings file.  Default: True</li>
+<li><strong>base_dir</strong> (<em>str</em>) – (Optional) The directory where this file should be saved. Default: output_dir from settings.ini</li>
 </ul>
 </td>
 </tr>
