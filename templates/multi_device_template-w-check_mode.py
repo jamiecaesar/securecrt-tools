@@ -108,6 +108,9 @@ def script_main(script):
         except sessions.InteractionError as e:
             with open(failed_log, 'a') as logfile:
                 logfile.write("Failure on {0}: {1}\n".format(hostname, e.message.strip()))
+        except sessions.UnsupportedOSError as e:
+            with open(failed_log, 'a') as logfile:
+                logfile.write("Unsupported OS on {0}: {1}\n".format(hostname, e.message.strip()))
 
     # #########################################  END DEVICE CONNECT LOOP  ############################################
 
@@ -121,7 +124,7 @@ def per_device_work(session, check_mode, enable_pass):
     task, it can be imported and called here, essentially making this script connect to all the devices in the chosen
     CSV file and then running a single-device script on each of them.
     """
-    session.start_cisco_session()
+    session.start_cisco_session(enable_pass=enable_pass)
     #
     # Your Code Here
     #
