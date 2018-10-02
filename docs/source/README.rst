@@ -4,6 +4,16 @@ This repository contains a collection of SecureCRT scripts that automate various
 
 These scripts should work on any version of SecureCRT that supports python.  If you find that a script won't work on your machine, please post an issue to let us know!
 
+Important Note For Users of Older Versions
+==========================================
+The settings files for these scripts have been changed from using JSON files to the Python built-in ConfigParse module.  In addition instead of each script uses indivdiual settings having its own JSON file, now that settings are saved in the common "settings.ini" file under a separate heading for that script.  **There is no code to migrate your settings from the old JSON format to the INI format, so please check your settings and remove the old JSON files**
+
+In addition to the new format for the settings, the newer version of these scripts now have support for initiating connections via Telnet and SSH to remote devices, as well as connecting via a jump/bastion host.  In addition there are methods for pushing configuration changes to devices that were not available previously.
+
+If you are looking for previous versions of the scripts, they can be found in the branches below:
+* Please see the `Pre-2017` branch if you need to access the original versions (1.0) that were all function based.
+* Please see the `2017` branch if you want the original class-based scripts use the JSON based settings files. (2.0)
+
 What These Scripts Do
 =====================
 While the documentation has a detailed list of every script in this collection and the specifics on how they work, below is a summarized list of the kinds of things these scripts will do.
@@ -19,15 +29,21 @@ While the documentation has a detailed list of every script in this collection a
 
 These various scripts are included in the repository so that someone can quickly download them and get started, but majority of the work has been put into building the `securecrt_tools` module which is designed to handle all of the low-level interactions with SecureCRT and make it as easy as possible to write new scripts.  This module handles discovering the remote device OS, its prompt and hostname, and the interactions with the device.  For example a single method call can send a command, collect the output and write it to a file named after the device.  This way a script should be able to gather the output needed in a few lines of code and anything beyond that is the processing required to parse that output (TextFSM makes this much easier) and take the appropriate follow up steps.  All of this is discussed in more detail in the "Writing Your Own Scripts" sectin of the documentation.
 
-Important Note For Users of Older Versions
-==========================================
-The settings files for these scripts have been changed from using JSON files to the Python built-in ConfigParse module.  In addition instead of each script uses indivdiual settings having its own JSON file, now that settings are saved in the common "settings.ini" file under a separate heading for that script.  **There is no code to migrate your settings from the old JSON format to the INI format, so please check your settings and remove the old JSON files**
+Using a Jumpbox/Bastion Host
+============================
+In some cases you can only access a remote device by proxying through a jump box/bastion host.  Fortunately, SecureCRT already has a method of handling this and so I don't have to build the code directly into the securecrt_tools module to do it.  The steps for proxying a connection through another device are:
 
-In addition to the new format for the settings, the newer version of these scripts now have support for initiating connections via Telnet and SSH to remote devices, as well as connecting via a jump/bastion host.  In addition there are methods for pushing configuration changes to devices that were not available previously.
+1) Create an SSH2 session to connect to the jump box.  Make sure you can use this session to connect to the jump box directly.
 
-If you are looking for previous versions of the scripts, they can be found in the branches below:
-* Please see the `Pre-2017` branch if you need to access the original versions (1.0) that were all function based.
-* Please see the `2017` branch if you want the original class-based scripts use the JSON based settings files. (2.0)
+2) Create a session to connect to the remote device by IP or name (that the jump box can resolve).
+
+3) While editing the remote device session, go to the SSH2/SSH1/Telnet section and look for the `Firewall` drop down.
+
+4) Choose `Select Session` and select the session for the jump box.
+
+5) When you launch the remote device session, you'll first be prompted for the jump box credentials (unless you've saved them) and then you'll be prompted for the remote device credentials.  You should now be connected to the remote device by proxying through the jump box.
+
+For more information, watch the video on VanDyke Software's YouTube channel at `https://youtu.be/XHOVTuv-LKY <https://youtu.be/XHOVTuv-LKY>`_.
 
 Running The Scripts
 ===================
