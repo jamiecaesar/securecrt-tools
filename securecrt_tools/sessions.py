@@ -81,13 +81,15 @@ class Session:
 
         :param desc: A short description to include in the filename (i.e. "show run", "cdp", etc)
         :type desc: str
-        :param base_dir: (Optional) The director where this file should be saved. Default: SavePath from settings.
-        :type base_dir: str
         :param ext: (Optional) Extension for the filename.  Default: ".txt"
         :type ext: str
+        :param include_hostname: (Optional) If true, includes the device hostname in the filename.
+        :type include_hostname: bool
         :param include_date: (Optional) Include a timestamp in the filename.  The timestamp format is taken from the
             settings file.  Default: True
         :type include_date: bool
+        :param base_dir: (Optional) The directory where this file should be saved. Default: output_dir from settings.ini
+        :type base_dir: str
 
         :return: The generated absolute path for the filename requested.
         :rtype: str
@@ -249,59 +251,6 @@ class Session:
         pass
 
     @abstractmethod
-    def ssh_via_jump(self, host, username, password, options="-o StrictHostKeyChecking=no"):
-        """
-        From the connected session, this method issues the SSH command to connect to another box, using the main
-        connected sessions as a jump point to reach the target.  In other words, connect_ssh() would be used to connect
-        to the jump box/bastion host and then this method would be used to connect to the remote device via the jump
-        host.
-
-        If this method doesn't receive the expected prompts after issuing the credentials, an exception will be raised.
-
-        :param host: IP address or hostname (resolvable on the jumpbox)
-        :type host: str
-        :param username: Username to log into the remote device with
-        :type username: str
-        :param password: Password for logging into the remote device
-        :type password: str
-        :param options: Additional "ssh" command paramters.  Default disables strict host key checking so that the
-                        script will not be prompted to accept the remote key.
-        :type options: str
-        """
-        pass
-
-    @abstractmethod
-    def telnet_via_jump(self, host, username, password):
-        """
-        From the connected session, this method issues the telnet command to connect to another box, using the main
-        connected sessions as a jump point to reach the target.  In other words, connect_ssh() would be used to connect
-        to the jump box/bastion host and then this method would be used to connect to the remote device via the jump
-        host.
-
-        If this method doesn't receive the expected prompts after issuing the credentials, an exception will be raised.
-
-        :param host: IP address or hostname (resolvable on the jumpbox)
-        :type host: str
-        :param username: Username to log into the remote device with
-        :type username: str
-        :param password: Password for logging into the remote device
-        :type password: str
-        """
-        pass
-
-    @abstractmethod
-    def disconnect_via_jump(self, command="exit"):
-        """
-        Issues a command to disconnect from the remote device, bringing us back to the jump host.  The default command
-        is "exit", but it can be changed by passing in a different "command".  If we don't see the prompt for the jump
-        host after issuing the disconnect command, an exception will be raised.
-
-        :param command: The command to be issued to the remote device to disconnect.  The default is 'exit'
-        :type command: str
-        """
-        pass
-
-    @abstractmethod
     def close(self):
         """
         A method to close the SecureCRT tab associated with this CRTSession.
@@ -416,7 +365,7 @@ class CRTSession(Session):
         self.tab = tab
         self.screen = tab.Screen
         self.session = tab.Session
-        self.response_timeout = 20
+        self.response_timeout = 30
         self.jump_endings = None
         self.session_set_sync = False
 
@@ -743,89 +692,6 @@ class CRTSession(Session):
         """
         if self.tab.Index != self.script.crt.GetScriptTab().Index:
             self.tab.Close()
-
-    def ssh_via_jump(self, host, username, password, options="-o StrictHostKeyChecking=no", prompt_endings=("#", ">")):
-        """
-        From the connected session, this method issues the SSH command to connect to another box, using the main
-        connected sessions as a jump point to reach the target.  In other words, connect_ssh() would be used to connect
-        to the jump box/bastion host and then this method would be used to connect to the remote device via the jump
-        host.
-
-        If this method doesn't receive the expected prompts after issuing the credentials, an exception will be raised.
-
-        :param host: IP address or hostname (resolvable on the jumpbox)
-        :type host: str
-        :param username: Username to log into the remote device with
-        :type username: str
-        :param password: Password for logging into the remote device
-        :type password: str
-        :param options: Additional "ssh" command paramters.  Default disables strict host key checking so that the
-                        script will not be prompted to accept the remote key.
-        :type options: str
-        :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
-                               Cisco devices (">" and "#"), but may need to be changed if connecting to another
-                               type of device (for example "$" for some linux hosts).
-        :type prompt_endings: list
-        """
-        if not self.prompt:
-            self.prompt = self.__get_prompt()
-        self.__send("ssh {0} {1}@{2}\n".format(options, username, host))
-        result = self.__wait_for_strings(["assword", "refused", "denied"])
-        if result == 1:
-            self.screen.Send("{0}\n".format(password))
-            self.__post_connect_check(prompt_endings)
-            self.prompt_stack.insert(0, self.prompt)
-        else:
-            raise ConnectError("SSH connection refused.")
-
-    def telnet_via_jump(self, host, username, password, prompt_endings=("#", ">")):
-        """
-        From the connected session, this method issues the telnet command to connect to another box, using the main
-        connected sessions as a jump point to reach the target.  In other words, connect_ssh() would be used to connect
-        to the jump box/bastion host and then this method would be used to connect to the remote device via the jump
-        host.
-
-        If this method doesn't receive the expected prompts after issuing the credentials, an exception will be raised.
-
-        :param host: IP address or hostname (resolvable on the jumpbox)
-        :type host: str
-        :param username: Username to log into the remote device with
-        :type username: str
-        :param password: Password for logging into the remote device
-        :type password: str
-        :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
-                               Cisco devices (">" and "#"), but may need to be changed if connecting to another
-                               type of device (for example "$" for some linux hosts).
-        :type prompt_endings: list
-        """
-        if not self.prompt:
-            self.prompt = self.__get_prompt()
-        self.__send("telnet {0}\n".format(host))
-        result = self.__wait_for_strings(["sername", "refused", "denied"])
-        if result == 1:
-            self.__send("{0}\n".format(username))
-            self.__wait_for_string("assword")
-            self.screen.Send("{0}\n".format(password))
-            self.__post_connect_check(prompt_endings)
-            self.prompt_stack.insert(0, self.prompt)
-        else:
-            raise ConnectError("Telnet connection refused.")
-
-    def disconnect_via_jump(self, command="exit"):
-        """
-        Issues a command to disconnect from the remote device, bringing us back to the jump host.  The default command
-        is "exit", but it can be changed by passing in a different "command".  If we don't see the prompt for the jump
-        host after issuing the disconnect command, an exception will be raised.
-
-        :param command: The command to be issued to the remote device to disconnect.  The default is 'exit'
-        :type command: str
-        """
-        try:
-            prev_prompt = self.prompt_stack.pop(0)
-        except IndexError:
-            prev_prompt = None
-        self.__send("{0}\n".format(command))
-        self.__wait_for_string(prev_prompt)
 
     def start_cisco_session(self, enable_pass=None):
         """
@@ -1392,65 +1258,6 @@ class DebugSession(Session):
         """
         print "Pretending to disconnect from device {0}.".format(self.hostname)
         self._connected = False
-
-    def ssh_via_jump(self, host, username, password, options="-o StrictHostKeyChecking=no"):
-        """
-        Pretends to connect to a device via SSH through a fictitious jump box.  Never fails unless our session isn't
-        marked as currently connected.
-
-        :param host: IP address or hostname (resolvable on the jumpbox)
-        :type host: str
-        :param username: Username to log into the remote device with
-        :type username: str
-        :param password: Password for logging into the remote device
-        :type password: str
-        :param options: Additional "ssh" command paramters.  Default disables strict host key checking so that the
-                        script will not be prompted to accept the remote key.
-        :type options: str
-        """
-        if self.is_connected():
-            if self.prompt:
-                self.prompt_stack.insert(0,self.prompt)
-            self.prompt = "{0}#".format(host)
-            print "Now connected to: {0} (using prompt: {1})".format(host, self.prompt)
-        else:
-            raise ConnectError("Not connected to a jumpbox")
-
-    def telnet_via_jump(self, host, username, password):
-        """
-        Pretends to connect to a device via telnet through a fictitious jump box.  Never fails unless our session isn't
-        marked as currently connected.
-
-        :param host: IP address or hostname (resolvable on the jumpbox)
-        :type host: str
-        :param username: Username to log into the remote device with
-        :type username: str
-        :param password: Password for logging into the remote device
-        :type password: str
-        """
-        if self.is_connected():
-            if self.prompt:
-                self.prompt_stack.insert(0,self.prompt)
-            self.prompt = "{0}#".format(host)
-            print "Now connected to: {0} (using prompt: {1})".format(host, self.prompt)
-        else:
-            raise ConnectError("Not connected to a jumpbox")
-
-    def disconnect_via_jump(self, command="exit"):
-        """
-        Pretends to disconnect from a device connect through a jump box.
-
-        :param command: The command to be issued to the remote device to disconnect.  The default is 'exit'
-        :type command: str
-        """
-        prev_prompt = None
-        try:
-            prev_prompt = self.prompt_stack.pop(0)
-            print "Simulated disconnect from remote host.  Now at prompt: {0}".format(prev_prompt)
-            self.prompt = prev_prompt
-        except IndexError:
-            print "Simulated disconnect from remote host.  Prompt not recorded from previous device".format
-            self.prompt = prev_prompt
 
     def close(self):
         """

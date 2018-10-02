@@ -21,5 +21,6 @@ These scripts can also be imported into Multi-Device scripts to reduce the amoun
    s_save_output
    s_save_running
    s_switchport_mapping
+   s_update_dhcp_relay
    s_update_interface_desc
    s_vlan_to_csv

@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Single Device Scripts &#8212; SecureCRT Tools 2.1.0 documentation</title>
+    <title>s_update_dhcp_relay &#8212; SecureCRT Tools 2.1.0 documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -23,8 +23,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="s_arp_to_csv" href="s_arp_to_csv.html" />
-    <link rel="prev" title="Scripts" href="scripts.html" /> 
+    <link rel="next" title="s_update_interface_desc" href="s_update_interface_desc.html" />
+    <link rel="prev" title="s_switchport_mapping" href="s_switchport_mapping.html" /> 
   </head>
   <body>
     <div class="header-wrapper" role="banner">
@@ -32,9 +32,9 @@
         <div class="headertitle"><a
           href="index.html">SecureCRT Tools 2.1.0 documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
-          <a href="scripts.html" title="Scripts"
+          <a href="s_switchport_mapping.html" title="s_switchport_mapping"
              accesskey="P">previous</a> |
-          <a href="s_arp_to_csv.html" title="s_arp_to_csv"
+          <a href="s_update_interface_desc.html" title="s_update_interface_desc"
              accesskey="N">next</a> |
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |
@@ -52,29 +52,58 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="single-device-scripts">
-<h1>Single Device Scripts<a class="headerlink" href="#single-device-scripts" title="Permalink to this headline">¶</a></h1>
-<p>Single Device Scripts are scripts that are designed to be lauched in a SecureCRT tab that is already connected to a remote device.  These scripts will make necessary terminal changes, perform their task, and return the terminal back to the original state so that the user can continue working after the script executes.</p>
-<p>These scripts can also be imported into Multi-Device scripts to reduce the amount of copying and pasting of code that is required to make a multi-device version.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="s_arp_to_csv.html">s_arp_to_csv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_cdp_to_csv.html">s_cdp_to_csv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_create_sessions_from_cdp.html">s_create_sessions_from_cdp</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_document_device.html">s_document_device</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_eigrp_topology_summary.html">s_eigrp_topology_summary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_eigrp_topology_to_csv.html">s_eigrp_topology_to_csv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_interface_stats.html">s_interface_stats</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_mac_to_csv.html">s_mac_to_csv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_nexthop_summary.html">s_nexthop_summary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_save_output.html">s_save_output</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_save_running.html">s_save_running</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_switchport_mapping.html">s_switchport_mapping</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_update_dhcp_relay.html">s_update_dhcp_relay</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_update_interface_desc.html">s_update_interface_desc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s_vlan_to_csv.html">s_vlan_to_csv</a></li>
-</ul>
+  <div class="section" id="module-s_update_dhcp_relay">
+<span id="s-update-dhcp-relay"></span><h1>s_update_dhcp_relay<a class="headerlink" href="#module-s_update_dhcp_relay" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="s_update_dhcp_relay.script_main">
+<code class="descclassname">s_update_dhcp_relay.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>session</em><span class="sig-paren">)</span><a class="headerlink" href="#s_update_dhcp_relay.script_main" title="Permalink to this definition">¶</a></dt>
+<dd><div class="line-block">
+<div class="line">SINGLE device script</div>
+<div class="line">Author: Jamie Caesar</div>
+<div class="line">Email: <a class="reference external" href="mailto:jcaesar&#37;&#52;&#48;presidio&#46;com">jcaesar<span>&#64;</span>presidio<span>&#46;</span>com</a></div>
 </div>
+<p>This script will scan the running configuration of the connected device looking for instances of old IP helper/DHCP
+relay addresses (IOS/NXOS) on interfaces and if found will update the helper/relay addresses with the newer ones.
+The new and old addresses that the script looks for is saved in the settings.ini file, as documented below.</p>
+<p>This script will prompt you to run in “Check Mode”, where the configuration changes the script would be pushed to
+the device are ONLY written to a file and NO CHANGES will be made to the device.  If you select “No” when prompted
+this script will push the configuration changes to the device. Also, when the changes are pushed to the device this
+script will save the running config before and after the changes are made, and will also output a log of the
+configuration session showing all the commands pushed.</p>
+<div class="line-block">
+<div class="line">Script Settings (found in settings/settings.ini):</div>
+<div class="line">show_instructions - When True, displays a pop-up upon launching the script explaining where to modify the list of</div>
+<div class="line-block">
+<div class="line">commands sent to devices.  This window also prompts the user if they want to continue seeing this message.  If</div>
+<div class="line">not, the script changes this setting to False.</div>
+</div>
+<div class="line">old_relays - This is a comma separated list of IP addresses that the script should search for as relay addresses</div>
+<div class="line-block">
+<div class="line">in the device’s configuration.</div>
+</div>
+<div class="line">new_relays - This is a comma separated list of IP addresses that are the new relay addresses that should be added</div>
+<div class="line-block">
+<div class="line">to any interface that has at least one of the old helper/relay addresses on it.</div>
+</div>
+<div class="line">remove_old_relays - If True, the script will add the new relays and REMOVE the old relays immediately after adding</div>
+<div class="line-block">
+<div class="line">the new ones.  If False (default), the script will only add the new relays to interfaces where at least</div>
+<div class="line">one old relay is found.  This is useful when you want to push out new relays as part of a migration process</div>
+<div class="line">without removing the old relays.  Since this script will not try to push new relay addresses that already</div>
+<div class="line">exist on an interface, the script can be run again with this option set to True to later remove the old relays.</div>
+</div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>session</strong> (<a class="reference internal" href="tools-sessions.html#securecrt_tools.sessions.Session" title="securecrt_tools.sessions.Session"><em>sessions.Session</em></a>) – A subclass of the sessions.Session object that represents this particular script session (either
+SecureCRTSession or DirectSession)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 
 
@@ -91,7 +120,7 @@
 <li class="toctree-l1"><a class="reference internal" href="README.html#running-the-scripts">Running The Scripts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="README.html#settings">Settings</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="scripts.html">Scripts</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Single Device Scripts</a><ul>
+<li class="toctree-l2 current"><a class="reference internal" href="single_device_scripts.html">Single Device Scripts</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="s_arp_to_csv.html">s_arp_to_csv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_cdp_to_csv.html">s_cdp_to_csv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_create_sessions_from_cdp.html">s_create_sessions_from_cdp</a></li>
@@ -104,7 +133,7 @@
 <li class="toctree-l3"><a class="reference internal" href="s_save_output.html">s_save_output</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_save_running.html">s_save_running</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_switchport_mapping.html">s_switchport_mapping</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_update_dhcp_relay.html">s_update_dhcp_relay</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">s_update_dhcp_relay</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_update_interface_desc.html">s_update_interface_desc</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_vlan_to_csv.html">s_vlan_to_csv</a></li>
 </ul>
@@ -134,9 +163,9 @@
       <div class="footer">
         <div class="left">
           <div role="navigation" aria-label="related navigaton">
-            <a href="scripts.html" title="Scripts"
+            <a href="s_switchport_mapping.html" title="s_switchport_mapping"
               >previous</a> |
-            <a href="s_arp_to_csv.html" title="s_arp_to_csv"
+            <a href="s_update_interface_desc.html" title="s_update_interface_desc"
               >next</a> |
             <a href="py-modindex.html" title="Python Module Index"
               >modules</a> |
@@ -145,7 +174,7 @@
           </div>
           <div role="note" aria-label="source link">
               <br/>
-              <a href="_sources/single_device_scripts.rst.txt"
+              <a href="_sources/s_update_dhcp_relay.rst.txt"
                 rel="nofollow">Show Source</a>
           </div>
         </div>

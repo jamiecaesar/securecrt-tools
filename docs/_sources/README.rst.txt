@@ -22,7 +22,9 @@ There are 2 types of scripts in this repository:
 
 2) Scripts that interat with multiple devices, where the script performs the login action (starts with 'm\_')
 
-The run any of these scripts, you need to download the entire repository to your computer.  You can either clone the repository or download an archive (.zip) to extact on your machine.  You can place the directory anywhere on your machine that is convenient, but the directory structure of the repository must stay the same (i.e. all scripts must be executed from the repository directory.  They will not work if either outside of the repository directory or from a sub-directory inside of it).
+A list of all the single- and multi-device scripts and descriptions on what they do can be found in the documentation below.
+
+The run any of these scripts, you need to download the entire repo to your computer.  You can either clone the repository or download an archive to extact on your machine.
 
 Single Device Scripts
 *********************

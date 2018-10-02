@@ -19,6 +19,7 @@ from securecrt_tools import sessions
 from securecrt_tools import utilities
 # Import message box constants names for use specifying the design of message boxes
 from securecrt_tools.message_box_const import *
+from s_update_dhcp_relay import build_valid_ip_list, update_helpers
 
 # Create global logger so we can write debug messages from any function (if debug mode setting is enabled in settings).
 logger = logging.getLogger("securecrt")
@@ -30,16 +31,40 @@ logger.debug("Starting execution of {0}".format(script_name))
 def script_main(script):
     """
     | MULTIPLE device script
-    | Author: XXXXXXXX
-    | Email: XXXXXXX@domain.com
+    | Author: Jamie Caesar
+    | Email: jcaesar@presidio.com
 
-    PUT A DESCRIPTION OF THIS SCRIPT HERE.  WHAT IT DOES, ETC.
-    This script checks that it will NOT be run in a connected tab.
+    This script will scan the running configuration of the provided list of devices, looking for instances of old IP
+    helper/DHCP relay addresses (IOS/NXOS) on interfaces and if found will update the helper/relay addresses with the
+    newer ones. The new and old addresses that the script looks for is saved in the settings.ini file, as documented
+    below.
 
+    Any devices that cannot be connected to will be logged in a separate file saved in the output directory.
+
+    This script will prompt you to run in "Check Mode", where the configuration changes the script would be pushed to
+    the devices are ONLY written to a file and NO CHANGES will be made to the devices.  If you select "No" when prompted
+    this script will push the configuration changes to the devices. Also, when the changes are pushed to the devices
+    this script will save the running config before and after the changes are made, and will also output a log of the
+    configuration sessions showing all the commands pushed.
+
+    | Script Settings (found in settings/settings.ini):
+    | show_instructions - When True, displays a pop-up upon launching the script explaining where to modify the list of
+    |   commands sent to devices.  This window also prompts the user if they want to continue seeing this message.  If
+    |   not, the script changes this setting to False.
+    | old_relays - This is a comma separated list of IP addresses that the script should search for as relay addresses
+    |   in the device's configuration.
+    | new_relays - This is a comma separated list of IP addresses that are the new relay addresses that should be added
+    |   to any interface that has at least one of the old helper/relay addresses on it.
+    | remove_old_relays - If True, the script will add the new relays and REMOVE the old relays immediately after adding
+    |   the new ones.  If False (default), the script will only add the new relays to interfaces where at least
+    |   one old relay is found.  This is useful when you want to push out new relays as part of a migration process
+    |   without removing the old relays.  Since this script will not try to push new relay addresses that already
+    |   exist on an interface, the script can be run again with this option set to True to later remove the old relays.
     :param script: A subclass of the scripts.Script object that represents the execution of this particular script
                    (either CRTScript or DirectScript)
     :type script: scripts.Script
     """
+    
     session = script.get_main_session()
 
     # If this is launched on an active tab, disconnect before continuing.
@@ -53,7 +78,24 @@ def script_main(script):
     if not device_list:
         return
 
-    check_mode = True
+    # #########################################  GET VALUES FROM SETTINGS  ###########################################
+    # Display instructions message, unless settings prevent it
+    show_instructions = script.settings.getboolean("update_dhcp_relay", "show_instructions")
+    if show_instructions:
+        response = script.message_box("The list of old and new ip-helper/dhcp relay IPs can be edited in the "
+                                      "'settings/settings.ini' file in the main securecrt-tools directory.\nSee the "
+                                      "documentation for this script ('docs/index.html') for more details.\n\n"
+                                      "Do you want to stop seeing this message?",
+                                      "Instructions", ICON_QUESTION + BUTTON_YESNO)
+        if response == IDYES:
+            script.settings.update("update_dhcp_relay", "show_instructions", False)
+
+    # Collection of old helpers/relays is in a set data structure to make membership checks easier.  A list works fine
+    # for new helpers/relays.
+    old_helpers = set(build_valid_ip_list(script.settings.getlist("update_dhcp_relay", "old_relays")))
+    new_helpers = build_valid_ip_list(script.settings.getlist("update_dhcp_relay", "new_relays"))
+    remove_old_helpers = script.settings.getboolean("update_dhcp_relay", "remove_old_relays")
+
     # #########################################  START CHECK MODE SECTION  ###########################################
     # Ask if this should be a test run (generate configs only) or full run (push updates to devices)
     # Comment out or remove the entire CHECK MODE SECTION if you don't want to prompt for check mode
@@ -100,7 +142,7 @@ def script_main(script):
         logger.debug("<M_SCRIPT> Connecting to {0}.".format(hostname))
         try:
             session.connect(hostname, username, password, protocol=protocol, proxy=proxy)
-            per_device_work(session, check_mode, enable)
+            per_device_work(session, check_mode, enable, old_helpers, new_helpers, remove_old_helpers)
             session.disconnect()
         except sessions.ConnectError as e:
             with open(failed_log, 'a') as logfile:
@@ -118,7 +160,7 @@ def script_main(script):
     # #########################################  END DEVICE CONNECT LOOP  ############################################
 
 
-def per_device_work(session, check_mode, enable_pass):
+def per_device_work(session, check_mode, enable_pass, old_helpers, new_helpers, remove_old_helpers):
     """
     This function contains the code that should be executed on each device that this script connects to.  It is called
     after establishing a connection to each device in the loop above.
@@ -128,9 +170,7 @@ def per_device_work(session, check_mode, enable_pass):
     CSV file and then running a single-device script on each of them.
     """
     session.start_cisco_session(enable_pass=enable_pass)
-    #
-    # Your Code Here
-    #
+    update_helpers(session, check_mode, old_helpers, new_helpers, remove_old_helpers)
     session.end_cisco_session()
 
 
