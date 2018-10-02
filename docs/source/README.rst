@@ -20,6 +20,8 @@ There are 2 types of scripts in this repository:
 1) Scripts that interact with a single device, AFTER you have logged in manually (starts with 's\_'), and
 2) Scripts that interat with multiple devices, where the script performs the login action (starts with 'm\_')
 
+A list of all the single- and multi-device scripts and descriptions on what they do can be found in the documentation below.
+
 The run any of these scripts, you need to download the entire repo to your computer.  You can either clone the repository or download an archive to extact on your machine.
 
 Single Device Scripts

@@ -64,6 +64,7 @@ def script_main(script):
                    (either CRTScript or DirectScript)
     :type script: scripts.Script
     """
+    
     session = script.get_main_session()
 
     # If this is launched on an active tab, disconnect before continuing.

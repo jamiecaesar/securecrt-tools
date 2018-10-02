@@ -242,22 +242,6 @@ the disconnect happen, attempt to force and ungraceful disconnect.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="securecrt_tools.sessions.CRTSession.disconnect_via_jump">
-<code class="descname">disconnect_via_jump</code><span class="sig-paren">(</span><em>command='exit'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.disconnect_via_jump" title="Permalink to this definition">¶</a></dt>
-<dd><p>Issues a command to disconnect from the remote device, bringing us back to the jump host.  The default command
-is “exit”, but it can be changed by passing in a different “command”.  If we don’t see the prompt for the jump
-host after issuing the disconnect command, an exception will be raised.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>command</strong> (<em>str</em>) – The command to be issued to the remote device to disconnect.  The default is ‘exit’</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="securecrt_tools.sessions.CRTSession.end_cisco_session">
 <code class="descname">end_cisco_session</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.end_cisco_session" title="Permalink to this definition">¶</a></dt>
 <dd><p>End the session by returning the device’s terminal parameters that were modified by start_session() to their
@@ -346,34 +330,6 @@ applying the commands will be written to this file.</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="securecrt_tools.sessions.CRTSession.ssh_via_jump">
-<code class="descname">ssh_via_jump</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>options='-o StrictHostKeyChecking=no'</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.ssh_via_jump" title="Permalink to this definition">¶</a></dt>
-<dd><p>From the connected session, this method issues the SSH command to connect to another box, using the main
-connected sessions as a jump point to reach the target.  In other words, connect_ssh() would be used to connect
-to the jump box/bastion host and then this method would be used to connect to the remote device via the jump
-host.</p>
-<p>If this method doesn’t receive the expected prompts after issuing the credentials, an exception will be raised.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>host</strong> (<em>str</em>) – IP address or hostname (resolvable on the jumpbox)</li>
-<li><strong>username</strong> (<em>str</em>) – Username to log into the remote device with</li>
-<li><strong>password</strong> (<em>str</em>) – Password for logging into the remote device</li>
-<li><strong>options</strong> (<em>str</em>) – Additional “ssh” command paramters.  Default disables strict host key checking so that the
-script will not be prompted to accept the remote key.</li>
-<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
-Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
-type of device (for example “$” for some linux hosts).</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="securecrt_tools.sessions.CRTSession.start_cisco_session">
 <code class="descname">start_cisco_session</code><span class="sig-paren">(</span><em>enable_pass=None</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.start_cisco_session" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs initial setup of the session to a Cisco device by detecting parameters (prompt, hostname, network OS,
@@ -389,32 +345,6 @@ method.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>enable_pass</strong> (<em>str</em>) – The enable password that should be sent if the device is not in enable mode.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="securecrt_tools.sessions.CRTSession.telnet_via_jump">
-<code class="descname">telnet_via_jump</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.CRTSession.telnet_via_jump" title="Permalink to this definition">¶</a></dt>
-<dd><p>From the connected session, this method issues the telnet command to connect to another box, using the main
-connected sessions as a jump point to reach the target.  In other words, connect_ssh() would be used to connect
-to the jump box/bastion host and then this method would be used to connect to the remote device via the jump
-host.</p>
-<p>If this method doesn’t receive the expected prompts after issuing the credentials, an exception will be raised.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>host</strong> (<em>str</em>) – IP address or hostname (resolvable on the jumpbox)</li>
-<li><strong>username</strong> (<em>str</em>) – Username to log into the remote device with</li>
-<li><strong>password</strong> (<em>str</em>) – Password for logging into the remote device</li>
-<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
-Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
-type of device (for example “$” for some linux hosts).</li>
-</ul>
-</td>
 </tr>
 </tbody>
 </table>
@@ -560,20 +490,6 @@ type of device (for example “$” for some linux hosts).</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="securecrt_tools.sessions.DebugSession.disconnect_via_jump">
-<code class="descname">disconnect_via_jump</code><span class="sig-paren">(</span><em>command='exit'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.disconnect_via_jump" title="Permalink to this definition">¶</a></dt>
-<dd><p>Pretends to disconnect from a device connect through a jump box.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>command</strong> (<em>str</em>) – The command to be issued to the remote device to disconnect.  The default is ‘exit’</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="securecrt_tools.sessions.DebugSession.end_cisco_session">
 <code class="descname">end_cisco_session</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.end_cisco_session" title="Permalink to this definition">¶</a></dt>
 <dd><p>End the session by returning the device’s terminal parameters that were modified by start_session() to their
@@ -662,28 +578,6 @@ applying the commands will be written to this file.</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="securecrt_tools.sessions.DebugSession.ssh_via_jump">
-<code class="descname">ssh_via_jump</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>options='-o StrictHostKeyChecking=no'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.ssh_via_jump" title="Permalink to this definition">¶</a></dt>
-<dd><p>Pretends to connect to a device via SSH through a fictitious jump box.  Never fails unless our session isn’t
-marked as currently connected.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>host</strong> (<em>str</em>) – IP address or hostname (resolvable on the jumpbox)</li>
-<li><strong>username</strong> (<em>str</em>) – Username to log into the remote device with</li>
-<li><strong>password</strong> (<em>str</em>) – Password for logging into the remote device</li>
-<li><strong>options</strong> (<em>str</em>) – Additional “ssh” command paramters.  Default disables strict host key checking so that the
-script will not be prompted to accept the remote key.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="securecrt_tools.sessions.DebugSession.start_cisco_session">
 <code class="descname">start_cisco_session</code><span class="sig-paren">(</span><em>enable_pass=None</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.start_cisco_session" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs initial setup of the session to a Cisco device by detecting parameters (prompt, hostname, network OS,
@@ -698,26 +592,6 @@ method.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>enable_pass</strong> (<em>str</em>) – The enable password that should be sent if the device is not in enable mode.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="securecrt_tools.sessions.DebugSession.telnet_via_jump">
-<code class="descname">telnet_via_jump</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.sessions.DebugSession.telnet_via_jump" title="Permalink to this definition">¶</a></dt>
-<dd><p>Pretends to connect to a device via telnet through a fictitious jump box.  Never fails unless our session isn’t
-marked as currently connected.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>host</strong> (<em>str</em>) – IP address or hostname (resolvable on the jumpbox)</li>
-<li><strong>username</strong> (<em>str</em>) – Username to log into the remote device with</li>
-<li><strong>password</strong> (<em>str</em>) – Password for logging into the remote device</li>
-</ul>
-</td>
 </tr>
 </tbody>
 </table>
