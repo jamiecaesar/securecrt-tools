@@ -14,6 +14,37 @@ If you are looking for previous versions of the scripts, they can be found in th
 * Please see the `Pre-2017` branch if you need to access the original versions (1.0) that were all function based.
 * Please see the `2017` branch if you want the original class-based scripts use the JSON based settings files. (2.0)
 
+What These Scripts Do
+=====================
+While the documentation has a detailed list of every script in this collection and the specifics on how they work, below is a summarized list of the kinds of things these scripts will do.
+
+* Save command outputs from devices into files that are automatically named with the hostname of the device (from the prompt) and a time/date stamp.  There are some different versions depending on if you want a single output or multiple outputs and from one or multiple devices.
+* Write the detailed CDP neighbor information into a spreadsheet (CSV format) for easier viewing and re-use of the data.
+* Creation of SecureCRT sessions from the CDP information of a device, to quickly build your collection of sessions in SecureCRT's session manager.
+* Summarize the route table of a device to see a list of all next-hops found in the route table and how many routes from which routing protocols are sending routes to each next-hop.  This script is useful either as a validate tool after routing changes (see a summary of route behavior before and after the change), or to help with discovery of new devices (There are 4000 routes in the table, but are there 3 or 30 exits that packets can take?)
+* Write the ARP table for a device into a spreadsheet (CSV) file, either for manual lookups or to be leveraged by other scripts (see below).  There is also version that will build a single large ARP table from multiple devices (For when HSRP priorities are split across 2 cores, or multiple VRFs route different VLANs upstream).
+* Create a spreadsheet that maps out every device on the switch, including interface description, MAC Address, MAC Vendor and IP address.  This script uses the ARP table created above as input if you want MAC to IP mappings shown in the output.
+* Capture the interface stats from all interfaces on a device into a spreadsheet to more quickly see which ports have errors, high rates of traffic, etc.
+* Search devices for specific existing IP helper/DHCP relay addresses and add new relays (optionally remove old) on any interface where the current relays are found.  There are versions of this script for working with a single device or a list of devices.
+
+These various scripts are included in the repository so that someone can quickly download them and get started, but majority of the work has been put into building the `securecrt_tools` module which is designed to handle all of the low-level interactions with SecureCRT and make it as easy as possible to write new scripts.  This module handles discovering the remote device OS, its prompt and hostname, and the interactions with the device.  For example a single method call can send a command, collect the output and write it to a file named after the device.  This way a script should be able to gather the output needed in a few lines of code and anything beyond that is the processing required to parse that output (TextFSM makes this much easier) and take the appropriate follow up steps.  All of this is discussed in more detail in the "Writing Your Own Scripts" sectin of the documentation.
+
+Using a Jumpbox/Bastion Host
+============================
+In some cases you can only access a remote device by proxying through a jump box/bastion host.  Fortunately, SecureCRT already has a method of handling this and so I don't have to build the code directly into the securecrt_tools module to do it.  The steps for proxying a connection through another device are:
+
+1) Create an SSH2 session to connect to the jump box.  Make sure you can use this session to connect to the jump box directly.
+
+2) Create a session to connect to the remote device by IP or name (that the jump box can resolve).
+
+3) While editing the remote device session, go to the SSH2/SSH1/Telnet section and look for the `Firewall` drop down.
+
+4) Choose `Select Session` and select the session for the jump box.
+
+5) When you launch the remote device session, you'll first be prompted for the jump box credentials (unless you've saved them) and then you'll be prompted for the remote device credentials.  You should now be connected to the remote device by proxying through the jump box.
+
+For more information, watch the video on VanDyke Software's YouTube channel at `https://youtu.be/XHOVTuv-LKY <https://youtu.be/XHOVTuv-LKY>`_.
+
 Running The Scripts
 ===================
 There are 2 types of scripts in this repository:

@@ -60,6 +60,7 @@ def script_main(script):
     |   one old relay is found.  This is useful when you want to push out new relays as part of a migration process
     |   without removing the old relays.  Since this script will not try to push new relay addresses that already
     |   exist on an interface, the script can be run again with this option set to True to later remove the old relays.
+    
     :param script: A subclass of the scripts.Script object that represents the execution of this particular script
                    (either CRTScript or DirectScript)
     :type script: scripts.Script
