@@ -60,11 +60,12 @@ def script_main(script):
     |   one old relay is found.  This is useful when you want to push out new relays as part of a migration process
     |   without removing the old relays.  Since this script will not try to push new relay addresses that already
     |   exist on an interface, the script can be run again with this option set to True to later remove the old relays.
+
     :param script: A subclass of the scripts.Script object that represents the execution of this particular script
                    (either CRTScript or DirectScript)
     :type script: scripts.Script
     """
-    
+
     session = script.get_main_session()
 
     # If this is launched on an active tab, disconnect before continuing.
@@ -141,10 +142,11 @@ def script_main(script):
 
         logger.debug("<M_SCRIPT> Connecting to {0}.".format(hostname))
         try:
-            session.connect(hostname, username, password, protocol=protocol, proxy=proxy)
+            script.connect(hostname, username, password, protocol=protocol, proxy=proxy)
+            session = script.get_main_session()
             per_device_work(session, check_mode, enable, old_helpers, new_helpers, remove_old_helpers)
-            session.disconnect()
-        except sessions.ConnectError as e:
+            script.disconnect()
+        except scripts.ConnectError as e:
             with open(failed_log, 'a') as logfile:
                 logfile.write("Connect to {0} failed: {1}\n".format(hostname, e.message.strip()))
                 session.disconnect()

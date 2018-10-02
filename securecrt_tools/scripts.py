@@ -26,6 +26,12 @@ class ScriptError(Exception):
     """
     pass
 
+class ConnectError(Exception):
+    """
+    An exception type that is raised when there are problems connecting to a device.
+    """
+    pass
+
 
 # ################################################    APP  CLASSES    ##################################################
 
@@ -324,6 +330,94 @@ class Script:
         return device_list
 
     @abstractmethod
+    def connect_ssh(self, host, username, password, version=None, proxy=None, prompt_endings=("#", ">")):
+        """
+        Connects to a device via the SSH protocol. By default, SSH2 will be tried first, but if it fails it will attempt
+        to fall back to SSH1.
+
+        :param host: The IP address of DNS name for the device to connect
+        :type host: str
+        :param username: The username to login to the device with
+        :type username: str
+        :param password: The password that goes with the provided username.  If a password is not specified, the
+            user will be prompted for one.
+        :type password: str
+        :param version: The SSH version to connect with (1 or 2).  Default is None, which will try 2 first and fallback
+            to 1 if that fails.
+        :type version: int
+        :param proxy: The name of a SecureCRT session object that can be used as a jumpbox to proxy the SSH connection
+                      through.  This is the same as selecting a session under the "Firewall" selection under the SSH
+                      settings screen for a SecureCRT session.
+        :type proxy: str
+        :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
+                               Cisco devices (">" and "#"), but may need to be changed if connecting to another
+                               type of device (for example "$" for some linux hosts).
+        :type prompt_endings: list
+        """
+        pass
+
+    @abstractmethod
+    def connect_telnet(self, host, username, password, proxy=None, prompt_endings=("#", ">")):
+        """
+        Connects to a device via the Telnet protocol.
+
+        :param host: The IP address of DNS name for the device to connect
+        :type host: str
+        :param username: The username to login to the device with
+        :type username: str
+        :param password: The password that goes with the provided username.  If a password is not specified, the
+                         user will be prompted for one.
+        :type password: str
+        :param proxy: The name of a SecureCRT session object that can be used as a jumpbox to proxy the SSH connection
+                      through.  This is the same as selecting a session under the "Firewall" selection under the SSH
+                      settings screen for a SecureCRT session.
+        :type proxy: str
+        :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
+                               Cisco devices (">" and "#"), but may need to be changed if connecting to another
+                               type of device (for example "$" for some linux hosts).
+        :type prompt_endings: list
+        """
+        pass
+
+    @abstractmethod
+    def connect(self, host, username, password, protocol=None, proxy=None, prompt_endings=("#", ">")):
+        """
+        Attempts to connect to a device by any available protocol, starting with SSH2, then SSH1, then telnet
+
+        :param host: The IP address of DNS name for the device to connect
+        :type host: str
+        :param username: The username to login to the device with
+        :type username: str
+        :param password: The password that goes with the provided username.  If a password is not specified, the
+                         user will be prompted for one.
+        :type password: str
+        :param protocol: A string with the desired protocol (telnet, ssh1, ssh2, ssh). If left blank it will try all
+                         starting with SSH2, then SSH1 then Telnet.  "ssh" means SSH2 then SSH1.
+        :type protocol: str
+        :param proxy: The name of a SecureCRT session object that can be used as a jumpbox to proxy the SSH connection
+                      through.  This is the same as selecting a session under the "Firewall" selection under the SSH
+                      settings screen for a SecureCRT session.
+        :type proxy: str
+        :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
+                               Cisco devices (">" and "#"), but may need to be changed if connecting to another
+                               type of device (for example "$" for some linux hosts).
+        :type prompt_endings: list
+        """
+        pass
+
+    @abstractmethod
+    def disconnect(self, command="exit"):
+        """
+        Disconnects the connected session by sending the "exit" command to the remote device.  If that does not make
+        the disconnect happen, attempt to force and ungraceful disconnect.
+
+        :param command: The command to be issued to the remote device to disconnect.  The default is 'exit'
+        :type command: str
+        """
+        pass
+
+
+    @abstractmethod
     def message_box(self, message, title="", options=0):
         """
         Prints a message for the user.  In SecureCRT, the message is displayed in a pop-up message box.  When used in a
@@ -389,28 +483,6 @@ class Script:
         pass
 
     @abstractmethod
-    def ssh_in_new_tab(self, host, username, password, prompt_endings=("#", ">")):
-        """
-        Connects to a device via the SSH protocol in a new tab.  A new CRTSession object that controls the new tab is
-        returned by this method.
-
-        By default, SSH2 will be tried first, but if it fails it will attempt to fall back to SSH1.
-
-        :param host: The IP address of DNS name for the device to connect
-        :type host: str
-        :param username: The username to login to the device with
-        :type username: str
-        :param password: The password that goes with the provided username.  If a password is not specified, the
-                         user will be prompted for one.
-        :type password: str
-        :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
-                               Cisco devices (">" and "#"), but may need to be changed if connecting to another
-                               type of device (for example "$" for some linux hosts).
-        :type prompt_endings: list
-        """
-        pass
-
-    @abstractmethod
     def create_new_saved_session(self, session_name, ip, protocol="SSH2", folder="_imports"):
         """
         Creates a session object that can be opened from the Connect menu in SecureCRT.
@@ -443,6 +515,258 @@ class CRTScript(Script):
 
         # Set up SecureCRT tab for interaction with the scripts
         self.main_session = sessions.CRTSession(self, self.crt.GetScriptTab())
+
+    def __post_connect_check(self, endings):
+        """
+        Validates that we've gotten to the prompt after a connection is made.
+
+        :param endings: A list of strings, where each string is a possible character that would be found at the end
+                        of the CLI prompt for the remote device.
+        :type endings: list
+        """
+        self.logger.debug("<CONN_CHECK> Started looking for following prompt endings: {0}".format(endings))
+        at_prompt = False
+        while not at_prompt:
+            found = self.main_session.screen.WaitForStrings(endings, self.main_session.response_timeout)
+            if not found:
+                raise sessions.InteractionError("Timeout reached looking for prompt endings: {0}".format(endings))
+            else:
+                test_string = "!@&^"
+                self.main_session.screen.Send(test_string + "\b" * len(test_string))
+                result = self.main_session.screen.WaitForStrings(test_string, self.main_session.response_timeout)
+                if result:
+                    self.logger.debug("<CONN_CHECK> At prompt.  Continuing".format(result))
+                    at_prompt = True
+
+    def __connect_ssh_2(self, host, username, password, proxy=None, prompt_endings=("#", "# ", ">")):
+        if not prompt_endings:
+            raise ConnectError("Cannot connect without knowing what character ends the CLI prompt.")
+
+        expanded_endings = []
+        for ending in prompt_endings:
+            expanded_endings.append("{0}".format(ending))
+            expanded_endings.append("{0} ".format(ending))
+
+        # If we have a proxy object, verify
+        if proxy:
+            ssh2_string = "/FIREWALL=Session:\"{0}\" /SSH2 /ACCEPTHOSTKEYS  /L {1} /PASSWORD {2} {3}"\
+                .format(proxy, username, password, host)
+        else:
+            ssh2_string = "/SSH2 /ACCEPTHOSTKEYS /L {0} /PASSWORD {1} {2}".format(username, password, host)
+
+        # If the tab is already connected, then give an exception that we cannot connect.
+        if self.main_session.is_connected():
+            self.logger.debug("<CONNECT_SSH2> Session already connected.  Raising exception")
+            raise ConnectError("Tab is already connected to another device.")
+        else:
+            try:
+                self.logger.debug("<CONNECT_SSH2> Attempting Connection to: {0}@{1} via SSH2".format(username, host))
+                tab = self.main_session.session.ConnectInTab(ssh2_string)
+                tab_index = tab.Index
+                self.main_session = sessions.CRTSession(self, self.crt.GetTab(tab_index), prompt_endings=prompt_endings)
+            except:
+                error = self.crt.GetLastErrorMessage()
+                raise ConnectError(error)
+
+        self.main_session.wait_for_connected()
+        # Set Tab parameters to allow correct sending/receiving of data via SecureCRT
+        self.main_session.screen.Synchronous = True
+        self.main_session.screen.IgnoreEscape = True
+        self.logger.debug("<CONNECT_SSH2> Set Synchronous and IgnoreEscape")
+
+        # Make sure banners have printed and we've reached our expected prompt.
+        self.__post_connect_check(expanded_endings)
+
+    def __connect_ssh_1(self, host, username, password, proxy=None, prompt_endings=("#", "# ", ">")):
+        if not prompt_endings:
+            raise ConnectError("Cannot connect without knowing what character ends the CLI prompt.")
+
+        expanded_endings = []
+        for ending in prompt_endings:
+            expanded_endings.append("{0}".format(ending))
+            expanded_endings.append("{0} ".format(ending))
+
+        if proxy:
+            ssh1_string="/FIREWALL=Session:\"{0}\" /SSH1 /ACCEPTHOSTKEYS /L {0} /PASSWORD {1} {2}".format(proxy, username,
+                                                                                                      password, host)
+        else:
+            ssh1_string = "/SSH1 /ACCEPTHOSTKEYS /L {0} /PASSWORD {1} {2}".format(username, password, host)
+
+        # If the tab is already connected, then give an exception that we cannot connect.
+        if self.main_session.is_connected():
+            self.logger.debug("<CONNECT_SSH1> Session already connected.  Raising exception")
+            raise ConnectError("Tab is already connected to another device.")
+        else:
+            try:
+                self.logger.debug("<CONNECT_SSH1> Attempting Connection to: {0}@{1} via SSH1".format(username, host))
+                tab = self.main_session.session.ConnectInTab(ssh1_string)
+                tab_index = tab.Index
+                self.main_session = sessions.CRTSession(self, self.crt.GetTab(tab_index), prompt_endings=prompt_endings)
+            except:
+                error = self.crt.GetLastErrorMessage()
+                raise ConnectError(error)
+
+        # Set Tab parameters to allow correct sending/receiving of data via SecureCRT
+        self.main_session.screen.Synchronous = True
+        self.main_session.screen.IgnoreEscape = True
+        self.logger.debug("<CONNECT_SSH1> Set Synchronous and IgnoreEscape")
+
+        # Make sure banners have printed and we've reached our expected prompt.
+        self.__post_connect_check(expanded_endings)
+
+    def connect_ssh(self, host, username, password, version=None, proxy=None, prompt_endings=("#", ">")):
+        """
+        Connects to a device via the SSH protocol. By default, SSH2 will be tried first, but if it fails it will attempt
+        to fall back to SSH1.
+
+        :param host: The IP address of DNS name for the device to connect
+        :type host: str
+        :param username: The username to login to the device with
+        :type username: str
+        :param password: The password that goes with the provided username.  If a password is not specified, the
+            user will be prompted for one.
+        :type password: str
+        :param version: The SSH version to connect with (1 or 2).  Default is None, which will try 2 first and fallback
+            to 1 if that fails.
+        :type version: int
+        :param proxy: The name of a SecureCRT session object that can be used as a jumpbox to proxy the SSH connection
+                      through.  This is the same as selecting a session under the "Firewall" selection under the SSH
+                      settings screen for a SecureCRT session.
+        :type proxy: str
+        :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
+                               Cisco devices (">" and "#"), but may need to be changed if connecting to another
+                               type of device (for example "$" for some linux hosts).
+        :type prompt_endings: list
+        """
+        self.logger.debug("<CONNECT_SSH> Attempting Connection to: {0}@{1}".format(username, host))
+
+        if not prompt_endings:
+            raise ConnectError("Cannot connect without knowing what character ends the CLI prompt.")
+
+        if version == 2:
+            self.__connect_ssh_2(host, username, password, proxy=proxy, prompt_endings=prompt_endings)
+        elif version == 1:
+            self.__connect_ssh_1(host, username, password, proxy=proxy, prompt_endings=prompt_endings)
+        else:
+            try:
+                self.__connect_ssh_2(host, username, password, proxy=proxy, prompt_endings=prompt_endings)
+            except ConnectError as e:
+                self.logger.debug("<CONNECT_SSH> Failure trying SSH2: {0}".format(e.message))
+                ssh2_error = e.message
+                try:
+                    self.__connect_ssh_1(host, username, password, proxy=proxy, prompt_endings=prompt_endings)
+                except ConnectError as e:
+                    ssh1_error = e.message
+                    self.logger.debug("<CONNECT_SSH> Failure trying SSH1: {0}".format(e.message))
+                    error = "SSH2 and SSH1 failed.\nSSH2 Failure:{0}\nSSH1 Failure:{1}".format(ssh2_error, ssh1_error)
+                    raise ConnectError(error)
+
+    def connect_telnet(self, host, username, password, proxy=None, prompt_endings=("#", ">")):
+        """
+        Connects to a device via the Telnet protocol.
+
+        :param host: The IP address of DNS name for the device to connect
+        :type host: str
+        :param username: The username to login to the device with
+        :type username: str
+        :param password: The password that goes with the provided username.  If a password is not specified, the
+                         user will be prompted for one.
+        :type password: str
+        :param proxy: The name of a SecureCRT session object that can be used as a jumpbox to proxy the SSH connection
+                      through.  This is the same as selecting a session under the "Firewall" selection under the SSH
+                      settings screen for a SecureCRT session.
+        :type proxy: str
+        :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
+                               Cisco devices (">" and "#"), but may need to be changed if connecting to another
+                               type of device (for example "$" for some linux hosts).
+        :type prompt_endings: list
+        """
+        if not prompt_endings:
+            raise ConnectError("Cannot connect without knowing what character ends the CLI prompt.")
+
+        if proxy:
+            telnet_string="/FIREWALL=Session:\"{0}\" /TELNET {0}".format(proxy, host)
+        else:
+            telnet_string = "/TELNET {0}".format(host)
+
+        # If the tab is already connected, then give an exception that we cannot connect.
+        if self.main_session.is_connected():
+            self.logger.debug("<CONNECT_TELNET> Session already connected.  Raising exception")
+            raise ConnectError("Tab is already connected to another device.")
+        else:
+            try:
+                self.logger.debug("<CONNECT_TELNET> Attempting Connection to: {0} via TELNET".format(host))
+                tab = self.main_session.session.ConnectInTab(telnet_string)
+                tab_index = tab.Index
+                self.main_session = sessions.CRTSession(self, self.crt.GetTab(tab_index), prompt_endings=prompt_endings)
+            except:
+                error = self.crt.GetLastErrorMessage()
+                raise ConnectError(error)
+
+        # Set Tab parameters to allow correct sending/receiving of data via SecureCRT
+        self.main_session.screen.Synchronous = True
+        self.main_session.screen.IgnoreEscape = True
+        self.logger.debug("<CONNECT_TELNET> Set Synchronous and IgnoreEscape")
+
+        # Handle Login
+        self.main_session.telnet_login(username, password)
+
+        # Make sure banners have printed and we've reached our expected prompt.
+        self.__post_connect_check(prompt_endings)
+
+    def connect(self, host, username, password, protocol=None, proxy=None, prompt_endings=("#", ">")):
+        """
+        Attempts to connect to a device by any available protocol, starting with SSH2, then SSH1, then telnet
+
+        :param host: The IP address of DNS name for the device to connect
+        :type host: str
+        :param username: The username to login to the device with
+        :type username: str
+        :param password: The password that goes with the provided username.  If a password is not specified, the
+                         user will be prompted for one.
+        :type password: str
+        :param protocol: A string with the desired protocol (telnet, ssh1, ssh2, ssh). If left blank it will try all
+                         starting with SSH2, then SSH1 then Telnet.  "ssh" means SSH2 then SSH1.
+        :type protocol: str
+        :param proxy: The name of a SecureCRT session object that can be used as a jumpbox to proxy the SSH connection
+                      through.  This is the same as selecting a session under the "Firewall" selection under the SSH
+                      settings screen for a SecureCRT session.
+        :type proxy: str
+        :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
+                               Cisco devices (">" and "#"), but may need to be changed if connecting to another
+                               type of device (for example "$" for some linux hosts).
+        :type prompt_endings: list
+        """
+        if not prompt_endings:
+            raise ConnectError("Cannot connect without knowing what character ends the CLI prompt.")
+
+        if not protocol:
+            try:
+                self.connect_ssh(host, username, password, proxy=proxy, prompt_endings=prompt_endings)
+            except ConnectError:
+                try:
+                    self.connect_telnet(host, username, password, prompt_endings=prompt_endings)
+                except ConnectError:
+                    raise ConnectError("Unable to make a connection with either SSH or Telnet")
+        elif protocol.lower() == "ssh":
+            self.connect_ssh(host, username, password, proxy=proxy, prompt_endings=prompt_endings)
+        elif protocol.lower() == "ssh2":
+            self.connect_ssh(host, username, password, version=2, proxy=proxy, prompt_endings=prompt_endings)
+        elif protocol.lower() == "ssh1":
+            self.connect_ssh(host, username, password, version=1, proxy=proxy, prompt_endings=prompt_endings)
+        elif protocol.lower() == "telnet":
+            self.connect_telnet(host, username, password, proxy=proxy, prompt_endings=prompt_endings)
+        else:
+            raise ConnectError("Unknown protocol specified.")
+
+    def disconnect(self, command="exit"):
+        """
+        Disconnects the main session used by the script by calling the disconnect method on the session object.
+
+        :param command: The command to be issued to the remote device to disconnect.  The default is 'exit'
+        :type command: str
+        """
+        self.main_session.disconnect(command=command)
 
     def message_box(self, message, title="", options=0):
         """
@@ -512,74 +836,6 @@ class CRTScript(Script):
         result_filename = self.crt.Dialog.FileOpenDialog(title, button_label, default_filename, file_filter)
         return result_filename
 
-    def ssh_in_new_tab(self, host, username, password, prompt_endings=("#", ">")):
-        """
-        Connects to a device via the SSH protocol in a new tab.  A new CRTSession object that controls the new tab is
-        returned by this method.
-
-        By default, SSH2 will be tried first, but if it fails it will attempt to fall back to SSH1.
-
-        :param host: The IP address of DNS name for the device to connect
-        :type host: str
-        :param username: The username to login to the device with
-        :type username: str
-        :param password: The password that goes with the provided username.  If a password is not specified, the
-                         user will be prompted for one.
-        :type password: str
-        :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
-                               Cisco devices (">" and "#"), but may need to be changed if connecting to another
-                               type of device (for example "$" for some linux hosts).
-        :type prompt_endings: list
-        """
-        response_timeout = 10
-        self.logger.debug("<NEW_TAB> Attempting new tab connection to: {0}@{1}".format(username, host))
-
-        expanded_endings = []
-        for ending in prompt_endings:
-            expanded_endings.append("{0}".format(ending))
-            expanded_endings.append("{0} ".format(ending))
-
-        ssh2_string = "/SSH2 /ACCEPTHOSTKEYS /L {0} /PASSWORD {1} {2}".format(username, password, host)
-        self.logger.debug("<NEW_TAB> Attempting connection in a new tab.")
-        new_tab = self.crt.Session.ConnectInTab(ssh2_string, failSilently=True)
-
-        # Check if we successfully connected.  If not, try SSH1
-        if not new_tab.Session.Connected:
-            ssh1_string = "/SSH1 /ACCEPTHOSTKEYS /L {0} /PASSWORD {1} {2}".format(username, password, host)
-            self.logger.debug("<NEW_TAB> Attempting connection via SSH1 in existing new tab")
-            new_tab.Session.Connect(ssh1_string)
-
-            if not new_tab.Session.Connected:
-                self.logger.debug("<NEW_TAB> SSH1 Failed.  Closing tab and raising exception.")
-                new_tab.Close()
-                raise sessions.ConnectError("Unabled to connect to {0} in a new tab with SSH2 or SSH1.")
-
-        # Set Tab parameters to allow correct sending/receiving of data via SecureCRT
-        self.logger.debug("<NEW_TAB> Set Synchronous and IgnoreEscape")
-        new_tab.Screen.Synchronous = True
-        new_tab.Screen.IgnoreEscape = True
-
-        self.logger.debug("<NEW_TAB> Started looking for following prompt endings: {0}".format(expanded_endings))
-        at_prompt = False
-        while not at_prompt:
-            found = new_tab.Screen.WaitForStrings(expanded_endings, response_timeout)
-            if not found:
-                raise sessions.InteractionError("Timeout reached looking for prompt endings: {0}"
-                                                .format(expanded_endings))
-            else:
-                test_string = "!@&^"
-                new_tab.Screen.Send(test_string + "\b" * len(test_string))
-                result = new_tab.Screen.WaitForStrings(test_string, response_timeout)
-                if result:
-                    self.logger.debug("<NEW_TAB> At prompt.  Continuing".format(result))
-                    at_prompt = True
-
-        new_session = sessions.CRTSession(self, new_tab, from_new_tab=True, prompt_endings=expanded_endings)
-        if new_tab.Index == self.crt.GetScriptTab().Index:
-            self.main = new_session
-        # Return a new CRTSession object that can interact with this new connection
-        return new_session
-
     def create_new_saved_session(self, session_name, ip, protocol="SSH2", folder="_imports"):
         """
         Creates a session object that can be opened from the Connect menu in SecureCRT.
@@ -627,6 +883,104 @@ class DebugScript(Script):
         super(DebugScript, self).__init__(full_script_path)
         self.logger.debug("<INIT> Building DirectExecution Object")
         self.main_session = sessions.DebugSession(self)
+
+    def connect_ssh(self, host, username, password, version=None, proxy=None, prompt_endings=("#", ">")):
+        """
+        Pretends to connect to a device via SSH.  Simply tracks that we are now connected to something within this
+        session (this method never fails).
+
+        :param host: The IP address of DNS name for the device to connect
+        :type host: str
+        :param username: The username to login to the device with
+        :type username: str
+        :param password: The password that goes with the provided username.  If a password is not specified, the
+            user will be prompted for one.
+        :type password: str
+        :param version: The SSH version to connect with (1 or 2).  Default is None, which will try 2 first and fallback
+            to 1 if that fails.
+        :type version: int
+        :param proxy: The name of a SecureCRT session object that can be used as a jumpbox to proxy the SSH connection
+                      through.  This is the same as selecting a session under the "Firewall" selection under the SSH
+                      settings screen for a SecureCRT session.
+        :type proxy: str
+        :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
+                               Cisco devices (">" and "#"), but may need to be changed if connecting to another
+                               type of device (for example "$" for some linux hosts).
+        :type prompt_endings: list
+        """
+        if version == 2 or version == 1:
+            print "Pretending to log into device {0} with username {1} using SSH{2}.".format(host, username, version)
+        else:
+            print "Pretending to log into device {0} with username {1} using SSH2.".format(host, username)
+        self.main_session.hostname = host
+        self.main_session.prompt = host + "#"
+        self.main_session._connected = True
+
+    def connect_telnet(self, host, username, password, proxy=None, prompt_endings=("#", ">")):
+        """
+        Pretends to connect to a device via the Telnet protocol, just like connect_ssh above.  Never fails.
+
+        :param host: The IP address of DNS name for the device to connect
+        :type host: str
+        :param username: The username to login to the device with
+        :type username: str
+        :param password: The password that goes with the provided username.  If a password is not specified, the
+                         user will be prompted for one.
+        :type password: str
+        :param proxy: The name of a SecureCRT session object that can be used as a jumpbox to proxy the SSH connection
+                      through.  This is the same as selecting a session under the "Firewall" selection under the SSH
+                      settings screen for a SecureCRT session.
+        :type proxy: str
+        :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
+                               Cisco devices (">" and "#"), but may need to be changed if connecting to another
+                               type of device (for example "$" for some linux hosts).
+        :type prompt_endings: list
+        """
+        print "Pretending to log into device {0} with username {1} using TELNET.".format(host, username)
+        self.main_session.hostname = host
+        self.main_session.prompt = host + "#"
+        self.main_session._connected = True
+
+    def connect(self, host, username, password, protocol=None, proxy=None, prompt_endings=("#", ">")):
+        """
+        Pretends to connect to a device.  Simply marks the state of the session as connected.  Never fails.
+
+        :param host: The IP address of DNS name for the device to connect
+        :type host: str
+        :param username: The username to login to the device with
+        :type username: str
+        :param password: The password that goes with the provided username.  If a password is not specified, the
+                         user will be prompted for one.
+        :type password: str
+        :param protocol: A string with the desired protocol (telnet, ssh1, ssh2, ssh). If left blank it will try all
+                         starting with SSH2, then SSH1 then Telnet.  "ssh" means SSH2 then SSH1.
+        :type protocol: str
+        :param proxy: The name of a SecureCRT session object that can be used as a jumpbox to proxy the SSH connection
+                      through.  This is the same as selecting a session under the "Firewall" selection under the SSH
+                      settings screen for a SecureCRT session.
+        :type proxy: str
+        :param prompt_endings: A list of strings that are possible prompt endings to watch for.  The default is for
+                               Cisco devices (">" and "#"), but may need to be changed if connecting to another
+                               type of device (for example "$" for some linux hosts).
+        :type prompt_endings: list
+        """
+        if proxy:
+            print "Using session '{}' as a proxy."
+
+        if not protocol:
+            print "Pretending to log into device {0} with username {1} using ANY.".format(host, username, protocol)
+        else:
+            print "Pretending to log into device {0} with username {1} using {2}.".format(host, username, protocol)
+        self.main_session._connected = True
+
+    def disconnect(self, command="exit"):
+        """
+        Disconnects the main session used by the script by calling the disconnect method on the session object.
+
+        :param command: The command to be issued to the remote device to disconnect.  The default is 'exit'
+        :type command: str
+        """
+        self.main_session.disconnect(command=command)
 
     def message_box(self, message, title="", options=0):
         """

@@ -101,10 +101,11 @@ def script_main(script):
 
         logger.debug("<M_SCRIPT> Connecting to {0}.".format(hostname))
         try:
-            session.connect(hostname, username, password, protocol=protocol, proxy=proxy)
+            script.connect(hostname, username, password, protocol=protocol, proxy=proxy)
+            session = script.get_main_session()
             arp_collection.extend(per_device_work(session, selected_vrf, add_header=False))
-            session.disconnect()
-        except sessions.ConnectError as e:
+            script.disconnect()
+        except scripts.ConnectError as e:
             with open(failed_log, 'a') as logfile:
                 logfile.write("Connect to {0} failed: {1}\n".format(hostname, e.message.strip()))
                 session.disconnect()

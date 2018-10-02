@@ -18,7 +18,7 @@ CRTScript Class
 	:show-inheritance:
 
 
-DirectScript Class
+DebugScript Class
 ---------------------
 
 .. autoclass:: DebugScript
@@ -30,3 +30,4 @@ Script Class Exceptions:
 -------------------------
 
 .. autoexception:: ScriptError
+.. autoexception:: ConnectError

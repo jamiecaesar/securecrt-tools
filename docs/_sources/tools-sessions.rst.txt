@@ -18,7 +18,7 @@ CRTSession Class
 	:show-inheritance:
 
 
-DirectSession Class
+DebugSession Class
 ---------------------
 
 .. autoclass:: DebugSession
@@ -29,7 +29,6 @@ DirectSession Class
 Session Class Exceptions:
 -------------------------
 
-.. autoexception:: ConnectError
 .. autoexception:: InteractionError
 .. autoexception:: UnsupportedOSError
 

@@ -188,6 +188,89 @@ tabs that have connections to remote devices) and represent a script being execu
 class inherits the methods from the Script class that are documented above, and is required to implement all of the
 abstract classes defined in the Script class.</p>
 <dl class="method">
+<dt id="securecrt_tools.scripts.CRTScript.connect">
+<code class="descname">connect</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>protocol=None</em>, <em>proxy=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.CRTScript.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempts to connect to a device by any available protocol, starting with SSH2, then SSH1, then telnet</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> (<em>str</em>) – The IP address of DNS name for the device to connect</li>
+<li><strong>username</strong> (<em>str</em>) – The username to login to the device with</li>
+<li><strong>password</strong> (<em>str</em>) – The password that goes with the provided username.  If a password is not specified, the
+user will be prompted for one.</li>
+<li><strong>protocol</strong> (<em>str</em>) – A string with the desired protocol (telnet, ssh1, ssh2, ssh). If left blank it will try all
+starting with SSH2, then SSH1 then Telnet.  “ssh” means SSH2 then SSH1.</li>
+<li><strong>proxy</strong> (<em>str</em>) – The name of a SecureCRT session object that can be used as a jumpbox to proxy the SSH connection
+through.  This is the same as selecting a session under the “Firewall” selection under the SSH
+settings screen for a SecureCRT session.</li>
+<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
+Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
+type of device (for example “$” for some linux hosts).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.scripts.CRTScript.connect_ssh">
+<code class="descname">connect_ssh</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>version=None</em>, <em>proxy=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.CRTScript.connect_ssh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connects to a device via the SSH protocol. By default, SSH2 will be tried first, but if it fails it will attempt
+to fall back to SSH1.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> (<em>str</em>) – The IP address of DNS name for the device to connect</li>
+<li><strong>username</strong> (<em>str</em>) – The username to login to the device with</li>
+<li><strong>password</strong> (<em>str</em>) – The password that goes with the provided username.  If a password is not specified, the
+user will be prompted for one.</li>
+<li><strong>version</strong> (<em>int</em>) – The SSH version to connect with (1 or 2).  Default is None, which will try 2 first and fallback
+to 1 if that fails.</li>
+<li><strong>proxy</strong> (<em>str</em>) – The name of a SecureCRT session object that can be used as a jumpbox to proxy the SSH connection
+through.  This is the same as selecting a session under the “Firewall” selection under the SSH
+settings screen for a SecureCRT session.</li>
+<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
+Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
+type of device (for example “$” for some linux hosts).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.scripts.CRTScript.connect_telnet">
+<code class="descname">connect_telnet</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>proxy=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.CRTScript.connect_telnet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connects to a device via the Telnet protocol.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> (<em>str</em>) – The IP address of DNS name for the device to connect</li>
+<li><strong>username</strong> (<em>str</em>) – The username to login to the device with</li>
+<li><strong>password</strong> (<em>str</em>) – The password that goes with the provided username.  If a password is not specified, the
+user will be prompted for one.</li>
+<li><strong>proxy</strong> (<em>str</em>) – The name of a SecureCRT session object that can be used as a jumpbox to proxy the SSH connection
+through.  This is the same as selecting a session under the “Firewall” selection under the SSH
+settings screen for a SecureCRT session.</li>
+<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
+Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
+type of device (for example “$” for some linux hosts).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="securecrt_tools.scripts.CRTScript.create_new_saved_session">
 <code class="descname">create_new_saved_session</code><span class="sig-paren">(</span><em>session_name</em>, <em>ip</em>, <em>protocol='SSH2'</em>, <em>folder='_imports'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.CRTScript.create_new_saved_session" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a session object that can be opened from the Connect menu in SecureCRT.</p>
@@ -202,6 +285,20 @@ abstract classes defined in the Script class.</p>
 <li><strong>folder</strong> (<em>str</em>) – The folder (starting from the configured Sessions folder) where this session should be saved.</li>
 </ul>
 </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.scripts.CRTScript.disconnect">
+<code class="descname">disconnect</code><span class="sig-paren">(</span><em>command='exit'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.CRTScript.disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disconnects the main session used by the script by calling the disconnect method on the session object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>command</strong> (<em>str</em>) – The command to be issued to the remote device to disconnect.  The default is ‘exit’</td>
 </tr>
 </tbody>
 </table>
@@ -294,36 +391,11 @@ requested information.</p>
 </table>
 </dd></dl>
 
-<dl class="method">
-<dt id="securecrt_tools.scripts.CRTScript.ssh_in_new_tab">
-<code class="descname">ssh_in_new_tab</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.CRTScript.ssh_in_new_tab" title="Permalink to this definition">¶</a></dt>
-<dd><p>Connects to a device via the SSH protocol in a new tab.  A new CRTSession object that controls the new tab is
-returned by this method.</p>
-<p>By default, SSH2 will be tried first, but if it fails it will attempt to fall back to SSH1.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>host</strong> (<em>str</em>) – The IP address of DNS name for the device to connect</li>
-<li><strong>username</strong> (<em>str</em>) – The username to login to the device with</li>
-<li><strong>password</strong> (<em>str</em>) – The password that goes with the provided username.  If a password is not specified, the
-user will be prompted for one.</li>
-<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
-Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
-type of device (for example “$” for some linux hosts).</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 </dd></dl>
 
 </div>
-<div class="section" id="directscript-class">
-<h2>DirectScript Class<a class="headerlink" href="#directscript-class" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="debugscript-class">
+<h2>DebugScript Class<a class="headerlink" href="#debugscript-class" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="securecrt_tools.scripts.DebugScript">
 <em class="property">class </em><code class="descclassname">securecrt_tools.scripts.</code><code class="descname">DebugScript</code><span class="sig-paren">(</span><em>full_script_path</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DebugScript" title="Permalink to this definition">¶</a></dt>
@@ -336,6 +408,89 @@ from the user via the console).</p>
 <p>This class inherits the methods from the Script class that are documented above, and is required to implement all
 of the abstract classes defined in the Script class.  This way, it is a complete replacement for the CRTScript class
 if a script is run directly.</p>
+<dl class="method">
+<dt id="securecrt_tools.scripts.DebugScript.connect">
+<code class="descname">connect</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>protocol=None</em>, <em>proxy=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DebugScript.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pretends to connect to a device.  Simply marks the state of the session as connected.  Never fails.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> (<em>str</em>) – The IP address of DNS name for the device to connect</li>
+<li><strong>username</strong> (<em>str</em>) – The username to login to the device with</li>
+<li><strong>password</strong> (<em>str</em>) – The password that goes with the provided username.  If a password is not specified, the
+user will be prompted for one.</li>
+<li><strong>protocol</strong> (<em>str</em>) – A string with the desired protocol (telnet, ssh1, ssh2, ssh). If left blank it will try all
+starting with SSH2, then SSH1 then Telnet.  “ssh” means SSH2 then SSH1.</li>
+<li><strong>proxy</strong> (<em>str</em>) – The name of a SecureCRT session object that can be used as a jumpbox to proxy the SSH connection
+through.  This is the same as selecting a session under the “Firewall” selection under the SSH
+settings screen for a SecureCRT session.</li>
+<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
+Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
+type of device (for example “$” for some linux hosts).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.scripts.DebugScript.connect_ssh">
+<code class="descname">connect_ssh</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>version=None</em>, <em>proxy=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DebugScript.connect_ssh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pretends to connect to a device via SSH.  Simply tracks that we are now connected to something within this
+session (this method never fails).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> (<em>str</em>) – The IP address of DNS name for the device to connect</li>
+<li><strong>username</strong> (<em>str</em>) – The username to login to the device with</li>
+<li><strong>password</strong> (<em>str</em>) – The password that goes with the provided username.  If a password is not specified, the
+user will be prompted for one.</li>
+<li><strong>version</strong> (<em>int</em>) – The SSH version to connect with (1 or 2).  Default is None, which will try 2 first and fallback
+to 1 if that fails.</li>
+<li><strong>proxy</strong> (<em>str</em>) – The name of a SecureCRT session object that can be used as a jumpbox to proxy the SSH connection
+through.  This is the same as selecting a session under the “Firewall” selection under the SSH
+settings screen for a SecureCRT session.</li>
+<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
+Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
+type of device (for example “$” for some linux hosts).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.scripts.DebugScript.connect_telnet">
+<code class="descname">connect_telnet</code><span class="sig-paren">(</span><em>host</em>, <em>username</em>, <em>password</em>, <em>proxy=None</em>, <em>prompt_endings=('#'</em>, <em>'&gt;')</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DebugScript.connect_telnet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pretends to connect to a device via the Telnet protocol, just like connect_ssh above.  Never fails.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> (<em>str</em>) – The IP address of DNS name for the device to connect</li>
+<li><strong>username</strong> (<em>str</em>) – The username to login to the device with</li>
+<li><strong>password</strong> (<em>str</em>) – The password that goes with the provided username.  If a password is not specified, the
+user will be prompted for one.</li>
+<li><strong>proxy</strong> (<em>str</em>) – The name of a SecureCRT session object that can be used as a jumpbox to proxy the SSH connection
+through.  This is the same as selecting a session under the “Firewall” selection under the SSH
+settings screen for a SecureCRT session.</li>
+<li><strong>prompt_endings</strong> (<em>list</em>) – A list of strings that are possible prompt endings to watch for.  The default is for
+Cisco devices (“&gt;” and “#”), but may need to be changed if connecting to another
+type of device (for example “$” for some linux hosts).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="method">
 <dt id="securecrt_tools.scripts.DebugScript.create_new_saved_session">
 <code class="descname">create_new_saved_session</code><span class="sig-paren">(</span><em>session_name</em>, <em>ip</em>, <em>protocol='SSH2'</em>, <em>folder='_imports'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DebugScript.create_new_saved_session" title="Permalink to this definition">¶</a></dt>
@@ -352,6 +507,20 @@ print a message that a device was created.</p>
 <li><strong>folder</strong> (<em>str</em>) – The folder (starting from the configured Sessions folder) where this session should be saved.</li>
 </ul>
 </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="securecrt_tools.scripts.DebugScript.disconnect">
+<code class="descname">disconnect</code><span class="sig-paren">(</span><em>command='exit'</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.scripts.DebugScript.disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disconnects the main session used by the script by calling the disconnect method on the session object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>command</strong> (<em>str</em>) – The command to be issued to the remote device to disconnect.  The default is ‘exit’</td>
 </tr>
 </tbody>
 </table>
@@ -477,6 +646,12 @@ type of device (for example “$” for some linux hosts). (only for API compati
 <dt id="securecrt_tools.scripts.ScriptError">
 <em class="property">exception </em><code class="descclassname">securecrt_tools.scripts.</code><code class="descname">ScriptError</code><a class="headerlink" href="#securecrt_tools.scripts.ScriptError" title="Permalink to this definition">¶</a></dt>
 <dd><p>An exception type that is raised when there is a problem with the main scripts, such as missing settings files.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="securecrt_tools.scripts.ConnectError">
+<em class="property">exception </em><code class="descclassname">securecrt_tools.scripts.</code><code class="descname">ConnectError</code><a class="headerlink" href="#securecrt_tools.scripts.ConnectError" title="Permalink to this definition">¶</a></dt>
+<dd><p>An exception type that is raised when there are problems connecting to a device.</p>
 </dd></dl>
 
 </div>
