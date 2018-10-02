@@ -1,0 +1,16 @@
+Value Filldown INTERFACE (.+)
+Value Required RELAY (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})
+Value VRF ([\w-]+)
+Value Filldown,List IP (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})
+
+Start
+  ^interface -> Continue.Clearall
+  # Match interface line
+  ^interface ${INTERFACE}
+  #
+  ^\s+ip address ${IP}
+  #
+  ^\s+ip helper-address vrf ${VRF} ${RELAY} -> Record
+  ^\s+ip helper-address ${VRF} ${RELAY} -> Record
+  # Match helper-address line.
+  ^\s+ip helper-address ${RELAY} -> Record
