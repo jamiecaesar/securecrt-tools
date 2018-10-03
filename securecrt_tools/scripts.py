@@ -81,6 +81,7 @@ class Script:
         self.script_dir, self.script_name = os.path.split(script_path)
         self.logger = logging
         self.main_session = None
+        self.host_os = sys.platform
 
         # Load Settings
         settings_file = os.path.join(self.script_dir, "settings", "settings.ini")
@@ -833,6 +834,8 @@ class CRTScript(Script):
         :rtype: str
         """
         self.logger.debug("<FILE_OPEN> Creating File Open Dialog with title: '{0}'".format(title))
+        if 'darwin' in self.host_os:
+            self.message_box(title, "Select File", ICON_INFO)
         result_filename = self.crt.Dialog.FileOpenDialog(title, button_label, default_filename, file_filter)
         return result_filename
 
