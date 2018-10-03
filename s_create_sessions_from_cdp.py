@@ -37,6 +37,10 @@ def script_main(session):
     based on the information.  By default all sessions will be created as SSH2, so you may have
     to manually change some sessions to make them work, depending on the device capabilities/configuration.
 
+    Only devices that contain "Router" or "Switch" in their capabilities field of the CDP information will have sessions
+    created for them. This skips phones, hosts like VMware or Server modules, and other devices that we don't usually
+    log into directly).
+
     NOTE ON DEFAULTS: This script uses the SecureCRT Default Session settings as a base for any sessions that are
     created.  The folder where the sessions are saved is specified in the 'settings.ini' file, and the hostname and IP
     are extracted from the CDP information.  All other setting defaults are configured within SecureCRT.
@@ -89,7 +93,8 @@ def script_main(session):
 
     setting_msg = "{0} sessions created in the Sessions sub-directory '{1}'\n" \
                   "\n" \
-                  "{0} sessions skipped (no IP or duplicate)".format(num_created, dest_folder, num_skipped)
+                  "{0} sessions skipped (no IP, duplicate, or not Router/Switch)".format(num_created,
+                                                                                         dest_folder, num_skipped)
     script.message_box(setting_msg, "Sessions Created", ICON_INFO)
 
     # Return terminal parameters back to the original state.
@@ -107,38 +112,52 @@ def create_session_list(cdp_list):
     :return: A list (system name and IP address) of the sessions that need to be created.
     :rtype: list
     """
+    accepted_capabilities = {"Router", "Switch"}
     created = set()
     session_list = []
     for device in cdp_list:
-        # Extract hostname and IP to create session
-        system_name = device[2]
+        # Get capabilties field of CDP and parse into a set
+        capabilities_string = device[9]
+        capabilities = set(capabilities_string.strip().split(' '))
 
-        # If we couldn't get a System name, use the device ID
-        if system_name == "":
-            system_name = device[1]
+        # Determine if items in "accepted_capabilities" are also in the capabilties of this device.  If so, we'll get
+        # a set of common items.  If not, we'll get an empty set.
+        accepted = capabilities.intersection(accepted_capabilities)
 
-        if system_name in created:
-            logger.debug("Skipping {0} because it is a duplicate.".format(system_name))
-            # Go directly to the next device (skip this one)
-            continue
+        # Check for any items in our "accepted" set - If so, add it to the list to build a session, otherwise skip.
+        if accepted:
+            # Extract hostname and IP to create session
+            system_name = device[2]
 
-        mgmt_ip = device[7]
-        if mgmt_ip == "":
-            if device[4] == "":
-                # If no mgmt IP or interface IP, skip device.
-                logger.debug("Skipping {0} because cannot find IP in CDP data.".format(system_name))
+            # If we couldn't get a System name, use the device ID
+            if system_name == "":
+                system_name = device[1]
+
+            if system_name in created:
+                logger.debug("Skipping {0} because it is a duplicate.".format(system_name))
                 # Go directly to the next device (skip this one)
                 continue
-            else:
-                mgmt_ip = device[4]
-                logger.debug("Using interface IP ({0}) for {1}.".format(mgmt_ip, system_name))
-        else:
-            logger.debug("Using management IP ({0}) for {1}.".format(mgmt_ip, system_name))
 
-        # Add device to session_list
-        session_list.append((system_name, mgmt_ip,))
-        # Create a new session from the default information.
-        created.add(system_name)
+            mgmt_ip = device[7]
+            if mgmt_ip == "":
+                if device[4] == "":
+                    # If no mgmt IP or interface IP, skip device.
+                    logger.debug("Skipping {0} because cannot find IP in CDP data.".format(system_name))
+                    # Go directly to the next device (skip this one)
+                    continue
+                else:
+                    mgmt_ip = device[4]
+                    logger.debug("Using interface IP ({0}) for {1}.".format(mgmt_ip, system_name))
+            else:
+                logger.debug("Using management IP ({0}) for {1}.".format(mgmt_ip, system_name))
+
+            # Add device to session_list
+            session_list.append((system_name, mgmt_ip,))
+            # Create a new session from the default information.
+            created.add(system_name)
+        else:
+            logger.debug("Skipping {0} because capabilties are {1}, which does not contain any of {2}."
+                         .format(device[1], capabilities, accepted_capabilities))
 
     return session_list
 
