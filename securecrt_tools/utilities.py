@@ -109,6 +109,24 @@ def list_of_lists_to_csv(data, filename):
             csv_out.writerow(line)
 
 
+def list_of_dicts_to_csv(data, filename, header, add_header=True):
+    """
+
+    :param data:
+    :param filename:
+    :param header:
+    :return:
+    """
+    # Validate path before creating file.
+    logger.debug("Opening file {0} for writing".format(filename))
+    with open(filename, 'wb') as output_csv:
+        csv_writer = csv.DictWriter(output_csv, fieldnames=header)
+        if add_header:
+            csv_writer.writeheader()
+        for entry in data:
+            csv_writer.writerow(entry)
+
+
 def extract_system_name(device_id, strip_list=[]):
     """
     In the CDP output some systems return a Hostname(Serial Number) format, while others return Serial(Hostname) output.

@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>m_update_dhcp_relay &#8212; SecureCRT Tools 2.1.0 documentation</title>
+    <title>m_inventory_report &#8212; SecureCRT Tools 2.1.0 documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -23,8 +23,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="m_update_interface_desc" href="m_update_interface_desc.html" />
-    <link rel="prev" title="m_save_output" href="m_save_output.html" /> 
+    <link rel="next" title="m_merged_arp_to_csv" href="m_merged_arp_to_csv.html" />
+    <link rel="prev" title="m_find_macs_by_vlans" href="m_find_macs_by_vlans.html" /> 
   </head>
   <body>
     <div class="header-wrapper" role="banner">
@@ -32,9 +32,9 @@
         <div class="headertitle"><a
           href="index.html">SecureCRT Tools 2.1.0 documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
-          <a href="m_save_output.html" title="m_save_output"
+          <a href="m_find_macs_by_vlans.html" title="m_find_macs_by_vlans"
              accesskey="P">previous</a> |
-          <a href="m_update_interface_desc.html" title="m_update_interface_desc"
+          <a href="m_merged_arp_to_csv.html" title="m_merged_arp_to_csv"
              accesskey="N">next</a> |
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |
@@ -52,49 +52,36 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-m_update_dhcp_relay">
-<span id="m-update-dhcp-relay"></span><h1>m_update_dhcp_relay<a class="headerlink" href="#module-m_update_dhcp_relay" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-m_inventory_report">
+<span id="m-inventory-report"></span><h1>m_inventory_report<a class="headerlink" href="#module-m_inventory_report" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
-<dt id="m_update_dhcp_relay.script_main">
-<code class="descclassname">m_update_dhcp_relay.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#m_update_dhcp_relay.script_main" title="Permalink to this definition">¶</a></dt>
+<dt id="m_inventory_report.get_manufacture_date">
+<code class="descclassname">m_inventory_report.</code><code class="descname">get_manufacture_date</code><span class="sig-paren">(</span><em>serial</em><span class="sig-paren">)</span><a class="headerlink" href="#m_inventory_report.get_manufacture_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>A function that will decode the manufacture date of a device from its serial number.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>serial</strong> (<em>str</em>) – The serial number of a Cisco device, which should be 11 digits long.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The month and year the device was manufactured in string format. (e.g. “September 2010”)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="m_inventory_report.script_main">
+<code class="descclassname">m_inventory_report.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#m_inventory_report.script_main" title="Permalink to this definition">¶</a></dt>
 <dd><div class="line-block">
 <div class="line">MULTIPLE device script</div>
 <div class="line">Author: Jamie Caesar</div>
 <div class="line">Email: <a class="reference external" href="mailto:jcaesar&#37;&#52;&#48;presidio&#46;com">jcaesar<span>&#64;</span>presidio<span>&#46;</span>com</a></div>
 </div>
-<p>This script will scan the running configuration of the provided list of devices, looking for instances of old IP
-helper/DHCP relay addresses (IOS/NXOS) on interfaces and if found will update the helper/relay addresses with the
-newer ones. The new and old addresses that the script looks for is saved in the settings.ini file, as documented
-below.</p>
-<p>Any devices that cannot be connected to will be logged in a separate file saved in the output directory.</p>
-<p>This script will prompt you to run in “Check Mode”, where the configuration changes the script would be pushed to
-the devices are ONLY written to a file and NO CHANGES will be made to the devices.  If you select “No” when prompted
-this script will push the configuration changes to the devices. Also, when the changes are pushed to the devices
-this script will save the running config before and after the changes are made, and will also output a log of the
-configuration sessions showing all the commands pushed.</p>
-<div class="line-block">
-<div class="line">Script Settings (found in settings/settings.ini):</div>
-<div class="line">show_instructions - When True, displays a pop-up upon launching the script explaining where to modify the list of</div>
-<div class="line-block">
-<div class="line">commands sent to devices.  This window also prompts the user if they want to continue seeing this message.  If</div>
-<div class="line">not, the script changes this setting to False.</div>
-</div>
-<div class="line">old_relays - This is a comma separated list of IP addresses that the script should search for as relay addresses</div>
-<div class="line-block">
-<div class="line">in the device’s configuration.</div>
-</div>
-<div class="line">new_relays - This is a comma separated list of IP addresses that are the new relay addresses that should be added</div>
-<div class="line-block">
-<div class="line">to any interface that has at least one of the old helper/relay addresses on it.</div>
-</div>
-<div class="line">remove_old_relays - If True, the script will add the new relays and REMOVE the old relays immediately after adding</div>
-<div class="line-block">
-<div class="line">the new ones.  If False (default), the script will only add the new relays to interfaces where at least</div>
-<div class="line">one old relay is found.  This is useful when you want to push out new relays as part of a migration process</div>
-<div class="line">without removing the old relays.  Since this script will not try to push new relay addresses that already</div>
-<div class="line">exist on an interface, the script can be run again with this option set to True to later remove the old relays.</div>
-</div>
-</div>
+<p>This script will connect to all devices in the provided CSV file and create a CSV file (that can be opened in Excel)
+containing inventory data about the devices, such as hostname, model number, code version, serial number,
+manufacture date, etc.</p>
+<p>This script checks that it will NOT be run in a connected tab.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -107,8 +94,8 @@ configuration sessions showing all the commands pushed.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="m_update_dhcp_relay.per_device_work">
-<code class="descclassname">m_update_dhcp_relay.</code><code class="descname">per_device_work</code><span class="sig-paren">(</span><em>session</em>, <em>check_mode</em>, <em>enable_pass</em>, <em>old_helpers</em>, <em>new_helpers</em>, <em>remove_old_helpers</em><span class="sig-paren">)</span><a class="headerlink" href="#m_update_dhcp_relay.per_device_work" title="Permalink to this definition">¶</a></dt>
+<dt id="m_inventory_report.per_device_work">
+<code class="descclassname">m_inventory_report.</code><code class="descname">per_device_work</code><span class="sig-paren">(</span><em>session</em>, <em>enable_pass</em><span class="sig-paren">)</span><a class="headerlink" href="#m_inventory_report.per_device_work" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function contains the code that should be executed on each device that this script connects to.  It is called
 after establishing a connection to each device in the loop above.</p>
 <p>You can either put your own code here, or if there is a single-device version of a script that performs the correct
@@ -133,17 +120,16 @@ CSV file and then running a single-device script on each of them.</p>
 <li class="toctree-l1"><a class="reference internal" href="README.html#using-a-jumpbox-bastion-host">Using a Jumpbox/Bastion Host</a></li>
 <li class="toctree-l1"><a class="reference internal" href="README.html#running-the-scripts">Running The Scripts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="README.html#settings">Settings</a></li>
-<li class="toctree-l1"><a class="reference internal" href="README.html#contributing">Contributing</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="scripts.html">Scripts</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="single_device_scripts.html">Single Device Scripts</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="multi_device_scripts.html">Multiple Device Scripts</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="m_cdp_to_csv.html">m_cdp_to_csv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="m_document_device.html">m_document_device</a></li>
 <li class="toctree-l3"><a class="reference internal" href="m_find_macs_by_vlans.html">m_find_macs_by_vlans</a></li>
-<li class="toctree-l3"><a class="reference internal" href="m_inventory_report.html">m_inventory_report</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">m_inventory_report</a></li>
 <li class="toctree-l3"><a class="reference internal" href="m_merged_arp_to_csv.html">m_merged_arp_to_csv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="m_save_output.html">m_save_output</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">m_update_dhcp_relay</a></li>
+<li class="toctree-l3"><a class="reference internal" href="m_update_dhcp_relay.html">m_update_dhcp_relay</a></li>
 <li class="toctree-l3"><a class="reference internal" href="m_update_interface_desc.html">m_update_interface_desc</a></li>
 </ul>
 </li>
@@ -171,9 +157,9 @@ CSV file and then running a single-device script on each of them.</p>
       <div class="footer">
         <div class="left">
           <div role="navigation" aria-label="related navigaton">
-            <a href="m_save_output.html" title="m_save_output"
+            <a href="m_find_macs_by_vlans.html" title="m_find_macs_by_vlans"
               >previous</a> |
-            <a href="m_update_interface_desc.html" title="m_update_interface_desc"
+            <a href="m_merged_arp_to_csv.html" title="m_merged_arp_to_csv"
               >next</a> |
             <a href="py-modindex.html" title="Python Module Index"
               >modules</a> |
@@ -182,7 +168,7 @@ CSV file and then running a single-device script on each of them.</p>
           </div>
           <div role="note" aria-label="source link">
               <br/>
-              <a href="_sources/m_update_dhcp_relay.rst.txt"
+              <a href="_sources/m_inventory_report.rst.txt"
                 rel="nofollow">Show Source</a>
           </div>
         </div>

@@ -23,6 +23,7 @@ Below is a list of multi-device scripts available with this release of SecureCRT
    m_cdp_to_csv
    m_document_device
    m_find_macs_by_vlans
+   m_inventory_report
    m_merged_arp_to_csv
    m_save_output
    m_update_dhcp_relay

@@ -19,6 +19,7 @@ What These Scripts Do
 While the documentation has a detailed list of every script in this collection and the specifics on how they work, below is a summarized list of the kinds of things these scripts will do.
 
 * Save command outputs from devices into files that are automatically named with the hostname of the device (from the prompt) and a time/date stamp.  There are some different versions depending on if you want a single output or multiple outputs and from one or multiple devices.
+* Capture device inventory data (code version, model number, serial number, mfg. date, etc.) for a list of devices provided to the script in CSV format.
 * Write the detailed CDP neighbor information into a spreadsheet (CSV format) for easier viewing and re-use of the data.
 * Creation of SecureCRT sessions from the CDP information of a device, to quickly build your collection of sessions in SecureCRT's session manager.
 * Summarize the route table of a device to see a list of all next-hops found in the route table and how many routes from which routing protocols are sending routes to each next-hop.  This script is useful either as a validate tool after routing changes (see a summary of route behavior before and after the change), or to help with discovery of new devices (There are 4000 routes in the table, but are there 3 or 30 exits that packets can take?)
