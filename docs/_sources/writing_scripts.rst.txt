@@ -5,6 +5,5 @@ Writing Your Own Scripts
 	:maxdepth: 2
 
 	writing_intro
-	about_templates
 	textfsm_note
 	modules
