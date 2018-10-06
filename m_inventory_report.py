@@ -5,7 +5,6 @@ import os
 import sys
 import logging
 from datetime import datetime
-import pprint
 
 # Add script directory to the PYTHONPATH so we can import our modules (only if run from SecureCRT)
 if 'crt' in globals():
@@ -38,15 +37,18 @@ def get_manufacture_date(serial):
 
     :return: The month and year the device was manufactured in string format. (e.g. "September 2010")
     """
+    logger.debug("Received {0} as input".format(serial))
     if len(serial) == 11:
         try:
             year = str(1996 + int(serial[3:5]))
             week = int(serial[5:7])
         except ValueError:
+            logger.debug("Could not convert {0} or {1} to an int".format(serial[3:5], serial[5:7]))
             return ""
         date_of_serial = datetime.strptime('{} {} 1'.format(year, week), '%Y %W %w')
         return date_of_serial.strftime('%B %Y')
     else:
+        logger.debug("Received serial {0} is not the correct length".format(serial))
         return ""
 
 
@@ -111,15 +113,15 @@ def script_main(script):
             script.disconnect()
         except scripts.ConnectError as e:
             with open(failed_log, 'a') as logfile:
-                logfile.write("Connect to {0} failed: {1}\n".format(hostname, e.message.strip()))
+                logfile.write("<M_SCRIPT> Connect to {0} failed: {1}\n".format(hostname, e.message.strip()))
                 session.disconnect()
         except sessions.InteractionError as e:
             with open(failed_log, 'a') as logfile:
-                logfile.write("Failure on {0}: {1}\n".format(hostname, e.message.strip()))
+                logfile.write("<M_SCRIPT> Failure on {0}: {1}\n".format(hostname, e.message.strip()))
                 session.disconnect()
         except sessions.UnsupportedOSError as e:
             with open(failed_log, 'a') as logfile:
-                logfile.write("Unsupported OS on {0}: {1}\n".format(hostname, e.message.strip()))
+                logfile.write("<M_SCRIPT> Unsupported OS on {0}: {1}\n".format(hostname, e.message.strip()))
                 session.disconnect()
 
     # #########################################  END DEVICE CONNECT LOOP  ############################################
@@ -171,24 +173,32 @@ def per_device_work(session, enable_pass):
     # For NXOS get parse 'show inventory' for model and serial number
     if session.os == 'NXOS':
         ver_info['HOSTNAME'] = session.hostname
+        logger.debug("<M_SCRIPT> NXOS device, getting 'show inventory'.")
         raw_inv = session.get_command_output('show inventory')
         inv_template_file = script.get_template('cisco_nxos_show_inventory.template')
         inv_info = utilities.textfsm_parse_to_dict(raw_inv, inv_template_file)
         for entry in inv_info:
             if entry['NAME'] == "Chassis":
+                logger.debug("<M_SCRIPT> Adding {0} as model number".format(entry['PID']))
                 ver_info['MODEL'] = entry['PID']
+                logger.debug("<M_SCRIPT> Adding {0} as serial number".format(entry['SN']))
                 ver_info['SERIAL'] = entry['SN']
                 break
     elif session.os == 'ASA':
+        logger.debug("<M_SCRIPT> ASA device, writing 'N/A' for last reboot reason.")
         # For ASA put a N/A reload reason since ASA doesn't have this output
         ver_info['LAST_REBOOT_REASON'] = "N/A"
         # If we don't have a model number in older 'show ver' extract it from the hardware column.
         if not ver_info['MODEL']:
-            ver_info['MODEL'] = ver_info['HARDWARE'].split(',')[0]
+            model = ver_info['HARDWARE'].split(',')[0]
+            logger.debug("<M_SCRIPT> ASA device without model, using {0}".format(model))
+            ver_info['MODEL'] = model
     elif session.os == 'IOS':
         # Expand multiple serial numbers found in stacks, or just remove lists for serial and model if only 1 device
+        logger.debug("<M_SCRIPT> IOS device, writing list of serials/models to separate entries")
         num_in_stack = len(ver_info['SERIAL'])
         if len(ver_info['MODEL']) != num_in_stack:
+            logger.debug("<M_SCRIPT> List of Serials & Models aren't the same length. Likely TextFSM parsing problem.")
             raise sessions.InteractionError("Received {0} serial nums and only {1} model nums in output."
                                             .format(num_in_stack, len(ver_info['MODEL'])))
         new_output = []
@@ -198,10 +208,12 @@ def per_device_work(session, enable_pass):
             stack_subset['SERIAL'] = ver_info['SERIAL'][x]
             stack_subset['MODEL'] = ver_info['MODEL'][x]
             new_output.append(stack_subset)
+            logger.debug("Created an entry for {0}/{1}".format(stack_subset['MODEL'], stack_subset['SERIAL']))
         fsm_output = new_output
 
     # Create output data structure with only the keys that we need.
     inv_data = []
+    logger.debug("Creating list of dictionaries to return, and adding manufacture dates.")
     for entry in fsm_output:
         subset = dict((key, entry[key]) for key in interesting_keys)
         subset['MANUFACTURE_DATE'] = get_manufacture_date(subset['SERIAL'])

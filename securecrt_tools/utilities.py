@@ -107,6 +107,7 @@ def list_of_lists_to_csv(data, filename):
         for line in data:
             logger.debug("Writing row: '{0}'".format(line))
             csv_out.writerow(line)
+    logger.debug("Completed writing to file {0}".format(filename))
 
 
 def list_of_dicts_to_csv(data, filename, header, add_header=True):
@@ -125,6 +126,7 @@ def list_of_dicts_to_csv(data, filename, header, add_header=True):
             csv_writer.writeheader()
         for entry in data:
             csv_writer.writerow(entry)
+    logger.debug("Completed writing to file {0}".format(filename))
 
 
 def extract_system_name(device_id, strip_list=[]):

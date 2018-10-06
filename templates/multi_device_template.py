@@ -84,15 +84,15 @@ def script_main(script):
             script.disconnect()
         except scripts.ConnectError as e:
             with open(failed_log, 'a') as logfile:
-                logfile.write("Connect to {0} failed: {1}\n".format(hostname, e.message.strip()))
+                logfile.write("<M_SCRIPT> Connect to {0} failed: {1}\n".format(hostname, e.message.strip()))
                 session.disconnect()
         except sessions.InteractionError as e:
             with open(failed_log, 'a') as logfile:
-                logfile.write("Failure on {0}: {1}\n".format(hostname, e.message.strip()))
+                logfile.write("<M_SCRIPT> Failure on {0}: {1}\n".format(hostname, e.message.strip()))
                 session.disconnect()
         except sessions.UnsupportedOSError as e:
             with open(failed_log, 'a') as logfile:
-                logfile.write("Unsupported OS on {0}: {1}\n".format(hostname, e.message.strip()))
+                logfile.write("<M_SCRIPT> Unsupported OS on {0}: {1}\n".format(hostname, e.message.strip()))
                 session.disconnect()
 
     # #########################################  END DEVICE CONNECT LOOP  ############################################
