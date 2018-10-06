@@ -76,7 +76,7 @@ Multiple Device Scripts
 ***********************
 1) While **NOT** connected to a device, go to the *Scripts* menu and select "Run"
 
-2) The script will prompt you to select a CSV file that contains all the required information for the devices the script should connect to.  You will be prompted for credentials, if required.
+2) The script will prompt you to select a CSV file that contains all the required information for the devices the script should connect to.  You will be prompted for credentials, if required.  **A sample device file can be found at `templates/sample_device_list.csv`**
 
 3) The script will connect to each device and execute the script logic.  The script will process one device at a time in the same tab.  While this it the case because SecureCRT does not support multi-threading within scripts, you can manually multi-thread by breaking your devices file into multiple files and lauching the same script in multiple tabs with differnet device files.
 
@@ -105,7 +105,7 @@ Global settings that are used by all scripts are under the `Global` heading in t
 Script-Specific Settings
 ************************
 
-Some scripts have local settings files that only apply to that script.  If such a setting is needed, the setting will be saved under a heading named for the script in the `settings.ini` file.  Details about the settings should be in the docstring for that particular script file.
+Some scripts have settings that are used to change certain behaviors while running.  If such a settings are used, the setting will be saved under a heading named for the script in the `settings.ini` file.  Details about the settings used by a script are described in the documentation for that script, or in the docstring in the script file itself.
 
 Contributing
 ============

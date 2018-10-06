@@ -55,7 +55,9 @@
   <div class="section" id="multiple-device-scripts">
 <h1>Multiple Device Scripts<a class="headerlink" href="#multiple-device-scripts" title="Permalink to this headline">¶</a></h1>
 <p>Multiple Device Scripts are scripts that are designed to be executed while NOT attached to a remote device (You will get an error if you try to launch a multi-device script from a connected tab).  The script will prompt for an input CSV containing all of the hosts and other required details (credentials, jumpbox, etc) to be able to connect all of the devices in the list automatically. The logic of the script will be performed on each device, one at a time.</p>
-<p>The device list CSV has required columns that must be included.  These are the Hostname, Protocol, Username columns (case sensitive).  If these columns are missing from your CSV file an error will be returned, because these are the minimum pieces of information required to connect to a device.</p>
+<div class="section" id="device-import-csv-file">
+<h2>Device Import CSV File<a class="headerlink" href="#device-import-csv-file" title="Permalink to this headline">¶</a></h2>
+<p>The device list CSV has required columns that must be included.  These are the Hostname, Protocol, Username columns (case sensitive).  If these columns are missing from your CSV file an error will be returned, because these are the minimum pieces of information required to connect to a device.  <strong>A sample device input CSV file is located at `templates/sample_device_list.csv`</strong></p>
 <p>Additional columns are allowed to be in the CSV file and will be accessible from the scripts, although the data will never be used if a script is not written to look for a particular column.  For example, the “m_document_device” script will use a column called “Command List” to override which list of commands (in the settings.ini file) are used when documenting that particular device.  The same device list can be used in other multi-device scripts, but they will not try to access that column.</p>
 <p>Some standard columns that will be added with default vaules if missings are “Password”, “Enable” and “Proxy Session”:</p>
 <ul class="simple">
@@ -63,6 +65,9 @@
 <li>The “Enable” column will override the default enable password that the script uses (based on prompting the user).</li>
 <li>The “Proxy Session” column can override the default SecureCRT session to use as a proxy to reach the target device.  The default SecureCRT session is in the settings.ini file (as well as a flag on whether to use a proxy or not).</li>
 </ul>
+</div>
+<div class="section" id="available-scripts">
+<h2>Available Scripts<a class="headerlink" href="#available-scripts" title="Permalink to this headline">¶</a></h2>
 <p>Below is a list of multi-device scripts available with this release of SecureCRT Tools.</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -75,6 +80,7 @@
 <li class="toctree-l1"><a class="reference internal" href="m_update_dhcp_relay.html">m_update_dhcp_relay</a></li>
 <li class="toctree-l1"><a class="reference internal" href="m_update_interface_desc.html">m_update_interface_desc</a></li>
 </ul>
+</div>
 </div>
 </div>
 
@@ -97,14 +103,18 @@
 <li class="toctree-l1 current"><a class="reference internal" href="scripts.html">Scripts</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="single_device_scripts.html">Single Device Scripts</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Multiple Device Scripts</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="m_cdp_to_csv.html">m_cdp_to_csv</a></li>
-<li class="toctree-l3"><a class="reference internal" href="m_document_device.html">m_document_device</a></li>
-<li class="toctree-l3"><a class="reference internal" href="m_find_macs_by_vlans.html">m_find_macs_by_vlans</a></li>
-<li class="toctree-l3"><a class="reference internal" href="m_inventory_report.html">m_inventory_report</a></li>
-<li class="toctree-l3"><a class="reference internal" href="m_merged_arp_to_csv.html">m_merged_arp_to_csv</a></li>
-<li class="toctree-l3"><a class="reference internal" href="m_save_output.html">m_save_output</a></li>
-<li class="toctree-l3"><a class="reference internal" href="m_update_dhcp_relay.html">m_update_dhcp_relay</a></li>
-<li class="toctree-l3"><a class="reference internal" href="m_update_interface_desc.html">m_update_interface_desc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#device-import-csv-file">Device Import CSV File</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#available-scripts">Available Scripts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="m_cdp_to_csv.html">m_cdp_to_csv</a></li>
+<li class="toctree-l4"><a class="reference internal" href="m_document_device.html">m_document_device</a></li>
+<li class="toctree-l4"><a class="reference internal" href="m_find_macs_by_vlans.html">m_find_macs_by_vlans</a></li>
+<li class="toctree-l4"><a class="reference internal" href="m_inventory_report.html">m_inventory_report</a></li>
+<li class="toctree-l4"><a class="reference internal" href="m_merged_arp_to_csv.html">m_merged_arp_to_csv</a></li>
+<li class="toctree-l4"><a class="reference internal" href="m_save_output.html">m_save_output</a></li>
+<li class="toctree-l4"><a class="reference internal" href="m_update_dhcp_relay.html">m_update_dhcp_relay</a></li>
+<li class="toctree-l4"><a class="reference internal" href="m_update_interface_desc.html">m_update_interface_desc</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="no_device_scripts.html">No Device Scripts</a></li>

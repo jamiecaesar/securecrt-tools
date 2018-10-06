@@ -58,7 +58,7 @@ def script_main(script):
     | Author: Jamie Caesar
     | Email: jcaesar@presidio.com
 
-    This script will connect to all devices in the provided CSV file and create a CSV file (that can be opened in Excel)
+    This script will connect to all devices in the provided CSV file and create an output report (also CSV format)
     containing inventory data about the devices, such as hostname, model number, code version, serial number,
     manufacture date, etc.
 
