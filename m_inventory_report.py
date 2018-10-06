@@ -198,9 +198,14 @@ def per_device_work(session, enable_pass):
         logger.debug("<M_SCRIPT> IOS device, writing list of serials/models to separate entries")
         num_in_stack = len(ver_info['SERIAL'])
         if len(ver_info['MODEL']) != num_in_stack:
-            logger.debug("<M_SCRIPT> List of Serials & Models aren't the same length. Likely TextFSM parsing problem.")
-            raise sessions.InteractionError("Received {0} serial nums and only {1} model nums in output."
-                                            .format(num_in_stack, len(ver_info['MODEL'])))
+            # For older IOS, we may not get a model number, but we'll pick up the hardware.  As long as this happens
+            # when only 1 serial is detected (not a switch stack), then just use the HARDWARE for the model number.
+            if len(ver_info['MODEL']) == 0 and num_in_stack == 1 and ver_info['HARDWARE']:
+                ver_info['MODEL'] = [ver_info['HARDWARE']]
+            else:
+                logger.debug("<M_SCRIPT> List of Serials & Models aren't the same length. Likely TextFSM parsing problem.")
+                raise sessions.InteractionError("Received {0} serial nums and only {1} model nums in output."
+                                                .format(num_in_stack, len(ver_info['MODEL'])))
         new_output = []
         for x in range(num_in_stack):
             stack_subset = dict((key, ver_info[key]) for key in interesting_keys)
