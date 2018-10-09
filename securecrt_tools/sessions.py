@@ -407,14 +407,17 @@ class CRTSession(Session):
         if not self.is_connected():
             raise InteractionError("Session is not connected.  Cannot start Cisco session.")
 
+        # Lock the tab so that keystrokes won't mess up the reading/writing of data
+        self.session.Lock()
+
         prompt_for_enable = False
+
         # Set Tab parameters to allow correct sending/receiving of data via SecureCRT, if manually connected session
         # (i.e. it hasn't been set yet)
         if not self.screen.Synchronous:
             self.session_set_sync = True
             self.screen.Synchronous = True
             self.screen.IgnoreEscape = True
-            self.session.Lock()
             prompt_for_enable = True
             self.logger.debug("<START> Set Synchronous and IgnoreEscape and Prompt For Enable")
 
@@ -504,9 +507,11 @@ class CRTSession(Session):
             if self.session_set_sync:
                 self.screen.Synchronous = False
                 self.screen.IgnoreEscape = False
-                self.session.Unlock()
                 self.session_set_sync = False
                 self.logger.debug("<END> Unset Synchronous and IgnoreEscape")
+
+        # Unlock the tab to return control to the user
+        self.session.Unlock()
 
     def __enter_enable(self, enable_pass, prompt=False):
         """
