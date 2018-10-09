@@ -897,8 +897,13 @@ class DebugSession(Session):
             raise InteractionError("Session is not connected.  Cannot start Cisco session.")
 
         # Get prompt (and thus hostname) from device
-        self.prompt = "DebugHost#"
-        self.hostname = self.prompt[:-1]
+        provided_hostname = raw_input("What hostname should be used for this device (leave blank for 'DebugHost'): ")
+        if provided_hostname:
+            self.hostname = provided_hostname
+            self.prompt = "{0}#".format(provided_hostname)
+        else:
+            self.prompt = "DebugHost#"
+            self.hostname = self.prompt[:-1]
         self.logger.debug("<START> Set Hostname: {0}".format(self.hostname))
 
         # Detect the OS of the device, because outputs will differ per OS
