@@ -1,3 +1,8 @@
+================
+SecureCRT Tools
+================
+.. image:: https://readthedocs.org/projects/securecrt-tools/badge/?version=latest
+
 Introduction
 ==================
 This repository contains a collection of SecureCRT scripts that automate various tasks, primarily around interacting with Cisco routers and switches.
