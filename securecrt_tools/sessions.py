@@ -421,6 +421,7 @@ class CRTSession(Session):
             self.session_set_sync = True
             self.screen.Synchronous = True
             self.screen.IgnoreEscape = True
+            self.session.Lock()
             prompt_for_enable = True
             self.logger.debug("<START> Set Synchronous and IgnoreEscape and Prompt For Enable")
 
@@ -510,6 +511,7 @@ class CRTSession(Session):
             if self.session_set_sync:
                 self.screen.Synchronous = False
                 self.screen.IgnoreEscape = False
+                self.session.Unlock()
                 self.session_set_sync = False
                 self.logger.debug("<END> Unset Synchronous and IgnoreEscape")
 
