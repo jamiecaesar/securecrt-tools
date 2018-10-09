@@ -847,8 +847,7 @@ class TextFSM(object):
 
     Args:
       text: (str), Text to parse with embedded newlines.
-      eof: (boolean), Set to False if we are parsing only part of the file.
-            Suppresses triggering EOF state.
+      eof: (boolean), Set to False if we are parsing only part of the file. Suppresses triggering EOF state.
 
     Raises:
       TextFSMError: An error occurred within the FSM.

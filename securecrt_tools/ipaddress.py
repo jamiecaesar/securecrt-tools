@@ -429,7 +429,7 @@ def collapse_addresses(addresses):
     Example:
         collapse_addresses([IPv4Network('192.0.2.0/25'),
                             IPv4Network('192.0.2.128/25')]) ->
-                           [IPv4Network('192.0.2.0/24')]
+                            [IPv4Network('192.0.2.0/24')]
 
     Args:
         addresses: An iterator of IPv4Network or IPv6Network objects.
@@ -439,7 +439,6 @@ def collapse_addresses(addresses):
 
     Raises:
         TypeError: If passed a list of mixed version objects.
-
     """
     addrs = []
     ips = []

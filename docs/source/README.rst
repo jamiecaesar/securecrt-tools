@@ -77,7 +77,7 @@ Multiple Device Scripts
 ***********************
 1) While **NOT** connected to a device, go to the *Scripts* menu and select "Run"
 
-2) The script will prompt you to select a CSV file that contains all the required information for the devices the script should connect to.  You will be prompted for credentials, if required.  **A sample device file can be found at `templates/sample_device_list.csv`**
+2) The script will prompt you to select a CSV file that contains all the required information for the devices the script should connect to.  You will be prompted for credentials, if required.  **A sample device file can be found at templates/sample_device_list.csv**
 
 3) The script will connect to each device and execute the script logic.  The script will process one device at a time in the same tab.  While this it the case because SecureCRT does not support multi-threading within scripts, you can manually multi-thread by breaking your devices file into multiple files and lauching the same script in multiple tabs with differnet device files.
 
@@ -90,7 +90,7 @@ Global Settings
 
 Global settings that are used by all scripts are under the `Global` heading in the `settings.ini` file.  The following options are available in the global settings file:
 
-* '**output_dir**': This is the path where you want the output from scripts to be saved.  *NOTE* For Windows systems, either use forward slashes (/) or double backslash (\\) to represent a single backslash.  If a single backslash is used, Python may interpret it as an escape character.
+* '**output_dir**': This is the path where you want the output from scripts to be saved.
 * '**date_format**': Default is '%Y-%m-%d-%H-%M-%S'.  This string specifies how the date stamp in output filenames is formatted.
   - %Y - 4-digit Year
   - %m - numeric month

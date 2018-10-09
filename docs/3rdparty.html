@@ -128,11 +128,8 @@ state_list: Ordered list of valid states.</dd>
 <p>First tuple is the header, every subsequent tuple is a row.</p>
 <dl class="docutils">
 <dt>Args:</dt>
-<dd><p class="first">text: (str), Text to parse with embedded newlines.
-eof: (boolean), Set to False if we are parsing only part of the file.</p>
-<blockquote class="last">
-<div>Suppresses triggering EOF state.</div></blockquote>
-</dd>
+<dd>text: (str), Text to parse with embedded newlines.
+eof: (boolean), Set to False if we are parsing only part of the file. Suppresses triggering EOF state.</dd>
 <dt>Raises:</dt>
 <dd>TextFSMError: An error occurred within the FSM.</dd>
 <dt>Returns:</dt>
@@ -885,10 +882,8 @@ addresses as defined by RFC 4193.</p>
 <dt>Example:</dt>
 <dd><dl class="first last docutils">
 <dt>collapse_addresses([IPv4Network(‘192.0.2.0/25’),</dt>
-<dd><blockquote class="first">
-<div>IPv4Network(‘192.0.2.128/25’)]) -&gt;</div></blockquote>
-<p class="last">[IPv4Network(‘192.0.2.0/24’)]</p>
-</dd>
+<dd>IPv4Network(‘192.0.2.128/25’)]) -&gt;
+[IPv4Network(‘192.0.2.0/24’)]</dd>
 </dl>
 </dd>
 <dt>Args:</dt>
@@ -1071,12 +1066,8 @@ Contains full support for netmasks and other strange things in the database.</p>
 <p>See <a class="reference external" href="https://www.wireshark.org/tools/oui-lookup.html">https://www.wireshark.org/tools/oui-lookup.html</a></p>
 <dl class="docutils">
 <dt>Args:</dt>
-<dd><dl class="first docutils">
-<dt>manuf_name (str): Location of the manuf database file. Defaults to “manuf” in the same</dt>
-<dd>directory.</dd>
-</dl>
-<p class="last">update (bool): Whether to update the manuf file automatically. Defaults to False.</p>
-</dd>
+<dd>manuf_name (str): Location of the manuf database file. Defaults to “manuf” in the same directory.
+update (bool): Whether to update the manuf file automatically. Defaults to False.</dd>
 <dt>Raises:</dt>
 <dd>IOError: If manuf file could not be found.</dd>
 </dl>

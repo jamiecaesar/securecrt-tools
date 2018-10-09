@@ -54,8 +54,7 @@ class MacParser(object):
     See https://www.wireshark.org/tools/oui-lookup.html
 
     Args:
-        manuf_name (str): Location of the manuf database file. Defaults to "manuf" in the same
-            directory.
+        manuf_name (str): Location of the manuf database file. Defaults to "manuf" in the same directory.
         update (bool): Whether to update the manuf file automatically. Defaults to False.
 
     Raises:
