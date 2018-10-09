@@ -64,7 +64,7 @@ def document(session, command_list_name, folder_per_device, prompt_create_dirs=T
             return
 
     if folder_per_device:
-        output_dir = os.path.join(script.output_dir, session.hostname)
+        output_dir = os.path.join(script.output_dir, utilities.path_safe_name(session.hostname))
     else:
         output_dir = script.output_dir
 
