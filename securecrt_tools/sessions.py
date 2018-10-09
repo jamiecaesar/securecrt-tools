@@ -576,12 +576,14 @@ class CRTSession(Session):
         Discovers Network OS type so that scripts can make decisions based on the information, such as sending a
         different version of a command for a particular OS.
         """
-        send_cmd = "show version | i Cisco"
+        send_cmd = "show version | i Cisco IOS"
 
         raw_version = self.__get_output(send_cmd)
         self.logger.debug("<GET OS> Version String: {0}".format(raw_version))
 
         if "IOS XE" in raw_version:
+            version = "IOS"
+        elif "IOS XR" in raw_version:
             version = "IOS"
         elif "Cisco IOS Software" in raw_version or "Cisco Internetwork Operating System" in raw_version:
             version = "IOS"
