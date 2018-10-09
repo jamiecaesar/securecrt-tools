@@ -569,7 +569,7 @@ class CRTSession(Session):
         Discovers Network OS type so that scripts can make decisions based on the information, such as sending a
         different version of a command for a particular OS.
         """
-        send_cmd = "show version"
+        send_cmd = "show version | i Cisco"
         raw_version = self.__get_output(send_cmd)
         self.logger.debug("<GET OS> show version output: {0}".format(raw_version))
 
@@ -680,7 +680,7 @@ class CRTSession(Session):
         exp_more = r' [\b]+[ ]+[\b]+(?P<line>.*)'
         re_more = re.compile(exp_more)
 
-        # The 3 different types of lines we want to match (MatchIndex) and treat differntly
+        # The 3 different types of lines we want to match (MatchIndex) and treat differently
         if self.os == "IOS" or self.os == "NXOS":
             matches = ["\r\n", '--More--', self.prompt]
         elif self.os == "ASA":
