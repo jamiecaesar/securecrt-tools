@@ -41,13 +41,15 @@ def script_main(session):
     created for them. This skips phones, hosts like VMware or Server modules, and other devices that we don't usually
     log into directly).
 
-    NOTE ON DEFAULTS: This script uses the SecureCRT Default Session settings as a base for any sessions that are
+    **NOTE ON DEFAULTS**: This script uses the SecureCRT Default Session settings as a base for any sessions that are
     created.  The folder where the sessions are saved is specified in the 'settings.ini' file, and the hostname and IP
     are extracted from the CDP information.  All other setting defaults are configured within SecureCRT.
 
-    Script Settings (found in settings/settings.ini):
-    folder - The path starting from the <SecureCRT Config>/Sessions/ directory where the sessions will be created.
-    strip_domains -  A list of domain names that will be stripped away if found in the CDP remote device name.
+    **Script Settings** (found in settings/settings.ini):
+
+    * | **folder** - The path starting from the <SecureCRT Config>/Sessions/ directory where
+      | the sessions will be created.
+    * | **strip_domains** -  A list of domain names that will be stripped away if found in the CDP remote device name.
 
     :param session: A subclass of the sessions.Session object that represents this particular script session (either
                     SecureCRTSession or DirectSession)

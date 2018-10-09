@@ -11,6 +11,7 @@ The settings files for these scripts have been changed from using JSON files to 
 In addition to the new format for the settings, the newer version of these scripts now have support for initiating connections via Telnet and SSH to remote devices, as well as connecting via a jump/bastion host.  In addition there are methods for pushing configuration changes to devices that were not available previously.
 
 If you are looking for previous versions of the scripts, they can be found in the branches below:
+
 * Please see the `Pre-2017` branch if you need to access the original versions (1.0) that were all function based.
 * Please see the `2017` branch if you want the original class-based scripts use the JSON based settings files. (2.0)
 

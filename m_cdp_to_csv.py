@@ -35,6 +35,11 @@ def script_main(script):
     CSV file and export each to a CSV file containing the important information, such as Remote Device hostname, model
     and IP information, in addition to the local and remote interfaces that connect the devices.
 
+    **Script Settings** (found in settings/settings.ini):
+
+    * | **strip_domains** -  A list of domain names that will be stripped away if found in the CDP remote device name.
+
+
     :param script: A subclass of the scripts.Script object that represents the execution of this particular script
                    (either CRTScript or DirectScript)
     :type script: scripts.Script

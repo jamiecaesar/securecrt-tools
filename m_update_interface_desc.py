@@ -39,14 +39,18 @@ def script_main(script):
     write the configuration changes to a file (for verification or later manual application).  If not, then the script
     will push the configuration commands to the device and save the configuration.
 
-    IMPORTANT:  This script imports the script_main() function from the s_update_interface_desc.py to run a majority
+    **IMPORTANT**:  This script imports the script_main() function from the s_update_interface_desc.py to run a majority
     of the script logic.  Much of this script is only handling multiple logins and calling the single-device version of
     this script.
 
-    | Local Settings:
-    | "strip_domains" -  A list of domain names that will be stripped away if found in the CDP remote device name.
-    | "take_backups" - If True, the script will save a copy of the running config before and after making changes.
-    | "rollback_file" - If True, the script will generate a rollback configuration script and save it to a file.
+    **Script Settings** (found in settings/settings.ini):
+
+    * | **strip_domains** -  A list of domain names that will be stripped away if found in
+      | the CDP remote device name.
+    * | **take_backups** - If True, the script will save a copy of the running config before
+      | and after making changes.
+    * | **rollback_file** - If True, the script will generate a rollback configuration script
+      | and save it to a file.
 
     :param script: A subclass of the scripts.Script object that represents the execution of this particular script
                    (either CRTScript or DirectScript)

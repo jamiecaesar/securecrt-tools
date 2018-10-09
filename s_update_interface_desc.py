@@ -36,10 +36,14 @@ def script_main(session, prompt_check_mode=True, check_mode=True, enable_pass=No
     write the configuration changes to a file (for verification or later manual application).  If not, then the script
     will push the configuration commands to the device and save the configuration.
 
-    Local Settings:
-    "strip_domains" -  A list of domain names that will be stripped away if found in the CDP remote device name.
-    "take_backups" - If set to True, the script will save a copy of the running config before and after making changes.
-    "rollback_file" - If set to True, the script will generate a rollback configuration script and save it to a file.
+    **Script Settings** (found in settings/settings.ini):
+
+    * | **strip_domains** -  A list of domain names that will be stripped away if found in
+      | the CDP remote device name.
+    * | **take_backups** - If True, the script will save a copy of the running config before
+      | and after making changes.
+    * | **rollback_file** - If True, the script will generate a rollback configuration script
+      | and save it to a file.
 
     :param session: A subclass of the sessions.Session object that represents this particular script session (either
         SecureCRTSession or DirectSession)
@@ -59,7 +63,7 @@ def script_main(session, prompt_check_mode=True, check_mode=True, enable_pass=No
     script = session.script
 
     # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
-    session.start_cisco_session()
+    session.start_cisco_session(enable_pass=enable_pass)
 
     # Validate device is running a supported OS
     session.validate_os(["IOS", "NXOS"])

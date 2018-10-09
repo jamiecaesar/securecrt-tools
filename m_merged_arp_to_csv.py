@@ -45,8 +45,8 @@ def script_main(script):
     2) The switch has VLANs that are being used in multiple upstream VRFs (not all with SVIs on the same devices) so
     the ARP tables from many devices may be needed to fully map the switch.
 
-    NOTE: Since this script merges the ARP tables of multiple devices which may have duplicate entries, the interface
-          is NOT written to the output file like it is with the single device version of this script.
+    **NOTE**: Since this script merges ARP tables of multiple devices which may have duplicate entries, the interface
+    is NOT written to the output file like it is with the single device version of this script.
 
     This script checks that it will NOT be run in a connected tab.  This script initiates the connection to all devices
     based on the input of the device CSV file that the script requests.

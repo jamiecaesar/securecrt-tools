@@ -51,22 +51,27 @@ def script_main(script):
     field is left blank for a device then the list will be chosen using the default behavior (i.e. use the list
     specified when running the script, or based on the network OS of each device).
 
-    | Script Settings (found in settings/settings.ini):
-    | show_instructions - When True, displays a pop-up upon launching the script explaining where to modify the list of
-    |   commands sent to devices.  This window also prompts the user if they want to continue seeing this message.  If
-    |   not, the script changes this setting to False.
-    | folder_per_device - If True, Creates a folder for each device, based on the hostname, and saves all files inside
-    |   that folder WITHOUT the hostname in the output file names.  If False, it saves all the files directly into the
-    |   output folder from the global settings and includes the hostname in each individual filename.
-    | prompt_for_custom_lists - When set to True, the script will prompt the user to type the name of a list of
-    |   commands to use with the connected device.  This list name must be found as an option in the [document_device]
-    |   section of the settings.ini file.  The format is the same as the default network OS lists, 'ios', 'nxos', etc.
-    | ios - The list of commands that will be run on IOS devices
-    | nxos - The list of commands that will be run on NXOS devices
-    | asa - The list of commands that will be run on ASA devices
+    **Script Settings** (found in settings/settings.ini):
 
-    Any additional options found in this section would be custom added by the user and are expected to be lists of
-    commands for use with the 'prompt_for_custom_lists' setting.
+    * | **show_instructions** - When True, displays a pop-up upon launching the script
+      | explaining where to modify the list of commands sent to devices.  This window also
+      | prompts the user if they want to continue seeing this message.  If not, the script
+      | changes this setting to False.
+    * | **folder_per_device** - If True, Creates a folder for each device, based on the
+      | hostname, and saves all files inside that folder WITHOUT the hostname in the output
+      | file names.  If False, it saves all the files directly into the output folder from
+      | the global settings and includes the hostname in each individual filename.
+    * | **prompt_for_custom_lists** - When set to True, the script will prompt the user to
+      | type the name of a list of commands to use with the connected device.  This list
+      | name must be found as an option in the [document_device] section of the
+      | settings.ini file.  The format is the same as the default network OS lists, 'ios',
+      | 'nxos', etc.
+    * | **ios** - The list of commands that will be run on IOS devices
+    * | **nxos** - The list of commands that will be run on NXOS devices
+    * | **asa** - The list of commands that will be run on ASA devices
+
+    **Any additional options found in this section would be custom added by the user and are expected to be lists of
+    commands for use with the 'prompt_for_custom_lists' setting.**
 
     By default, The outputs will be saved in a folder named after the hostname of the device, with each output file
     being saved inside that directory.  This behavior can be changed in the settings above.

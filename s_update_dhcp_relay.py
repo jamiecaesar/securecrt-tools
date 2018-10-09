@@ -188,19 +188,24 @@ def script_main(session):
     script will save the running config before and after the changes are made, and will also output a log of the
     configuration session showing all the commands pushed.
 
-    | Script Settings (found in settings/settings.ini):
-    | show_instructions - When True, displays a pop-up upon launching the script explaining where to modify the list of
-    |   commands sent to devices.  This window also prompts the user if they want to continue seeing this message.  If
-    |   not, the script changes this setting to False.
-    | old_relays - This is a comma separated list of IP addresses that the script should search for as relay addresses
-    |   in the device's configuration.
-    | new_relays - This is a comma separated list of IP addresses that are the new relay addresses that should be added
-    |   to any interface that has at least one of the old helper/relay addresses on it.
-    | remove_old_relays - If True, the script will add the new relays and REMOVE the old relays immediately after adding
-    |   the new ones.  If False (default), the script will only add the new relays to interfaces where at least
-    |   one old relay is found.  This is useful when you want to push out new relays as part of a migration process
-    |   without removing the old relays.  Since this script will not try to push new relay addresses that already
-    |   exist on an interface, the script can be run again with this option set to True to later remove the old relays.
+    **Script Settings** (found in settings/settings.ini):
+
+    * | **show_instructions** - When True, displays a pop-up upon launching the script
+      | explaining where to modify the list of commands sent to devices.  This window also
+      | prompts the user if they want to continue seeing this message. If not, the script
+      | changes this setting to False.
+    * | **old_relays** - This is a comma separated list of IP addresses that the script should
+      | search for as relay addresses in the device's configuration.
+    * | **new_relays** - This is a comma separated list of IP addresses that are the new relay
+      | addresses that should be added to any interface that has at least one of the old
+      | helper/relay addresses on it.
+    * | **remove_old_relays** - If True, the script will add the new relays and REMOVE the old
+      | relays immediately after adding the new ones.  If False (default), the script will
+      | only add the new relays to interfaces where at least one old relay is found.  This
+      | is useful when you want to push out new relays as part of a migration process
+      | without removing the old relays.  Since this script will not try to push new relay
+      | addresses that already exist on an interface, the script can be run again with this
+      | option set to True to later remove the old relays.
 
     :param session: A subclass of the sessions.Session object that represents this particular script session (either
                 SecureCRTSession or DirectSession)
