@@ -29,6 +29,7 @@ import time
 import re
 from abc import ABCMeta, abstractmethod
 from message_box_const import *
+from utilities import path_safe_name
 
 # ################################################    EXCEPTIONS     ###################################################
 
@@ -98,16 +99,6 @@ class Session:
 
         self.logger.debug("<CREATE_FILENAME> Save Location: {0}".format(save_path))
 
-        # Remove reserved filename characters from filename
-        clean_desc = desc.replace("/", "-")
-        clean_desc = clean_desc.replace(".", "-")
-        clean_desc = clean_desc.replace(":", "-")
-        clean_desc = clean_desc.replace("\\", "")
-        clean_desc = clean_desc.replace("| ", "")
-        clean_desc = clean_desc.replace("*", "all")
-        # Just in case the trailing space from the above replacement was missing.
-        clean_desc = clean_desc.replace("|", "")
-
         if include_hostname:
             self.logger.debug("<CREATE_FILENAME> Using hostname.")
             hostname = self.hostname
@@ -122,10 +113,12 @@ class Session:
             self.logger.debug("<CREATE_FILENAME> Not including date.")
             my_date = ""
 
-        file_bits = [hostname, clean_desc, my_date]
+        file_bits = [hostname, desc, my_date]
         self.logger.debug("<CREATE_FILENAME> Using {0} to create filename".format(file_bits))
         # Create filename, stripping off leading or trailing "-" if some fields are not used.
         filename = '-'.join(file_bits).strip("-")
+        # Remove reserved characters from the filename
+        filename = path_safe_name(filename)
         # If ext starts with a '.', add it, otherwise put the '.' in there ourselves.
         if ext[0] == '.':
             filename = filename + ext
@@ -414,7 +407,11 @@ class CRTSession(Session):
         if not self.is_connected():
             raise InteractionError("Session is not connected.  Cannot start Cisco session.")
 
+        # Lock the tab so that keystrokes won't mess up the reading/writing of data
+        self.session.Lock()
+
         prompt_for_enable = False
+
         # Set Tab parameters to allow correct sending/receiving of data via SecureCRT, if manually connected session
         # (i.e. it hasn't been set yet)
         if not self.screen.Synchronous:
@@ -513,6 +510,9 @@ class CRTSession(Session):
                 self.session_set_sync = False
                 self.logger.debug("<END> Unset Synchronous and IgnoreEscape")
 
+        # Unlock the tab to return control to the user
+        self.session.Unlock()
+
     def __enter_enable(self, enable_pass, prompt=False):
         """
         A function that will attempt to enter enable mode, if we aren't in enable mode when the method is called.
@@ -577,18 +577,21 @@ class CRTSession(Session):
         different version of a command for a particular OS.
         """
         send_cmd = "show version | i Cisco"
-
         raw_version = self.__get_output(send_cmd)
-        self.logger.debug("<GET OS> Version String: {0}".format(raw_version))
+        self.logger.debug("<GET OS> show version output: {0}".format(raw_version))
 
-        if "IOS XE" in raw_version:
+        lower_version = raw_version.lower()
+
+        if "cisco ios xe" in lower_version:
             version = "IOS"
-        elif "Cisco IOS Software" in raw_version or "Cisco Internetwork Operating System" in raw_version:
+        elif "cisco ios software" in lower_version or "Cisco Internetwork Operating System" in lower_version:
             version = "IOS"
-        elif "Cisco Nexus Operating System" in raw_version:
+        elif "cisco nexus operating system" in lower_version:
             version = "NXOS"
-        elif "Adaptive Security Appliance" in raw_version:
+        elif "cisco adaptive security appliance" in lower_version:
             version = "ASA"
+        elif "cisco ios xr software" in lower_version:
+            version = "IOS-XR"
         else:
             self.logger.debug("<GET OS> Error detecting OS.  Raising Exception.")
             raise InteractionError("Unknown or Unsupported device OS.")
@@ -684,7 +687,7 @@ class CRTSession(Session):
         exp_more = r' [\b]+[ ]+[\b]+(?P<line>.*)'
         re_more = re.compile(exp_more)
 
-        # The 3 different types of lines we want to match (MatchIndex) and treat differntly
+        # The 3 different types of lines we want to match (MatchIndex) and treat differently
         if self.os == "IOS" or self.os == "NXOS":
             matches = ["\r\n", '--More--', self.prompt]
         elif self.os == "ASA":

@@ -182,6 +182,23 @@ connected routes.  This function will return ‘connected’ in both cases.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="securecrt_tools.utilities.path_safe_name">
+<code class="descclassname">securecrt_tools.utilities.</code><code class="descname">path_safe_name</code><span class="sig-paren">(</span><em>input_string</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.utilities.path_safe_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will remove or replace characters in the input string so that the output is suitable to be used as
+a file or directory name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>input_string</strong> (<em>str</em>) – The string that should be converted into a filename safe version.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The filename safe version of the input string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="securecrt_tools.utilities.remove_empty_or_invalid_file">
 <code class="descclassname">securecrt_tools.utilities.</code><code class="descname">remove_empty_or_invalid_file</code><span class="sig-paren">(</span><em>l_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#securecrt_tools.utilities.remove_empty_or_invalid_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if file is empty or if we captured an error in the command.  If so, delete the file.</p>

@@ -12,6 +12,7 @@ import csv
 import re
 import logging
 import os
+import sys
 
 import securecrt_tools.textfsm as textfsm
 
@@ -321,3 +322,27 @@ def remove_empty_or_invalid_file(l_filename):
     # If the file is empty, delete it
     elif file_size <= 3:
         os.remove(l_filename)
+
+
+def path_safe_name(input_string):
+    """
+    This function will remove or replace characters in the input string so that the output is suitable to be used as
+    a file or directory name.
+
+    :param input_string: The string that should be converted into a filename safe version.
+    :type input_string: str
+
+    :return: The filename safe version of the input string
+    """
+    # A list of reserved filename characters in windows.  Using this regardless of versions so files can be sent
+    # between operating systems (linux, OSX, Windows) without having to change them.
+    reserved_chars = ['/', '?', '<', '>', '\\', ':', '*', '|', '"']
+
+    # Place any character that should be replaced with another character below
+    updated_str = input_string.replace('/', '-')
+    updated_str = updated_str.replace("*", "all")
+
+    # Build output string by stripping out the rest of the reserved characters
+    output = ''.join(char for char in updated_str if char not in reserved_chars)
+
+    return output

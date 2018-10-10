@@ -59,6 +59,8 @@ A list of all the single- and multi-device scripts and descriptions on what they
 
 The run any of these scripts, you need to download the entire repo to your computer.  You can either clone the repository or download an archive to extact on your machine.
 
+**NOTE** While the scripts are running they will lock the tab until they complete.  If for some reason (error, etc) the script ends and the tab is still locked, you can unlock it by going to **File->Unlock Session** in the menus.
+
 Single Device Scripts
 *********************
 To run SINGLE device scripts, do the following:
