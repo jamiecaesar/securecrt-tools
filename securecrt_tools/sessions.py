@@ -362,8 +362,11 @@ class CRTSession(Session):
         :param command: The command to be issued to the remote device to disconnect.  The default is 'exit'
         :type command: str
         """
-        self.logger.debug("<DISCONNECT> Sending '{0}' command.".format(command))
-        self.__send("{0}\n".format(command))
+        if self.is_connected():
+            self.logger.debug("<DISCONNECT> Sending '{0}' command.".format(command))
+            self.__send("{0}\n".format(command))
+        else:
+            self.logger.debug("<DISCONNECT> Session already disconnected.  Doing nothing.")
 
         # Unset Sync and IgnoreEscape upon disconnect
         self.screen.Synchronous = False
