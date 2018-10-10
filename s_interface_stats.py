@@ -45,11 +45,13 @@ def script_main(session):
     session.start_cisco_session()
 
     # Validate device is running a supported OS
-    session.validate_os(["IOS", "NXOS"])
+    session.validate_os(["IOS", "NXOS", "IOS-XR"])
 
     # Get correct TextFSM template based on remote device OS
     if session.os == "NXOS":
         template_file = script.get_template("cisco_nxos_show_interface.template")
+    elif session.os == "IOS-XR":
+        template_file = script.get_template("cisco_ios_xr_show_interfaces.template")
     else:
         template_file = script.get_template("cisco_ios_show_interfaces.template")
 
