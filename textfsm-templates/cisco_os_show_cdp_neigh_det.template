@@ -2,10 +2,10 @@ Value Required LocalIntf (\S+)
 Value Required DeviceID (\S+)
 Value SystemName (\S+)
 Value Required RemoteIntf (\S+)
-Value InterfaceIP (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})
+Value List InterfaceIP (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})
 Value Platform ([\S ]+)
 Value Version ([\S ]+)
-Value MgmtIP (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})
+Value List MgmtIP (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})
 Value MTU (\d+)
 Value Capabilities ([\S ]+)
 
@@ -21,10 +21,12 @@ Start
   ^-------------* -> Record
 
 Interface
-  ^\s+IP\S* [Aa]ddress: ${InterfaceIP} -> Start
+  ^\s+IP\S* [Aa]ddress: ${InterfaceIP}
+  ^Platform:\s+${Platform},\s+Capabilities:\s+${Capabilities} -> Start
 
 Version
   ^${Version} -> Start
 
 Mgmt
   ^\s+IP\S* [Aa]ddress: ${MgmtIP} -> Start
+  ^-------------* -> Record Start
