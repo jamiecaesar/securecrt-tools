@@ -66,10 +66,14 @@ def script_main(session):
     fsm_results = utilities.textfsm_parse_to_list(raw_cdp, template_file, add_header=True)
 
     # Since "System Name" is a newer NXOS feature -- try to extract it from the device ID when its empty.
-    for entry in fsm_results:
+    for entry in fsm_results[1:]:
         # entry[2] is system name, entry[1] is device ID
         if entry[2] == "":
             entry[2] = utilities.extract_system_name(entry[1], strip_list=strip_list)
+        # Convert list of IPs into a comma-separated list of IPs
+        entry[4] = ", ".join(entry[4])
+        # Convert list of Mgmt IPs into a comma-separated list of IPs
+        entry[7] = ", ".join(entry[7])
 
     output_filename = session.create_output_filename("cdp", ext=".csv")
     utilities.list_of_lists_to_csv(fsm_results, output_filename)

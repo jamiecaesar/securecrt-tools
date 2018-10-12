@@ -76,6 +76,8 @@ def script_main(session):
         # entry[2] is system name, entry[1] is device ID
         if entry[2] == "":
             entry[2] = utilities.extract_system_name(entry[1], strip_list=strip_list)
+        # Convert list of Mgmt IPs into a comma-separated list of IPs
+        entry[7] = ", ".join(entry[7])
 
     session_list = create_session_list(cdp_table)
 
@@ -141,14 +143,14 @@ def create_session_list(cdp_list):
                 continue
 
             mgmt_ip = device[7]
-            if mgmt_ip == "":
-                if device[4] == "":
+            if not mgmt_ip:
+                if not device[4]:
                     # If no mgmt IP or interface IP, skip device.
                     logger.debug("Skipping {0} because cannot find IP in CDP data.".format(system_name))
                     # Go directly to the next device (skip this one)
                     continue
                 else:
-                    mgmt_ip = device[4]
+                    mgmt_ip = device[4][0]
                     logger.debug("Using interface IP ({0}) for {1}.".format(mgmt_ip, system_name))
             else:
                 logger.debug("Using management IP ({0}) for {1}.".format(mgmt_ip, system_name))
