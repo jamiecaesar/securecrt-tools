@@ -67,8 +67,8 @@ def script_main(session):
     # If a VRF was specified, update the commands and outputs to reflect this.
     if selected_vrf:
         send_cmd = send_cmd + " vrf {0}".format(selected_vrf)
-        script.hostname = script.hostname + "-VRF-{0}".format(selected_vrf)
-        logger.debug("Updated hostname to: '{0}'".format(script.hostname))
+        session.hostname = session.hostname + "-VRF-{0}".format(selected_vrf)
+        logger.debug("Updated hostname to: '{0}'".format(session.hostname))
 
     # Get "show ip arp" data
     raw_arp = session.get_command_output(send_cmd)

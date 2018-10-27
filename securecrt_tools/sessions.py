@@ -427,6 +427,7 @@ class CRTSession(Session):
         # Get prompt (and thus hostname) from device
         self.prompt = self.__get_prompt()
         if "(" in self.prompt:
+            self.session.Unlock()
             raise InteractionError("Please re-run this script when not in configuration mode.")
         self.__enter_enable(enable_pass, prompt_for_enable)
         self.hostname = self.prompt[:-1]
@@ -535,6 +536,7 @@ class CRTSession(Session):
                 result = self.__wait_for_strings(["% No", "assword", ">"])
                 if result == 1:
                     self.logger.debug("<__enter_enable> Enable password not set.")
+                    self.session.Unlock()
                     raise InteractionError("Unable to enter Enable mode. No password set.")
                 if result == 2:
                     self.screen.Send("{0}\n".format(enable_pass))
@@ -542,6 +544,7 @@ class CRTSession(Session):
                     self.prompt = self.__get_prompt()
                 else:
                     self.logger.debug("<__enter_enable> Failed to detect password prompt after issuing 'enable'.")
+                    self.session.Unlock()
                     raise InteractionError("Unable to enter Enable mode.")
             else:
                 self.logger.debug("<__enter_enable> Not in enable mode and no enable password given.  Cannot proceed.")

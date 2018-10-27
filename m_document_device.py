@@ -164,6 +164,10 @@ def script_main(script):
             with open(failed_log, 'a') as logfile:
                 logfile.write("<M_SCRIPT> Unsupported OS on {0}: {1}\n".format(hostname, e.message.strip()))
                 session.disconnect()
+        except Exception as e:
+            with open(failed_log, 'a') as logfile:
+                logfile.write("<M_SCRIPT> Exception on {0}: {1} ({2})\n".format(hostname, e.message.strip(), e))
+                session.disconnect()
 
     # #########################################  END DEVICE CONNECT LOOP  ############################################
 
