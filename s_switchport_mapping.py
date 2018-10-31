@@ -107,7 +107,8 @@ def script_main(session):
                         mac_vendor = mac_to_vendor(mac_lookup_table, mac)
                     if dns_lookup and ip:
                         try:
-                            fqdn, _, _, = socket.gethostbyaddr(ip)
+                            # fqdn, _, _, = socket.gethostbyaddr(ip)
+                            pass
                         except socket.herror:
                             pass
                     output_line = [intf, state, mac, mac_vendor, fqdn, ip, vlan, desc]
@@ -123,15 +124,13 @@ def script_main(session):
                 ip = None
                 fqdn = None
                 mac_vendor = None
-                if mac and mac in arp_lookup.keys():
-                    for entry in arp_lookup[mac]:
-                        ip, arp_vlan = entry
-                        if vlan == arp_vlan:
-                            if dns_lookup and ip:
-                                try:
-                                    fqdn, _, _, = socket.gethostbyaddr(ip)
-                                except socket.herror:
-                                    pass
+                if mac and mac_entry in arp_lookup.keys():
+                    ip = arp_lookup[(mac, vlan)]
+                    if dns_lookup and ip:
+                        try:
+                            fqdn, _, _, = socket.gethostbyaddr(ip)
+                        except socket.herror:
+                            pass
                 if mac and mac_lookup:
                     mac_vendor = mac_to_vendor(mac_lookup_table, mac)
                 output_line = [intf, state, mac, mac_vendor, fqdn, ip, vlan, desc]
@@ -313,10 +312,7 @@ def get_arp_info(script):
         else:
             arp_lookup[intf] = [(mac, ip)]
 
-        if mac in arp_lookup.keys():
-            arp_lookup[mac].append((ip, vlan))
-        else:
-            arp_lookup[mac] = [(ip, vlan)]
+        arp_lookup[(mac, vlan)] = ip
 
     return arp_lookup
 
