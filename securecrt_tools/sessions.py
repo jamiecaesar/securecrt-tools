@@ -590,7 +590,7 @@ class CRTSession(Session):
 
         if "cisco ios xe" in lower_version:
             version = "IOS"
-        elif "cisco ios software" in lower_version or "Cisco Internetwork Operating System" in lower_version:
+        elif "cisco ios software" in lower_version or "cisco internetwork operating system" in lower_version:
             version = "IOS"
         elif "cisco nexus operating system" in lower_version:
             version = "NXOS"
