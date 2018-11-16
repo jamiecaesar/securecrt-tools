@@ -63,7 +63,11 @@ if __name__ == "__builtin__":
     # Get session object for the SecureCRT tab that the script was launched from.
     crt_session = crt_script.get_main_session()
     # Run script's main logic against our session
-    script_main(crt_session)
+    try:
+        script_main(crt_session)
+    except Exception:
+        crt_session.end_cisco_session()
+        raise
     # Shutdown logging after
     logging.shutdown()
 
