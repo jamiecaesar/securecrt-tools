@@ -410,8 +410,11 @@ class CRTSession(Session):
         if not self.is_connected():
             raise InteractionError("Session is not connected.  Cannot start Cisco session.")
 
-        # Lock the tab so that keystrokes won't mess up the reading/writing of data
-        self.session.Lock()
+        # Lock the tab so that keystrokes won't mess up the reading/writing of data.  If lock fails, just continue on.
+        try:
+            self.session.Lock()
+        except Exception:
+            pass
 
         prompt_for_enable = False
 
@@ -427,7 +430,10 @@ class CRTSession(Session):
         # Get prompt (and thus hostname) from device
         self.prompt = self.__get_prompt()
         if "(" in self.prompt:
-            self.session.Unlock()
+            try:
+                self.session.Unlock()
+            except Exception:
+                pass
             raise InteractionError("Please re-run this script when not in configuration mode.")
         self.__enter_enable(enable_pass, prompt_for_enable)
         self.hostname = self.prompt[:-1]
@@ -515,7 +521,10 @@ class CRTSession(Session):
                 self.logger.debug("<END> Unset Synchronous and IgnoreEscape")
 
         # Unlock the tab to return control to the user
-        self.session.Unlock()
+        try:
+            self.session.Unlock()
+        except Exception:
+            pass
 
     def __enter_enable(self, enable_pass, prompt=False):
         """
@@ -536,7 +545,10 @@ class CRTSession(Session):
                 result = self.__wait_for_strings(["% No", "assword", ">"])
                 if result == 1:
                     self.logger.debug("<__enter_enable> Enable password not set.")
-                    self.session.Unlock()
+                    try:
+                        self.session.Unlock()
+                    except Exception:
+                        pass
                     raise InteractionError("Unable to enter Enable mode. No password set.")
                 if result == 2:
                     self.screen.Send("{0}\n".format(enable_pass))
@@ -544,7 +556,10 @@ class CRTSession(Session):
                     self.prompt = self.__get_prompt()
                 else:
                     self.logger.debug("<__enter_enable> Failed to detect password prompt after issuing 'enable'.")
-                    self.session.Unlock()
+                    try:
+                        self.session.Unlock()
+                    except Exception:
+                        pass
                     raise InteractionError("Unable to enter Enable mode.")
             else:
                 self.logger.debug("<__enter_enable> Not in enable mode and no enable password given.  Cannot proceed.")
