@@ -62,6 +62,7 @@ class Session:
     def __init__(self):
         self.script = None
         self.os = None
+        self.remote_ip = "0.0.0.0"
         self.prompt = None
         self.prompt_stack = []
         self.hostname = None
@@ -418,6 +419,7 @@ class CRTSession(Session):
 
         prompt_for_enable = False
 
+        self.remote_ip = self.session.RemoteAddress
         # Set Tab parameters to allow correct sending/receiving of data via SecureCRT, if manually connected session
         # (i.e. it hasn't been set yet)
         if not self.screen.Synchronous:

@@ -133,7 +133,7 @@ def script_main(script):
     # Write complete output to a CSV file
     session = script.get_main_session()
     output_filename = session.create_output_filename("INVENTORY_REPORT", ext='.csv', include_hostname=False)
-    header_row = ['HOSTNAME', 'MODEL', 'VERSION', 'SERIAL', 'MANUFACTURE_DATE', 'UPTIME',
+    header_row = ['HOSTNAME', 'IP', 'MODEL', 'VERSION', 'SERIAL', 'MANUFACTURE_DATE', 'UPTIME',
                   'LAST_REBOOT_REASON', 'HARDWARE', 'IMAGE']
     utilities.list_of_dicts_to_csv(device_data, output_filename, header_row)
 
@@ -226,6 +226,7 @@ def per_device_work(session, enable_pass):
     for entry in fsm_output:
         subset = dict((key, entry[key]) for key in interesting_keys)
         subset['MANUFACTURE_DATE'] = get_manufacture_date(subset['SERIAL'])
+        subset['IP'] = session.remote_ip
         inv_data.append(subset)
 
     # End session on the Cisco device
