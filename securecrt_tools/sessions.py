@@ -1068,7 +1068,9 @@ class DebugSession(Session):
 
         self.logger.debug("<SEND CONFIG> Final command list:\n {0}".format(command_string))
 
-        output_filename = self.create_output_filename("CONFIG_RESULT")
+        if not output_filename:
+            output_filename = self.create_output_filename("CONFIG_RESULT")
+
         config_results = command_string
         with open(output_filename, 'w') as output_file:
             self.logger.debug("<SEND CONFIG> Writing output to: {0}".format(output_filename))
