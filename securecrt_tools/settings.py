@@ -149,4 +149,4 @@ class SettingsImporter:
         # Get the raw string from the settings file.
         raw_setting = self.config.get(section, setting)
         # Split the raw string on the comma, and save each item as an entry into the list, while removing
-        return map(lambda x: x.strip(), raw_setting.split(','))
+        return filter(None, map(lambda x: x.strip(), raw_setting.split(',')))
