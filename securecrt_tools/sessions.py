@@ -933,7 +933,7 @@ class DebugSession(Session):
         self.logger.debug("<START> Set Hostname: {0}".format(self.hostname))
 
         # Detect the OS of the device, because outputs will differ per OS
-        valid_os = ["IOS", "NXOS", "ASA"]
+        valid_os = ["IOS", "NXOS", "IOS-XR", "ASA"]
         response = ""
         while response not in valid_os:
             response = raw_input("Select OS ({0}): ".format(str(valid_os)))
