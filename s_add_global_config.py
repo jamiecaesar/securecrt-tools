@@ -134,6 +134,7 @@ def script_main(session):
         add_commands(session, check_mode, commands_to_add)
     else:
         logger.debug("<ADD_GLOBAL_CONFIG> No commands to send to {}, skipping device.\n".format(session.hostname))
+        script.message_box("There are no commands for OS type: {}".format(session.os), "No Commands", ICON_STOP)
 
     # Return terminal parameters back to the original state.
     session.end_cisco_session()

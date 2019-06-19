@@ -178,7 +178,7 @@ def per_device_work(session, check_mode, enable_pass, settings_header):
     if commands_to_add:
         add_commands(session, check_mode, commands_to_add)
     else:
-        raise scripts.ScriptError("There are no commands to add to this device.")
+        raise scripts.ScriptError("There are no commands to apply for OS type: {}.".format(session.os))
 
     session.end_cisco_session()
 
