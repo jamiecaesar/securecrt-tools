@@ -26,6 +26,7 @@ Below is a list of multi-device scripts available with this release of SecureCRT
 .. toctree::
    :maxdepth: 1
 
+   m_add_global_config
    m_cdp_to_csv
    m_document_device
    m_find_macs_by_vlans

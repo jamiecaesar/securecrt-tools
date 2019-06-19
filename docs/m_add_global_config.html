@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>s_update_dhcp_relay &#8212; SecureCRT Tools 2.1.0 documentation</title>
+    <title>m_add_global_config &#8212; SecureCRT Tools 2.1.0 documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -16,17 +16,17 @@
     <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="s_update_interface_desc" href="s_update_interface_desc.html" />
-    <link rel="prev" title="s_switchport_mapping" href="s_switchport_mapping.html" /> 
+    <link rel="next" title="m_cdp_to_csv" href="m_cdp_to_csv.html" />
+    <link rel="prev" title="Multiple Device Scripts" href="multi_device_scripts.html" /> 
   </head><body>
     <div class="header-wrapper" role="banner">
       <div class="header">
         <div class="headertitle"><a
           href="index.html">SecureCRT Tools 2.1.0 documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
-          <a href="s_switchport_mapping.html" title="s_switchport_mapping"
+          <a href="multi_device_scripts.html" title="Multiple Device Scripts"
              accesskey="P">previous</a> |
-          <a href="s_update_interface_desc.html" title="s_update_interface_desc"
+          <a href="m_cdp_to_csv.html" title="m_cdp_to_csv"
              accesskey="N">next</a> |
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |
@@ -44,24 +44,26 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-s_update_dhcp_relay">
-<span id="s-update-dhcp-relay"></span><h1>s_update_dhcp_relay<a class="headerlink" href="#module-s_update_dhcp_relay" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-m_add_global_config">
+<span id="m-add-global-config"></span><h1>m_add_global_config<a class="headerlink" href="#module-m_add_global_config" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
-<dt id="s_update_dhcp_relay.script_main">
-<code class="descclassname">s_update_dhcp_relay.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>session</em><span class="sig-paren">)</span><a class="headerlink" href="#s_update_dhcp_relay.script_main" title="Permalink to this definition">¶</a></dt>
+<dt id="m_add_global_config.script_main">
+<code class="descclassname">m_add_global_config.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#m_add_global_config.script_main" title="Permalink to this definition">¶</a></dt>
 <dd><div class="line-block">
-<div class="line">SINGLE device script</div>
+<div class="line">MULTIPLE device script</div>
 <div class="line">Author: Jamie Caesar</div>
 <div class="line">Email: <a class="reference external" href="mailto:jcaesar&#37;&#52;&#48;presidio&#46;com">jcaesar<span>&#64;</span>presidio<span>&#46;</span>com</a></div>
 </div>
-<p>This script will scan the running configuration of the connected device looking for instances of old IP helper/DHCP
-relay addresses (IOS/NXOS) on interfaces and if found will update the helper/relay addresses with the newer ones.
-The new and old addresses that the script looks for is saved in the settings.ini file, as documented below.</p>
+<p>This script will add global configuration commands to the provided list of devices.  The commands sent will depend
+on the operating system of each connected device.  For example, IOS devices get the commands listed in the ‘ios’
+section of the settings for this script.   If the device is running NX-OS, it will get the commands from the ‘nxos’
+section of the settings, etc.</p>
+<p>Any devices that cannot be connected to will be logged in a separate file saved in the output directory.</p>
 <p>This script will prompt you to run in “Check Mode”, where the configuration changes the script would be pushed to
-the device are ONLY written to a file and NO CHANGES will be made to the device.  If you select “No” when prompted
-this script will push the configuration changes to the device. Also, when the changes are pushed to the device this
-script will save the running config before and after the changes are made, and will also output a log of the
-configuration session showing all the commands pushed.</p>
+the devices are ONLY written to a file and NO CHANGES will be made to the devices.  If you select “No” when prompted
+this script will push the configuration changes to the devices. Also, when the changes are pushed to the devices
+this script will save the running config before and after the changes are made, and will also output a log of the
+configuration sessions showing all the commands pushed.</p>
 <p><strong>Script Settings</strong> (found in settings/settings.ini):</p>
 <ul>
 <li><div class="first line-block">
@@ -72,24 +74,19 @@ configuration session showing all the commands pushed.</p>
 </div>
 </li>
 <li><div class="first line-block">
-<div class="line"><strong>old_relays</strong> - This is a comma separated list of IP addresses that the script should</div>
-<div class="line">search for as relay addresses in the device’s configuration.</div>
+<div class="line"><strong>ios</strong> - A comma separated list of commands that will be sent to IOS devices.</div>
 </div>
 </li>
 <li><div class="first line-block">
-<div class="line"><strong>new_relays</strong> - This is a comma separated list of IP addresses that are the new relay</div>
-<div class="line">addresses that should be added to any interface that has at least one of the old</div>
-<div class="line">helper/relay addresses on it.</div>
+<div class="line"><strong>ios-xr</strong> - A comma separated list of commands that will be sent to IOS-XR devices.</div>
 </div>
 </li>
 <li><div class="first line-block">
-<div class="line"><strong>remove_old_relays</strong> - If True, the script will add the new relays and REMOVE the old</div>
-<div class="line">relays immediately after adding the new ones.  If False (default), the script will</div>
-<div class="line">only add the new relays to interfaces where at least one old relay is found.  This</div>
-<div class="line">is useful when you want to push out new relays as part of a migration process</div>
-<div class="line">without removing the old relays.  Since this script will not try to push new relay</div>
-<div class="line">addresses that already exist on an interface, the script can be run again with this</div>
-<div class="line">option set to True to later remove the old relays.</div>
+<div class="line"><strong>nxos</strong> - A comma separated list of commands that will be sent to NX-OS devices.</div>
+</div>
+</li>
+<li><div class="first line-block">
+<div class="line"><strong>asa</strong> - A comma separated list of commands that will be sent to ASA devices.</div>
 </div>
 </li>
 </ul>
@@ -97,11 +94,21 @@ configuration session showing all the commands pushed.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>session</strong> (<a class="reference internal" href="tools-sessions.html#securecrt_tools.sessions.Session" title="securecrt_tools.sessions.Session"><em>sessions.Session</em></a>) – A subclass of the sessions.Session object that represents this particular script session (either
-SecureCRTSession or DirectSession)</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>script</strong> (<a class="reference internal" href="tools-scripts.html#securecrt_tools.scripts.Script" title="securecrt_tools.scripts.Script"><em>scripts.Script</em></a>) – A subclass of the scripts.Script object that represents the execution of this particular script
+(either CRTScript or DirectScript)</td>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="m_add_global_config.per_device_work">
+<code class="descclassname">m_add_global_config.</code><code class="descname">per_device_work</code><span class="sig-paren">(</span><em>session</em>, <em>check_mode</em>, <em>enable_pass</em>, <em>settings_header</em><span class="sig-paren">)</span><a class="headerlink" href="#m_add_global_config.per_device_work" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function contains the code that should be executed on each device that this script connects to.  It is called
+after establishing a connection to each device in the loop above.</p>
+<p>You can either put your own code here, or if there is a single-device version of a script that performs the correct
+task, it can be imported and called here, essentially making this script connect to all the devices in the chosen
+CSV file and then running a single-device script on each of them.</p>
 </dd></dl>
 
 </div>
@@ -123,26 +130,23 @@ SecureCRTSession or DirectSession)</td>
 <li class="toctree-l1"><a class="reference internal" href="README.html#settings">Settings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="README.html#contributing">Contributing</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="scripts.html">Scripts</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="single_device_scripts.html">Single Device Scripts</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="s_add_global_config.html">s_add_global_config</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_arp_to_csv.html">s_arp_to_csv</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_cdp_to_csv.html">s_cdp_to_csv</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_create_sessions_from_cdp.html">s_create_sessions_from_cdp</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_document_device.html">s_document_device</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_eigrp_topology_summary.html">s_eigrp_topology_summary</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_eigrp_topology_to_csv.html">s_eigrp_topology_to_csv</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_interface_stats.html">s_interface_stats</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_mac_to_csv.html">s_mac_to_csv</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_nexthop_summary.html">s_nexthop_summary</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_save_output.html">s_save_output</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_save_running.html">s_save_running</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_switchport_mapping.html">s_switchport_mapping</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">s_update_dhcp_relay</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_update_interface_desc.html">s_update_interface_desc</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_vlan_to_csv.html">s_vlan_to_csv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="single_device_scripts.html">Single Device Scripts</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="multi_device_scripts.html">Multiple Device Scripts</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="multi_device_scripts.html#device-import-csv-file">Device Import CSV File</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="multi_device_scripts.html#available-scripts">Available Scripts</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">m_add_global_config</a></li>
+<li class="toctree-l4"><a class="reference internal" href="m_cdp_to_csv.html">m_cdp_to_csv</a></li>
+<li class="toctree-l4"><a class="reference internal" href="m_document_device.html">m_document_device</a></li>
+<li class="toctree-l4"><a class="reference internal" href="m_find_macs_by_vlans.html">m_find_macs_by_vlans</a></li>
+<li class="toctree-l4"><a class="reference internal" href="m_inventory_report.html">m_inventory_report</a></li>
+<li class="toctree-l4"><a class="reference internal" href="m_merged_arp_to_csv.html">m_merged_arp_to_csv</a></li>
+<li class="toctree-l4"><a class="reference internal" href="m_save_output.html">m_save_output</a></li>
+<li class="toctree-l4"><a class="reference internal" href="m_update_dhcp_relay.html">m_update_dhcp_relay</a></li>
+<li class="toctree-l4"><a class="reference internal" href="m_update_interface_desc.html">m_update_interface_desc</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="multi_device_scripts.html">Multiple Device Scripts</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="no_device_scripts.html">No Device Scripts</a></li>
 </ul>
 </li>
@@ -167,9 +171,9 @@ SecureCRTSession or DirectSession)</td>
       <div class="footer">
         <div class="left">
           <div role="navigation" aria-label="related navigaton">
-            <a href="s_switchport_mapping.html" title="s_switchport_mapping"
+            <a href="multi_device_scripts.html" title="Multiple Device Scripts"
               >previous</a> |
-            <a href="s_update_interface_desc.html" title="s_update_interface_desc"
+            <a href="m_cdp_to_csv.html" title="m_cdp_to_csv"
               >next</a> |
             <a href="py-modindex.html" title="Python Module Index"
               >modules</a> |
@@ -178,7 +182,7 @@ SecureCRTSession or DirectSession)</td>
           </div>
           <div role="note" aria-label="source link">
               <br/>
-              <a href="_sources/s_update_dhcp_relay.rst.txt"
+              <a href="_sources/m_add_global_config.rst.txt"
                 rel="nofollow">Show Source</a>
           </div>
         </div>

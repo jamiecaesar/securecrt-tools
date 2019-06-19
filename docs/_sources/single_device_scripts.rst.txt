@@ -9,6 +9,7 @@ These scripts can also be imported into Multi-Device scripts to reduce the amoun
 .. toctree::
    :maxdepth: 1
 
+   s_add_global_config
    s_arp_to_csv
    s_cdp_to_csv
    s_create_sessions_from_cdp
