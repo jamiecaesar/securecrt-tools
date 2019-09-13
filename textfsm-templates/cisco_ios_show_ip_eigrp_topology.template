@@ -14,9 +14,13 @@ Value NEXTHOP_IF ([A-Z][\w\-\.:/]+)
 Start
   # Forward Match Style:  When we detect the start of a VLAN line, write what has been saved already (if anything)
   ^IP-EIGRP Topology -> Continue.Record
+  ^EIGRP-IPv4 Topology -> Continue.Record
   ^IP-EIGRP Topology -> Continue.Clearall
+  ^EIGRP-IPv4 Topology -> Continue.Clearall
   ^IP-EIGRP Topology Table for AS\(${AS}\)\/ID\(${RID}\) Routing Table: ${VRF}
   ^IP-EIGRP Topology Table for AS\(${AS}\)\/ID\(${RID}\)
+  ^EIGRP-IPv4 Topology Table for AS\(${AS}\)\/ID\(${RID}\) Routing Table: ${VRF}
+  ^EIGRP-IPv4 Topology Table for AS\(${AS}\)\/ID\(${RID}\)
   ^${CODE}\s+${NETWORK}\/${MASK}, \d+ successors, FD is ${FD}(, tag is ${TAG})?
   # Standard EIGRP format
   ^\s+via ${NEXTHOP} \(${METRIC}\/${REPORTED}\), ${NEXTHOP_IF} -> Record
