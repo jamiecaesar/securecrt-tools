@@ -92,20 +92,17 @@ def script_main(session):
         if intf in desc_table.keys():
             desc = desc_table[intf]
 
+        duplex = ""
         if intf_entry[4]:
             duplex = intf_entry[4]
-        else:
-            duplex = ""
 
+        speed = ""
         if intf_entry[5]:
             speed = intf_entry[5]
-        else:
-            speed = ""
 
+        intf_type = ""
         if intf_entry[6]:
             intf_type = intf_entry[6]
-        else:
-            intf_type = ""
 
         # Record upsteam information for routed ports
         if intf_entry[3] == 'routed':

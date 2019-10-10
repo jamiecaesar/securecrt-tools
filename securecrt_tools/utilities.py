@@ -107,7 +107,9 @@ def list_of_lists_to_csv(data, filename):
         csv_out = csv.writer(output_csv)
         for line in data:
             logger.debug("Writing row: '{0}'".format(line))
-            csv_out.writerow(line)
+            # Convert every string on the list to utf-8, skipping attempt if value is None
+            encoded_line = [x.encode('utf-8', 'ignore') if x else None for x in line]
+            csv_out.writerow(encoded_line)
     logger.debug("Completed writing to file {0}".format(filename))
 
 
