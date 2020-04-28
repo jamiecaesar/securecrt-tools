@@ -4,6 +4,7 @@
 import os
 import sys
 import logging
+import csv
 
 # Add script directory to the PYTHONPATH so we can import our modules (only if run from SecureCRT)
 if 'crt' in globals():
@@ -15,6 +16,7 @@ else:
 
 # Now we can import our custom modules
 from securecrt_tools import scripts
+from securecrt_tools import utilities
 
 # Create global logger so we can write debug messages from any function (if debug mode setting is enabled in settings).
 logger = logging.getLogger("securecrt")
@@ -29,9 +31,7 @@ def script_main(session):
     | Author: Jamie Caesar
     | Email: jcaesar@presidio.com
 
-    This script will grab the running configuration of a Cisco IOS, NX-OS or ASA device and save it into a file.
-    The path where the file is saved is specified in settings.ini file.
-    This script assumes that you are already connected to the device before running it.
+    This script will
 
     :param session: A subclass of the sessions.Session object that represents this particular script session (either
                 SecureCRTSession or DirectSession)
@@ -44,24 +44,38 @@ def script_main(session):
     # Start session with device, i.e. modify term parameters for better interaction (assuming already connected)
     session.start_cisco_session()
 
-    supported_os = ["IOS", "NXOS", "ASA"]
+    # Validate device is running a supported OS
+    session.validate_os(["AireOS"])
 
-    if session.os == "AireOS":
-        send_cmd = "show run-config"
-        filename = session.create_output_filename(send_cmd)
-        send_cmd = "show run-config"
-        session.write_output_to_file(send_cmd, filename)
-        send_cmd = "show run-config commands"
-        session.write_output_to_file(send_cmd, filename)
-        send_cmd = "show run-config startup-commands"
-        session.write_output_to_file(send_cmd, filename)
-    elif session.os in supported_os:
-        send_cmd = "show run"
-        filename = session.create_output_filename(send_cmd)
-        session.write_output_to_file(send_cmd, filename)
+    # Get additional information we'll need
+    ap_summ_table = get_ap_summ_table(session)
+
+    output_filename = session.create_output_filename("ap-summ", ext=".csv")
+    utilities.list_of_lists_to_csv(ap_summ_table, output_filename)
 
     # Return terminal parameters back to the original state.
     session.end_cisco_session()
+
+
+def get_ap_summ_table(session):
+    """
+    A function that captures the WLC AireOS ap summary table and returns an output dictionary that can be used to look up the AP
+
+    :param session: The script object that represents this script being executed
+    :type session: session.Session
+
+    :return: A dictionary that allows lookups of MAC information for auth-list
+    :rtype: dict
+    """
+    send_cmd = "show ap summary"
+
+    # TextFSM template for parsing "show ap summary" output
+    template_file = session.script.get_template("cisco_aireos_show_ap_summary_table.template")
+
+    raw_ap_summ = session.get_command_output(send_cmd)
+    ap_summ_table = utilities.textfsm_parse_to_list(raw_ap_summ, template_file, add_header=True)
+
+    return ap_summ_table
 
 
 # ################################################  SCRIPT LAUNCH   ###################################################

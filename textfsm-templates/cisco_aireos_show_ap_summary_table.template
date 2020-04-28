@@ -1,0 +1,11 @@
+Value AP_NAME (\S+)
+Value AP_SLOTS (\d+)
+Value AP_MODEL (\S+)
+Value AP_MAC_ENET ([0-9a-fA-F]{2}\:[0-9a-fA-F]{2}\:[0-9a-fA-F]{2}\:[0-9a-fA-F]{2}\:[0-9a-fA-F]{2}\:[0-9a-fA-F]{2})
+Value AP_LOCATION (.*)
+Value AP_COUNTRY (\S+)
+Value AP_IPV6_ADDR (\S+)
+Value AP_CLIENTS (\d+)
+
+Start
+  ^${AP_NAME}\s+${AP_SLOTS}\s+${AP_MODEL}\s+${AP_MAC_ENET}\s+${AP_LOCATION}\s+${AP_COUNTRY}\s+${AP_IPV6_ADDR}\s+${AP_CLIENTS} -> Record

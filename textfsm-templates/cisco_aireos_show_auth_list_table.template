@@ -1,0 +1,6 @@
+Value AUTH_LIST_MAC ([0-9a-fA-F]{2}\:[0-9a-fA-F]{2}\:[0-9a-fA-F]{2}\:[0-9a-fA-F]{2}\:[0-9a-fA-F]{2}\:[0-9a-fA-F]{2})
+Value AUTH_LIST_CERT_TYPE (\S+)
+
+Start
+  ^Mac\s+Addr/Serial\s+No.\s+Cert\s+Type\s+Key\s+Hash -> Continue
+  ^${AUTH_LIST_MAC}\s+${AUTH_LIST_CERT_TYPE} -> Record
