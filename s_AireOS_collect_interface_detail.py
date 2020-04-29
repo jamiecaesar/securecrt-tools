@@ -48,16 +48,16 @@ def script_main(session):
     session.validate_os(["AireOS"])
 
     # Get additional information we'll need
-    ap_summ_table = get_int_detail(session)
+    info_list = get_interface_detail(session)
 
     output_filename = session.create_output_filename("interface-detail", ext=".csv")
-    utilities.list_of_lists_to_csv(ap_summ_table, output_filename)
+    utilities.list_of_lists_to_csv(info_list, output_filename)
 
     # Return terminal parameters back to the original state.
     session.end_cisco_session()
 
 
-def get_int_detail(session):
+def get_interface_detail(session):
     """
     A function that captures the WLC AireOS interface detail table and returns an output list
 
