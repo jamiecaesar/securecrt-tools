@@ -30,6 +30,7 @@ def script_main(session):
     | SINGLE device script
     | Author: Jamie Caesar
     | Email: jcaesar@presidio.com
+    | modified: Gordon Rogier grogier@cisco.com
 
     This script will
 
@@ -59,24 +60,23 @@ def script_main(session):
 
 def get_auth_list_table(session):
     """
-    A function that captures the WLC AireOS auth-list table and returns an output dictionary that can be used to look up the MAC
-    address.
+    A function that captures the WLC AireOS auth-list table and returns an output list
 
     :param session: The script object that represents this script being executed
     :type session: session.Session
 
-    :return: A dictionary that allows lookups of MAC information for auth-list
-    :rtype: dict
+    :return: A list of MAC information for auth-list
+    :rtype: list
     """
     send_cmd = "show auth-list"
 
     # TextFSM template for parsing "show auth-list" output
     template_file = session.script.get_template("cisco_aireos_show_auth_list_table.template")
 
-    raw_mac = session.get_command_output(send_cmd)
-    mac_table = utilities.textfsm_parse_to_list(raw_mac, template_file, add_header=True)
+    raw_auth_list = session.get_command_output(send_cmd)
+    auth_list_table = utilities.textfsm_parse_to_list(raw_auth_list, template_file, add_header=True)
 
-    return mac_table
+    return auth_list_table
 
 
 # ################################################  SCRIPT LAUNCH   ###################################################
