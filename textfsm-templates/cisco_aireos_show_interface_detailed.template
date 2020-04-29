@@ -1,0 +1,61 @@
+Value Required INT_Name (\S+)
+Value INT_MAC ([0-f][0-f]:[0-f][0-f]:[0-f][0-f]:[0-f][0-f]:[0-f][0-f]:[0-f][0-f])
+Value INT_IP_Add (\S+)
+Value INT_IP_Msk (\S+)
+Value INT_IP_DGw (\S+)
+Value INT_ExtNAT (\S+)
+Value INT_ExtNAT_IP_Add (\S+)
+Value INT_IPv6_IP_Add_LL (\S+)
+Value INT_IPv6_IP_Add_Pri (\S+)
+Value INT_IPv6_DGw (\S+)
+Value INT_IPv6_DGw_MAC ([0-f][0-f]:[0-f][0-f]:[0-f][0-f]:[0-f][0-f]:[0-f][0-f]:[0-f][0-f])
+Value INT_VLAN (\d+)
+Value INT_VLANQ (\d+)
+Value INT_Port_Act (.*)
+Value INT_Port_Pri (.*)
+Value INT_Port_Back (\S+)
+Value INT_DHCP_Proxy (\S+)
+Value INT_DHCP_Pri (\S+)
+Value INT_DHCP_Sec (\S+)
+Value INT_DHCP_Option82 (\S+)
+Value INT_DHCP_Option82_BridgeIns (\S+)
+Value INT_DHCP_Option6_OpenDNS (\S+)
+Value INT_ACL_IPv4 (\S+)
+Value INT_ACL_IPv6 (\S+)
+Value INT_mDNS_Prof (\S+)
+Value INT_AP_Mgr (\S+)
+Value INT_Guest_Int (\S+)
+Value INT_NAS_ID (\S+)
+
+Start
+  ^\s*Interface\s+Name -> Continue.Record
+  #   For concatenated output, on first entry the Continue.Record won't do a Record line Value is empty and Required.
+  #   This reliable than looking for some ending line that might not exist in every case/code-release.
+  ^\s*Interface\s+Name\s*[\.]+\s+${INT_Name}
+  ^\s*MAC\s+Address\s*[\.]+\s+${INT_MAC}
+  ^\s*IP\s+Address\s*[\.]+\s+${INT_IP_Add}
+  ^\s*IP\s+Netmask\s*[\.]+\s+${INT_IP_Msk}
+  ^\s*IP\s+Gateway\s*[\.]+\s+${INT_IP_DGw}
+  ^\s*External\s+NAT\s+IP\s+State\s*[\.]+\s+${INT_ExtNAT}
+  ^\s*External\s+NAT\s+IP\s+Address\s*[\.]+\s+${INT_ExtNAT_IP_Add}
+  ^\s*Link\s+Local\s+IPv6\s+Address\s*[\.]+\s+${INT_IPv6_IP_Add_LL}
+  ^\s*Primary\s+IPv6\s+Address\s*[\.]+\s+${INT_IPv6_IP_Add_Pri}
+  ^\s*Primary\s+IPv6\s+Gateway\s*[\.]+\s+${INT_IPv6_DGw}
+  ^\s*Primary\s+IPv6\s+Gateway\s+Mac\s+Address\s*[\.]+\s+${INT_IPv6_DGw_MAC}
+  ^\s*VLAN\s*[\.]+\s+${INT_VLAN}
+  ^\s*Quarantine-vlan\s*[\.]+\s+${INT_VLANQ}
+  ^\s*Active\s+Physical\s+Port\s*[\.]+\s+${INT_Port_Act}
+  ^\s*Primary\s+Physical\s+Port\s*[\.]+\s+${INT_Port_Pri}
+  ^\s*Backup\s+Physical\s+Port\s*[\.]+\s+${INT_Port_Back}
+  ^\s*DHCP\s+Proxy\s+Mode\s*[\.]+\s+${INT_DHCP_Proxy}
+  ^\s*Primary\s+DHCP\s+Server\s*[\.]+\s+${INT_DHCP_Pri}
+  ^\s*Secondary\s+DHCP\s+Server\s*[\.]+\s+${INT_DHCP_Sec}
+  ^\s*DHCP\s+Option\s+82\s*[\.]+\s+${INT_DHCP_Option82}
+  ^\s*DHCP\s+Option\s+82\s+bridge\s+mode\s+insertion\s*[\.]+\s+${INT_DHCP_Option82_BridgeIns}
+  ^\s*DHCP\s+Option\s+6\s+Opendns\s+Override\s*[\.]+\s+${INT_DHCP_Option6_OpenDNS}
+  ^\s*IPv4\s+ACL\s*[\.]+\s+${INT_ACL_IPv4}
+  ^\s*IPv6\s+ACL\s*[\.]+\s+${INT_ACL_IPv6}
+  ^\s*mDNS\s+Profile\s+Name\s*[\.]+\s+${INT_mDNS_Prof} -> Record
+  ^\s*AP\s+Manager\s*[\.]+\s+${INT_AP_Mgr}
+  ^\s*Guest\s+Interface\s*[\.]+\s+${INT_Guest_Int}
+  ^\s*NAS-Identifier\s*[\.]+\s+${INT_NAS_ID}
