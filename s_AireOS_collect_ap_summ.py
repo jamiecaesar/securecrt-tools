@@ -30,6 +30,7 @@ def script_main(session):
     | SINGLE device script
     | Author: Jamie Caesar
     | Email: jcaesar@presidio.com
+    | modified: Gordon Rogier grogier@cisco.com
 
     This script will
 
@@ -59,13 +60,13 @@ def script_main(session):
 
 def get_ap_summ_table(session):
     """
-    A function that captures the WLC AireOS ap summary table and returns an output dictionary that can be used to look up the AP
+    A function that captures the WLC AireOS ap summary table and returns an output list
 
     :param session: The script object that represents this script being executed
     :type session: session.Session
 
-    :return: A dictionary that allows lookups of MAC information for auth-list
-    :rtype: dict
+    :return: A list of MAC information for AP summary
+    :rtype: list
     """
     send_cmd = "show ap summary"
 
