@@ -1,6 +1,7 @@
 Value Required,Key WLAN_Identifier (\d+)
-Value Key WLAN_Wired_Identifier (\d+)
-Value WLAN_Profile (.*)
+Value Key WLAN_Guest_Identifier (\d+)
+Value Key WLAN_Remote_Identifier (\d+)
+Value Required,Key WLAN_Profile (.*)
 Value WLAN_SSID (.*)
 Value WLAN_Status (.*)
 Value WLAN_MACFilter (.*)
@@ -176,12 +177,18 @@ Value WLAN_SDAPeerIpAddress (.*)
 Value WLAN_SDAFlexAclName (.*)
 Value WLAN_SDAFlexAvcPolicyName (.*)
 
-
 Start
-  ^\s*WLAN\s+Configuration\s* -> Record
+  #   For first WLAN|Guest|Remote the Continue.Record won't do a Record as the WLAN Identifier is empty and Required
+  #   doing this as a new WLAN Identifier will trigger a new record to start as more reliable than
+  #   looking for some ending line that might not exist in every case/code-release.
+  #   The Continue part allows to extract the WLAN_Identifier on the next .. non-Record line
+  ^\s*(WLAN|Guest\s+LAN|Remote\s+LAN)\s+Identifier -> Continue.Record
+  #   Now extract the WLAN_Identifier
   ^\s*WLAN\s+Identifier\s*[\.]+\s*${WLAN_Identifier}
   ^\s*Guest\s+LAN\s+Identifier\s*[\.]+\s*${WLAN_Identifier} -> Continue
-  ^\s*Guest\s+LAN\s+Identifier\s*[\.]+\s*${WLAN_Wired_Identifier}
+  ^\s*Remote\s+LAN\s+Identifier\s*[\.]+\s*${WLAN_Identifier} -> Continue
+  ^\s*Guest\s+LAN\s+Identifier\s*[\.]+\s*${WLAN_Guest_Identifier}
+  ^\s*Remote\s+LAN\s+Identifier\s*[\.]+\s*${WLAN_Remote_Identifier}
   ^\s*Profile\s+Name\s*[\.]+\s*${WLAN_Profile}
   ^\s*Network\s+Name\s+\(SSID\)\s*[\.]+\s*${WLAN_SSID}
   ^\s*Status\s*[\.]+\s*${WLAN_Status}
