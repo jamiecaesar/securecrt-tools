@@ -72,10 +72,10 @@ def get_auth_list_table(session):
     # TextFSM template for parsing "show auth-list" output
     template_file = session.script.get_template("cisco_aireos_show_auth_list_table.template")
 
-    raw_auth_list = session.get_command_output(send_cmd)
-    auth_list_table = utilities.textfsm_parse_to_list(raw_auth_list, template_file, add_header=True)
+    output_raw = session.get_command_output(send_cmd)
+    output = utilities.textfsm_parse_to_list(output_raw, template_file, add_header=True)
 
-    return auth_list_table
+    return output
 
 
 # ################################################  SCRIPT LAUNCH   ###################################################
