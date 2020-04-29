@@ -48,16 +48,16 @@ def script_main(session):
     session.validate_os(["AireOS"])
 
     # Get additional information we'll need
-    mac_table = get_auth_list_table(session)
+    info_list = get_auth_list(session)
 
     output_filename = session.create_output_filename("auth-list", ext=".csv")
-    utilities.list_of_lists_to_csv(mac_table, output_filename)
+    utilities.list_of_lists_to_csv(info_list, output_filename)
 
     # Return terminal parameters back to the original state.
     session.end_cisco_session()
 
 
-def get_auth_list_table(session):
+def get_auth_list(session):
     """
     A function that captures the WLC AireOS auth-list table and returns an output list
 
