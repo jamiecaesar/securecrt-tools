@@ -1,0 +1,10 @@
+Value Filldown MG_LocalDomain (.*)
+Value Required MG_PeerMAC ([0-f][0-f]:[0-f][0-f]:[0-f][0-f]:[0-f][0-f]:[0-f][0-f]:[0-f][0-f])
+Value MG_PeerIP ([^\s]+)
+Value MG_PeerGroupName ([^\s]+)
+Value MG_PeerMCast ([^\s]+)
+Value MG_PeerStatus (.*)
+
+Start
+  ^\s*Default\s+Mobility\s+Domain\s*[\.]+\s*${MG_LocalDomain}
+  ^\s*${MG_PeerMAC}\s+${MG_PeerIP}\s+${MG_PeerGroupName}\s+${MG_PeerMCast}\s+${MG_PeerStatus} -> Record
