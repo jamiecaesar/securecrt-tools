@@ -1,8 +1,8 @@
 Value Filldown MG_LocalDomain (.*)
 Value Required MG_PeerMAC ([0-f][0-f]:[0-f][0-f]:[0-f][0-f]:[0-f][0-f]:[0-f][0-f]:[0-f][0-f])
-Value MG_PeerIP ([^\s]+)
-Value MG_PeerGroupName ([^\s]+)
-Value MG_PeerMCast ([^\s]+)
+Value MG_PeerIP (\S+)
+Value MG_PeerGroupName (\S+)
+Value MG_PeerMCast (\S+)
 Value MG_PeerStatus (.*)
 
 Start
