@@ -48,16 +48,16 @@ def script_main(session):
     session.validate_os(["AireOS"])
 
     # Get additional information we'll need
-    ap_summ_table = get_mobility_group_table(session)
+    info_list = get_mobility_group(session)
 
     output_filename = session.create_output_filename("mobility-group", ext=".csv")
-    utilities.list_of_lists_to_csv(ap_summ_table, output_filename)
+    utilities.list_of_lists_to_csv(info_list, output_filename)
 
     # Return terminal parameters back to the original state.
     session.end_cisco_session()
 
 
-def get_mobility_group_table(session):
+def get_mobility_group(session):
     """
     A function that captures the WLC AireOS mobility summary table and returns an output list
 
