@@ -83,26 +83,26 @@ def get_wlan_detail(session):
     rlan_summary_dict = utilities.textfsm_parse_to_dict(raw_rlan_summary, template_file)
     glan_summary_dict = utilities.textfsm_parse_to_dict(raw_glan_summary, template_file)
 
-    raw_detail = ''
+    output_raw = ''
     for wlan_entry in wlan_summary_dict:
         send_cmd = "show wlan " + format(wlan_entry["WLAN_Identifier"])
-        raw_detail += session.get_command_output(send_cmd)
+        output_raw += session.get_command_output(send_cmd)
 
     raw_rlan_detail = ''
     for wlan_entry in rlan_summary_dict:
         send_cmd = "show remote-lan " + format(wlan_entry["WLAN_Identifier"])
-        raw_detail += session.get_command_output(send_cmd)
+        output_raw += session.get_command_output(send_cmd)
 
     raw_glan_detail = ''
     for wlan_entry in glan_summary_dict:
         send_cmd = "show guest-lan " + format(wlan_entry["WLAN_Identifier"])
-        raw_detail += session.get_command_output(send_cmd)
+        output_raw += session.get_command_output(send_cmd)
 
     # TextFSM template for parsing "show wlan <WLAN-ID>" output
     template_file = session.script.get_template("cisco_aireos_show_wlan_detail.template")
-    detail_list = utilities.textfsm_parse_to_list(raw_detail, template_file, add_header=True)
+    output = utilities.textfsm_parse_to_list(output_raw, template_file, add_header=True)
 
-    return detail_list
+    return output
 
 
 # ################################################  SCRIPT LAUNCH   ###################################################
