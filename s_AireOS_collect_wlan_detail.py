@@ -28,9 +28,8 @@ logger.debug("Starting execution of {0}".format(script_name))
 def script_main(session):
     """
     | SINGLE device script
-    | Author: Jamie Caesar
-    | Email: jcaesar@presidio.com
-    | modified: Gordon Rogier grogier@cisco.com
+    | Morphed: Gordon Rogier grogier@cisco.com
+    | Framework: Jamie Caesar jcaesar@presidio.com
 
     This script will
 
