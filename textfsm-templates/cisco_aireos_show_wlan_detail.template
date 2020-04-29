@@ -178,12 +178,9 @@ Value WLAN_SDAFlexAclName (.*)
 Value WLAN_SDAFlexAvcPolicyName (.*)
 
 Start
-  #   For first WLAN|Guest|Remote the Continue.Record won't do a Record as the WLAN Identifier is empty and Required
-  #   doing this as a new WLAN Identifier will trigger a new record to start as more reliable than
-  #   looking for some ending line that might not exist in every case/code-release.
-  #   The Continue part allows to extract the WLAN_Identifier on the next .. non-Record line
   ^\s*(WLAN|Guest\s+LAN|Remote\s+LAN)\s+Identifier -> Continue.Record
-  #   Now extract the WLAN_Identifier
+  #   For concatenated output, on first entry the Continue.Record won't do a Record line Value is empty and Required.
+  #   This reliable than looking for some ending line that might not exist in every case/code-release.
   ^\s*WLAN\s+Identifier\s*[\.]+\s*${WLAN_Identifier}
   ^\s*Guest\s+LAN\s+Identifier\s*[\.]+\s*${WLAN_Identifier} -> Continue
   ^\s*Remote\s+LAN\s+Identifier\s*[\.]+\s*${WLAN_Identifier} -> Continue
