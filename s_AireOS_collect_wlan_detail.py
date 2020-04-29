@@ -48,10 +48,10 @@ def script_main(session):
     session.validate_os(["AireOS"])
 
     # Get additional information we'll need
-    wlan_detail = get_wlan_detail(session)
+    info_list = get_wlan_detail(session)
 
     output_filename = session.create_output_filename("wlan-detail", ext=".csv")
-    utilities.list_of_lists_to_csv(wlan_detail, output_filename)
+    utilities.list_of_lists_to_csv(info_list, output_filename)
 
     # Return terminal parameters back to the original state.
     session.end_cisco_session()
