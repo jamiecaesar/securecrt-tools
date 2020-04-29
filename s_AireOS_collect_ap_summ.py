@@ -28,9 +28,8 @@ logger.debug("Starting execution of {0}".format(script_name))
 def script_main(session):
     """
     | SINGLE device script
-    | Author: Jamie Caesar
-    | Email: jcaesar@presidio.com
-    | modified: Gordon Rogier grogier@cisco.com
+    | Morphed: Gordon Rogier grogier@cisco.com
+    | Framework: Jamie Caesar jcaesar@presidio.com
 
     This script will
 
@@ -50,6 +49,8 @@ def script_main(session):
 
     # Get additional information we'll need
     ap_summ_table = get_ap_summ_table(session)
+
+    # TODO grogier show ap config general extract
 
     output_filename = session.create_output_filename("ap-summ", ext=".csv")
     utilities.list_of_lists_to_csv(ap_summ_table, output_filename)
