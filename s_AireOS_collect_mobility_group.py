@@ -68,11 +68,10 @@ def get_mobility_group(session):
     :rtype: list
     """
     send_cmd = "show mobility summary"
+    output_raw = session.get_command_output(send_cmd)
 
     # TextFSM template for parsing "show ap summary" output
     template_file = session.script.get_template("cisco_aireos_show_mobility_summary.template")
-
-    output_raw = session.get_command_output(send_cmd)
     output = utilities.textfsm_parse_to_list(output_raw, template_file, add_header=True)
 
     return output
