@@ -1,0 +1,27 @@
+Value Required,Key AP_Name (\S+)
+Value AP_CDP_Neigh_DevID (\S+)
+Value AP_CDP_Neigh_IP (\S+)
+Value AP_CDP_Neigh_Platform ([^,]+)
+Value AP_CDP_Neigh_PortLocal ([^,]+)
+Value AP_CDP_Neigh_Port ([^,]+)
+Value AP_CDP_Neigh_Version (.*)
+Value AP_CDP_Neigh_Duplex (\S+)
+
+Start
+  ^\s*AP\s+Name: -> Continue.Record
+  ^\s*AP\s+Name:\s*${AP_Name}
+  ^\s*Device\s+ID:\s*${AP_CDP_Neigh_DevID}
+  #Entry address(es):
+  ^\s*IP\s+address:\s*${AP_CDP_Neigh_IP}
+  ^\s*Platform:\s+${AP_CDP_Neigh_Platform}[\,]
+  ^\s*Interface:\s+${AP_CDP_Neigh_PortLocal}[,]\s+Port\s+ID\s+\(outgoing\s+port\):\s+${AP_CDP_Neigh_Port}
+  ^\s*Interface:\s+${AP_CDP_Neigh_PortLocal}[,]
+  ^\s*Version\s*: -> Version
+  #Cisco IOS Software, C3560C Software (C3560c405ex-UNIVERSALK9-M), Version 15.2(2)E4, RELEASE SOFTWARE (fc2) Technical Support: http://www.cisco.com/techsupport Copyright (c) 1986-2016 by Cisco Systems, Inc. Compiled Sat 13-Feb-16 02:28 by prod_rel_team
+  #
+  #advertisement version: 2
+  ^\s*Duplex:\s+${AP_CDP_Neigh_Duplex}
+
+Version
+  # Just capture one line and go back to processing Start
+  ^${AP_CDP_Neigh_Version} -> Start

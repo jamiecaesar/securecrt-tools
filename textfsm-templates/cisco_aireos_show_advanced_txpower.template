@@ -1,0 +1,8 @@
+Value Required,Key AP_Name (\S+)
+Value AP_TxChannel (\S+)
+Value AP_TxPower_Lvl (\S+)
+Value AP_TxPower_dBm (\S+)
+Value AP_TxPower_AllowedPowerLvl (\S+)
+
+Start
+  ^\s*${AP_Name}\s+${AP_TxChannel}\s+${AP_TxPower_Lvl}\s+\(\s*${AP_TxPower_dBm}\s+dBm\)\s+${AP_TxPower_AllowedPowerLvl} -> Record
