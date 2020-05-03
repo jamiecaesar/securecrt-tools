@@ -68,11 +68,10 @@ def get_auth_list(session):
     :rtype: list
     """
     send_cmd = "show auth-list"
+    output_raw = session.get_command_output(send_cmd)
 
     # TextFSM template for parsing "show auth-list" output
     template_file = session.script.get_template("cisco_aireos_show_auth_list.template")
-
-    output_raw = session.get_command_output(send_cmd)
     output = utilities.textfsm_parse_to_list(output_raw, template_file, add_header=True)
 
     return output
