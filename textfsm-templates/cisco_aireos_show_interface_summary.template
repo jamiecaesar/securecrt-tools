@@ -8,4 +8,3 @@ Value INT_Guest (\S+)
 
 Start
   ^\s*${INT_Name}\s+${INT_Port}\s+${INT_VLAN}\s+${INT_IP}\s+${INT_Type}\s+${INT_APMgr}\s+${INT_Guest} -> Record
-  ^\s*${INT_Name}\s+${INT_Port}\s+${INT_VLAN} -> Record
