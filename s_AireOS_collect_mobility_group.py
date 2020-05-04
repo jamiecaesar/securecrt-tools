@@ -48,24 +48,21 @@ def script_main(session):
     session.validate_os(["AireOS"])
 
     # Get additional information we'll need
-    info_list = get_mobility_group(session)
-
-    output_filename = session.create_output_filename("mobility-group", ext=".csv")
-    utilities.list_of_lists_to_csv(info_list, output_filename)
+    get_mobility_group(session, to_cvs=True)
 
     # Return terminal parameters back to the original state.
     session.end_cisco_session()
 
 
-def get_mobility_group(session):
+def get_mobility_group(session, to_cvs=False):
     """
-    A function that captures the WLC AireOS mobility summary table and returns an output list
+    A function that captures the WLC AireOS mobility summary and returns an output list
 
     :param session: The script object that represents this script being executed
     :type session: session.Session
 
-    :return: A list of MAC information for AP summary
-    :rtype: list
+    :return: A list of mobility group peers
+    :rtype: list of lists
     """
     send_cmd = "show mobility summary"
     output_raw = session.get_command_output(send_cmd)
@@ -73,6 +70,10 @@ def get_mobility_group(session):
     # TextFSM template for parsing "show ap summary" output
     template_file = session.script.get_template("cisco_aireos_show_mobility_summary.template")
     output = utilities.textfsm_parse_to_list(output_raw, template_file, add_header=True)
+
+    if to_cvs:
+        output_filename = session.create_output_filename("mobility-group", ext=".csv")
+        utilities.list_of_lists_to_csv(output, output_filename)
 
     return output
 
