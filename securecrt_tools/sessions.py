@@ -431,19 +431,61 @@ class CRTSession(Session):
 
         # Get prompt (and thus hostname) from device
         self.prompt = self.__get_prompt()
-        if "(" in self.prompt:
+
+        # MOD-GROGIER Add exception for WLC having "(" ") >" prompt format
+        if "(" in self.prompt and not ") >" in self.prompt:
             try:
                 self.session.Unlock()
             except Exception:
                 pass
             raise InteractionError("Please re-run this script when not in configuration mode.")
-        self.__enter_enable(enable_pass, prompt_for_enable)
-        self.hostname = self.prompt[:-1]
-        self.logger.debug("<START> Set Hostname: {0}".format(self.hostname))
 
+        # MOD-GROGIER moved OS detect to before enable attempt to allow for WLC AireOS exception
         # Detect the OS of the device, because outputs will differ per OS
         self.os = self.__get_network_os()
         self.logger.debug("<START> Discovered OS: {0}".format(self.os))
+
+        # MOD-GROGIER get hostname from sysInfo
+        if self.os == "AireOS":
+            self.hostname = "AireOS"
+
+            matches = [self.prompt, "\r\n", '\r', '\n',
+                       'Press Enter to continue...', 'Press Enter to continue or <ctrl-z> to abort',
+                       '--More or (q)uit current module or <ctrl-z> to abort', '--More-- or (q)uit']
+            self.__send("show sysinfo\n")
+
+            # Loop to capture every line of the command. If we get our prompt back (which won't have CRLF),
+            # break the loop b/c we found the end of the output.
+            while True:
+                nextline = self.screen.ReadString(matches, 30)
+                if self.screen.MatchIndex == 0:
+                    raise InteractionError("Timeout trying to capture output")
+                elif self.screen.MatchIndex == 1:
+                    # We got our prompt, so break the loop
+                    break
+                elif self.screen.MatchIndex <= 4:
+                    # Strip newlines from front and back of line.
+                    nextline = nextline.strip('\r\n')
+                    # If there is something left, check it.
+                    if nextline != "":
+                        re_sysName_exp = r'\s*System\s+Name\s*\.+\s*(.*)'
+                        re_sysName = re.compile(re_sysName_exp)
+                        sysName = re_sysName.search(nextline)
+                        if sysName:
+                            self.hostname = sysName.group(1).strip(u"\r\n\b ")
+                elif self.screen.MatchIndex > 4:
+                    # If we get a --More-- send a space character
+                    self.screen.Send(" ")
+                else:
+                    raise InteractionError("Unknown ReadString result")
+
+        else:
+            self.hostname = self.prompt[:-1]
+        self.logger.debug("<START> Set Hostname: {0}".format(self.hostname))
+
+        # MOD-GROGIER only do enable if not AireOS
+        if not self.os == "AireOS":
+            self.__enter_enable(enable_pass, prompt_for_enable)
 
         # Get terminal length and width, so we can revert back after changing them.
         self.term_len, self.term_width = self.__get_term_info()
@@ -452,7 +494,12 @@ class CRTSession(Session):
         # If modify_term setting is True, then prevent "--More--" prompt (length) and wrapping of lines (width)
         if self.script.settings.getboolean("Global", "modify_term"):
             self.logger.debug("<START> Modify Term setting is set.  Sending commands to adjust terminal")
-            if self.os == "IOS" or self.os == "NXOS":
+            if self.os == "AireOS":
+                # Send config paging disable and wait for prompt to return
+                if self.term_len:
+                    self.__send('config paging disable\n')
+                    self.__wait_for_string(self.prompt)
+            elif self.os == "IOS" or self.os == "NXOS":
                 # Send term length command and wait for prompt to return
                 if self.term_len:
                     self.__send('term length 0\n')
@@ -599,13 +646,21 @@ class CRTSession(Session):
         Discovers Network OS type so that scripts can make decisions based on the information, such as sending a
         different version of a command for a particular OS.
         """
-        send_cmd = "show version | i Cisco"
-        raw_version = self.__get_output(send_cmd)
+        # MOD-GROGIER add detection of AireOS
+        if self.prompt[0] == "(" and ") >" == self.prompt[-3:]:
+            send_cmd = "show inventory"
+            raw_version = self.__get_output(send_cmd)
+        else:
+            send_cmd = "show version | i Cisco"
+            raw_version = self.__get_output(send_cmd)
+
         self.logger.debug("<GET OS> show version output: {0}".format(raw_version))
 
         lower_version = raw_version.lower()
 
-        if "cisco ios xe" in lower_version:
+        if "pid: air-ct" in lower_version:
+            version = "AireOS"
+        elif "cisco ios xe" in lower_version:
             version = "IOS"
         elif "cisco ios software" in lower_version or "cisco internetwork operating system" in lower_version:
             version = "IOS"
@@ -630,43 +685,38 @@ class CRTSession(Session):
         re_num_exp = r'\d+'
         re_num = re.compile(re_num_exp)
 
-        if self.os == "IOS" or self.os == "NXOS":
+        length = None
+        width = None
+
+        # MOD-GROGIER AireOS has fixed length 24 line and assume 120 char width
+        if self.os == "AireOS":
+            length = 24
+            width = 120
+
+        elif self.os == "IOS" or self.os == "NXOS":
             result = self.__get_output("show terminal | i Length")
             term_info = result.split(',')
 
             re_length = re_num.search(term_info[0])
             if re_length:
                 length = re_length.group(0)
-            else:
-                length = None
 
             re_width = re_num.search(term_info[1])
             if re_width:
                 width = re_width.group(0)
-            else:
-                width = None
-
-            return length, width
 
         elif self.os == "ASA":
             pager = self.__get_output("show pager")
             re_length = re_num.search(pager)
             if re_length:
                 length = re_length.group(0)
-            else:
-                length = None
 
             term_info = self.__get_output("show terminal")
             re_width = re_num.search(term_info[1])
             if re_width:
                 width = re_width.group(0)
-            else:
-                width = None
 
-            return length, width
-
-        else:
-            return None, None
+        return length, width
 
     def __get_output(self, command):
         """
@@ -710,18 +760,24 @@ class CRTSession(Session):
         exp_more = r' [\b]+[ ]+[\b]+(?P<line>.*)'
         re_more = re.compile(exp_more)
 
-        # The 3 different types of lines we want to match (MatchIndex) and treat differently
-        if self.os == "IOS" or self.os == "NXOS":
-            matches = ["\r\n", '--More--', self.prompt]
+        # The different types of lines we want to match (MatchIndex) and treat differently
+        # MOD-GROGIER handle AireOS
+        if self.os == "AireOS":
+            matches = [self.prompt, "\r\n", '\r', '\n',
+                       'Press Enter to continue...',
+                       'Press Enter to continue or <[Cc]trl-[Zz]> to abort',
+                       '--More or (q)uit current module or <[Cc]trl-[Zz]> to abort', '--More-- or (q)uit']
+        elif self.os == "IOS" or self.os == "NXOS":
+            matches = [self.prompt, "\r\n", '\r', '\n', '--More--']
         elif self.os == "ASA":
-            matches = ["\r\n", '<--- More --->', self.prompt]
+            matches = [self.prompt, "\r\n", '\r', '\n', '<--- More --->']
         else:
-            matches = ["\r\n", '--More--', self.prompt]
+            matches = [self.prompt, "\r\n", '\r', '\n', '--More--']
 
         # Write the output to the specified file
         try:
             # Need the 'b' in mode 'wb', or else Windows systems add extra blank lines.
-            with open(filename, 'wb') as newfile:
+            with open(filename, 'ab') as newfile:
                 self.__send(command + "\n")
 
                 # Loop to capture every line of the command.  If we get CRLF (first entry in our "endings" list), then
@@ -730,7 +786,12 @@ class CRTSession(Session):
                 while True:
                     nextline = self.screen.ReadString(matches, 30)
                     # If the match was the 1st index in the endings list -> \r\n
-                    if self.screen.MatchIndex == 1:
+                    if self.screen.MatchIndex == 0:
+                        raise InteractionError("Timeout trying to capture output")
+                    elif self.screen.MatchIndex == 1:
+                        # We got our prompt, so break the loop
+                        break
+                    elif self.screen.MatchIndex <= 4:
                         # Strip newlines from front and back of line.
                         nextline = nextline.strip('\r\n')
                         # If there is something left, write it.
@@ -742,15 +803,12 @@ class CRTSession(Session):
                             # Strip line endings from line.  Also re-encode line as ASCII
                             # and ignore the character if it can't be done (rare error on
                             # Nexus)
-                            newfile.write(nextline.strip('\r\n').encode('ascii', 'ignore') + "\r\n")
+                            newfile.write(nextline.strip('\r\n').encode('ascii', 'ignore') + "\n")
                             self.logger.debug("<WRITE_FILE> Writing Line: {0}".format(nextline.strip('\r\n')
                                                                                       .encode('ascii', 'ignore')))
-                    elif self.screen.MatchIndex == 2:
+                    elif self.screen.MatchIndex > 4:
                         # If we get a --More-- send a space character
                         self.screen.Send(" ")
-                    elif self.screen.MatchIndex == 3:
-                        # We got our prompt, so break the loop
-                        break
                     else:
                         raise InteractionError("Timeout trying to capture output")
 
@@ -933,7 +991,7 @@ class DebugSession(Session):
         self.logger.debug("<START> Set Hostname: {0}".format(self.hostname))
 
         # Detect the OS of the device, because outputs will differ per OS
-        valid_os = ["IOS", "NXOS", "IOS-XR", "ASA"]
+        valid_os = ["AireOS", "IOS", "IOS-XR", "NXOS", "ASA"]
         response = ""
         while response not in valid_os:
             response = raw_input("Select OS ({0}): ".format(str(valid_os)))

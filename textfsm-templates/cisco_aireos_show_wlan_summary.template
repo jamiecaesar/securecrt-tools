@@ -1,0 +1,9 @@
+Value Required,Key WLAN_Identifier (\d+)
+Value Key WLAN_Wired_Identifier (\d+)
+Value Required,Key WLAN_Profile (.*)
+Value WLAN_SSID (.*)
+Value WLAN_Status (.*)
+Value WLAN_Interface (.*)
+
+Start
+  ^\s*${WLAN_Identifier}\s+${WLAN_Profile}\s+(\/\s+${WLAN_SSID}\s+)*${WLAN_Status}\s+${WLAN_Interface} -> Record
