@@ -7,6 +7,10 @@ Value AP_Radio_Role (.*)
 Value AP_Radio_AssignMethod (\S+)
 Value AP_Radio_Band (.*)
 Value AP_Radio_MAC_BSSID ([0-f][0-f]:[0-f][0-f]:[0-f][0-f]:[0-f][0-f]:[0-f][0-f]:[0-f][0-f])
+Value AP_Radio_Channel_Num (\d+)
+Value AP_Radio_Channel_AssignedBy (.*)
+Value AP_Radio_Channel_Width (.*)
+Value AP_Radio_Channel_WidthExt (.*)
 Value AP_Radio_RF_Prof (.*)
 
 Start
@@ -23,5 +27,9 @@ SlotX
   ^\s*Assignment\s+Method\s*[\.]+\s*${AP_Radio_AssignMethod}
   ^\s*Band\s*[\.]+\s*${AP_Radio_Band}
   ^\s*BSSID\s*[\.]+\s*${AP_Radio_MAC_BSSID}
+  ^\s*Current\s+Channel\s*[\.]+\s*${AP_Radio_Channel_Num}
+  ^\s*Channel\s+Assigned\s+By\s*[\.]+\s*${AP_Radio_Channel_AssignedBy}
+  ^\s*Extension\s+Channel\s*[\.]+\s*${AP_Radio_Channel_WidthExt}
+  ^\s*Channel\s+Width\s*[\.]+\s*${AP_Radio_Channel_Width}
   ^\s*DCA\s+Channel\s+List\s*[\.]+\s*${AP_Radio_RF_Prof}
 
