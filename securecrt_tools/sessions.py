@@ -658,7 +658,7 @@ class CRTSession(Session):
 
         lower_version = raw_version.lower()
 
-        if "pid: air-ct" in lower_version:
+        if "pid: air-ct" in lower_version or "pid: isr-ap" in lower_version:
             version = "AireOS"
         elif "cisco ios xe" in lower_version:
             version = "IOS"
