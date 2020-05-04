@@ -48,24 +48,21 @@ def script_main(session):
     session.validate_os(["AireOS"])
 
     # Get additional information we'll need
-    info_list = get_wlan_detail(session)
-
-    output_filename = session.create_output_filename("wlan-detail", ext=".csv")
-    utilities.list_of_lists_to_csv(info_list, output_filename)
+    get_wlan_detail(session, to_cvs=True)
 
     # Return terminal parameters back to the original state.
     session.end_cisco_session()
 
 
-def get_wlan_detail(session):
+def get_wlan_detail(session, to_cvs=False):
     """
     A function that captures the WLC AireOS wlan & remote-lan & guest-lan details and returns an output list
 
     :param session: The script object that represents this script being executed
     :type session: session.Session
 
-    :return: A list of wlan detail
-    :rtype: list
+    :return: A list of wlan details
+    :rtype: list of lists
     """
 
     # Get the show wlan summary
@@ -101,6 +98,10 @@ def get_wlan_detail(session):
     # TextFSM template for parsing "show wlan <WLAN-ID>" output
     template_file = session.script.get_template("cisco_aireos_show_wlan_detail.template")
     output = utilities.textfsm_parse_to_list(output_raw, template_file, add_header=True)
+
+    if to_cvs:
+        output_filename = session.create_output_filename("wlan-detail", ext=".csv")
+        utilities.list_of_lists_to_csv(output, output_filename)
 
     return output
 
