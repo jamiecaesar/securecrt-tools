@@ -48,24 +48,21 @@ def script_main(session):
     session.validate_os(["AireOS"])
 
     # Get additional information we'll need
-    info_list = get_auth_list(session)
-
-    output_filename = session.create_output_filename("auth-list", ext=".csv")
-    utilities.list_of_lists_to_csv(info_list, output_filename)
+    get_auth_list(session, to_cvs=True)
 
     # Return terminal parameters back to the original state.
     session.end_cisco_session()
 
 
-def get_auth_list(session):
+def get_auth_list(session, to_cvs=False):
     """
-    A function that captures the WLC AireOS auth-list table and returns an output list
+    A function that captures the WLC AireOS auth-list and returns an output list
 
     :param session: The script object that represents this script being executed
     :type session: session.Session
 
-    :return: A list of MAC information for auth-list
-    :rtype: list
+    :return: A list of MAC auth-list
+    :rtype: list of lists
     """
     send_cmd = "show auth-list"
     output_raw = session.get_command_output(send_cmd)
@@ -73,6 +70,10 @@ def get_auth_list(session):
     # TextFSM template for parsing "show auth-list" output
     template_file = session.script.get_template("cisco_aireos_show_auth_list.template")
     output = utilities.textfsm_parse_to_list(output_raw, template_file, add_header=True)
+
+    if to_cvs:
+        output_filename = session.create_output_filename("auth-list", ext=".csv")
+        utilities.list_of_lists_to_csv(output, output_filename)
 
     return output
 
