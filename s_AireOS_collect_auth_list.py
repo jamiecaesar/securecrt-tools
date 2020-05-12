@@ -31,7 +31,7 @@ def script_main(session):
     | Morphed: Gordon Rogier grogier@cisco.com
     | Framework: Jamie Caesar jcaesar@presidio.com
 
-    This script will
+    This script will capture all WLC AireOS authorization lists and output them to a CSV file.
 
     :param session: A subclass of the sessions.Session object that represents this particular script session (either
                 SecureCRTSession or DirectSession)

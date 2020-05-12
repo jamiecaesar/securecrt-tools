@@ -32,7 +32,8 @@ def script_main(session):
     | Morphed: Gordon Rogier grogier@cisco.com
     | Framework: Jamie Caesar jcaesar@presidio.com
 
-    This script will
+    This script will capture details about the APs that are connected to the Wireless LAN Controller that this script
+    is being run against and will output details for each AP into a CSV file.
 
     :param session: A subclass of the sessions.Session object that represents this particular script session (either
                 SecureCRTSession or DirectSession)
