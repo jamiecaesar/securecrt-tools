@@ -1,6 +1,6 @@
 Value INT_Name (\S+)
 Value INT_Port (\S+)
-Value INT_VLAN (\d+)
+Value INT_VLAN (\S+)
 Value INT_IP (\d+[\.]\d+[\.]\d+[\.]\d+)
 Value INT_Type (\S+)
 Value INT_APMgr (\S+)
