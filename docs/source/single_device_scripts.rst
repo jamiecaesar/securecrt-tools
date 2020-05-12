@@ -10,6 +10,8 @@ These scripts can also be imported into Multi-Device scripts to reduce the amoun
    :maxdepth: 1
 
    s_add_global_config
+   s_AireOS_collect_ap_detail
+   s_AireOS_collect_auth_list
    s_arp_to_csv
    s_cdp_to_csv
    s_create_sessions_from_cdp
