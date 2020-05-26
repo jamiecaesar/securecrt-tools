@@ -31,7 +31,7 @@ def script_main(session):
     | Morphed: Gordon Rogier grogier@cisco.com
     | Framework: Jamie Caesar jcaesar@presidio.com
 
-    This script will
+    This script will capture the WLC AireOS mobility summary and returns an output list
 
     :param session: A subclass of the sessions.Session object that represents this particular script session (either
                 SecureCRTSession or DirectSession)

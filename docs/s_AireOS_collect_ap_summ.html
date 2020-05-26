@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>s_document_device &#8212; SecureCRT Tools 2.1.0 documentation</title>
+    <title>s_AireOS_collect_ap_summ &#8212; SecureCRT Tools 2.1.0 documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -16,17 +16,17 @@
     <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="s_eigrp_topology_summary" href="s_eigrp_topology_summary.html" />
-    <link rel="prev" title="s_create_sessions_from_cdp" href="s_create_sessions_from_cdp.html" /> 
+    <link rel="next" title="s_AireOS_collect_auth_list" href="s_AireOS_collect_auth_list.html" />
+    <link rel="prev" title="s_AireOS_collect_ap_detail" href="s_AireOS_collect_ap_detail.html" /> 
   </head><body>
     <div class="header-wrapper" role="banner">
       <div class="header">
         <div class="headertitle"><a
           href="index.html">SecureCRT Tools 2.1.0 documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
-          <a href="s_create_sessions_from_cdp.html" title="s_create_sessions_from_cdp"
+          <a href="s_AireOS_collect_ap_detail.html" title="s_AireOS_collect_ap_detail"
              accesskey="P">previous</a> |
-          <a href="s_eigrp_topology_summary.html" title="s_eigrp_topology_summary"
+          <a href="s_AireOS_collect_auth_list.html" title="s_AireOS_collect_auth_list"
              accesskey="N">next</a> |
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |
@@ -44,98 +44,41 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-s_document_device">
-<span id="s-document-device"></span><h1>s_document_device<a class="headerlink" href="#module-s_document_device" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-s_AireOS_collect_ap_summ">
+<span id="s-aireos-collect-ap-summ"></span><h1>s_AireOS_collect_ap_summ<a class="headerlink" href="#module-s_AireOS_collect_ap_summ" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
-<dt id="s_document_device.document">
-<code class="descclassname">s_document_device.</code><code class="descname">document</code><span class="sig-paren">(</span><em>session</em>, <em>command_list_name</em>, <em>folder_per_device</em>, <em>prompt_create_dirs=True</em><span class="sig-paren">)</span><a class="headerlink" href="#s_document_device.document" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function captures the output of the provided commands and writes them to files.  This is separated into a
-separate function so it can be called by both the single-device and multi-device version of this script.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>session</strong> (<a class="reference internal" href="tools-sessions.html#securecrt_tools.sessions.Session" title="securecrt_tools.sessions.Session"><em>sessions.Session</em></a>) – A subclass of the sessions.Session object that represents this particular script session (either
-SecureCRTSession or DirectSession)</li>
-<li><strong>command_list</strong> (<em>list</em>) – A list of commands that will be sent to the connected device.  Each output will be saved to a
-different file.</li>
-<li><strong>output_dir</strong> (<em>str</em>) – The full path to the directory where the output files are written.</li>
-<li><strong>folder_per_device</strong> (<em>bool</em>) – A boolean that if true will create a separate folder for each device</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="s_document_device.script_main">
-<code class="descclassname">s_document_device.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>session</em><span class="sig-paren">)</span><a class="headerlink" href="#s_document_device.script_main" title="Permalink to this definition">¶</a></dt>
+<dt id="s_AireOS_collect_ap_summ.script_main">
+<code class="descclassname">s_AireOS_collect_ap_summ.</code><code class="descname">script_main</code><span class="sig-paren">(</span><em>session</em><span class="sig-paren">)</span><a class="headerlink" href="#s_AireOS_collect_ap_summ.script_main" title="Permalink to this definition">¶</a></dt>
 <dd><div class="line-block">
 <div class="line">SINGLE device script</div>
-<div class="line">Author: Jamie Caesar</div>
-<div class="line">Email: <a class="reference external" href="mailto:jcaesar&#37;&#52;&#48;presidio&#46;com">jcaesar<span>&#64;</span>presidio<span>&#46;</span>com</a></div>
+<div class="line">Morphed: Gordon Rogier <a class="reference external" href="mailto:grogier&#37;&#52;&#48;cisco&#46;com">grogier<span>&#64;</span>cisco<span>&#46;</span>com</a></div>
+<div class="line">Framework: Jamie Caesar <a class="reference external" href="mailto:jcaesar&#37;&#52;&#48;presidio&#46;com">jcaesar<span>&#64;</span>presidio<span>&#46;</span>com</a></div>
 </div>
-<p>This script will grab the output for a list of commands from the connected device.  The list of commands is taken
-from the ‘settings/settings.ini’ file.  There is a separate list for each supported network operating system (IOS,
-NXOS and ASA) and by default the list that matches the network operating system of the connected device will be
-used.</p>
-<p>Custom lists of commands are supported.  These lists can be added manually to the [document_device] section of the
-‘settings/settings.ini’ file.  To be able to choose one of these lists when running the script, the
-‘prompt_for_custom_lists’ setting needs to be changed to ‘True’ in the settings.ini file.  Once this option is
-enabled, the script will prompt for the name of the list that you want to use.  If the input is left blank then
-the default behavior (based on network OS) will choose the list.</p>
-<p><strong>Script Settings</strong> (found in settings/settings.ini):</p>
-<ul>
-<li><div class="first line-block">
-<div class="line"><strong>show_instructions</strong> - When True, displays a pop-up upon launching the script</div>
-<div class="line">explaining where to modify the list of commands sent to devices.  This window also</div>
-<div class="line">prompts the user if they want to continue seeing this message.  If not, the script</div>
-<div class="line">changes this setting to False.</div>
-</div>
-</li>
-<li><div class="first line-block">
-<div class="line"><strong>folder_per_device</strong> - If True, Creates a folder for each device, based on the</div>
-<div class="line">hostname, and saves all files inside that folder WITHOUT the hostname in the output</div>
-<div class="line">file names.  If False, it saves all the files directly into the output folder from</div>
-<div class="line">the global settings and includes the hostname in each individual filename.</div>
-</div>
-</li>
-<li><div class="first line-block">
-<div class="line"><strong>prompt_for_custom_lists</strong> - When set to True, the script will prompt the user to</div>
-<div class="line">type the name of a list of commands to use with the connected device.  This list</div>
-<div class="line">name must be found as an option in the [document_device] section of the</div>
-<div class="line">settings.ini file.  The format is the same as the default network OS lists, ‘ios’,</div>
-<div class="line">‘nxos’, etc.</div>
-</div>
-</li>
-<li><div class="first line-block">
-<div class="line"><strong>ios</strong> - The list of commands that will be run on IOS devices</div>
-</div>
-</li>
-<li><div class="first line-block">
-<div class="line"><strong>nxos</strong> - The list of commands that will be run on NXOS devices</div>
-</div>
-</li>
-<li><div class="first line-block">
-<div class="line"><strong>asa</strong> - The list of commands that will be run on ASA devices</div>
-</div>
-</li>
-</ul>
-<p><strong>Any additional options found in this section would be custom added by the user and are expected to be lists of
-commands for use with the ‘prompt_for_custom_lists’ setting.</strong></p>
-<p>By default, The outputs will be saved in a folder named after the hostname of the device, with each output file
-being saved inside that directory.  This behavior can be changed in the settings above.</p>
+<p>This script will capture the WLC AireOS ap summary table and returns an output list</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>session</strong> (<a class="reference internal" href="tools-sessions.html#securecrt_tools.sessions.Session" title="securecrt_tools.sessions.Session"><em>sessions.Session</em></a>) – A subclass of the sessions.Session object that represents this particular script session (either
 SecureCRTSession or DirectSession)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="s_AireOS_collect_ap_summ.get_ap_summ_table">
+<code class="descclassname">s_AireOS_collect_ap_summ.</code><code class="descname">get_ap_summ_table</code><span class="sig-paren">(</span><em>session</em><span class="sig-paren">)</span><a class="headerlink" href="#s_AireOS_collect_ap_summ.get_ap_summ_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>A function that captures the WLC AireOS ap summary table and returns an output list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>session</strong> (<em>session.Session</em>) – The script object that represents this script being executed</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list of MAC information for AP summary</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
 </tr>
 </tbody>
 </table>
@@ -163,7 +106,7 @@ SecureCRTSession or DirectSession)</td>
 <li class="toctree-l2 current"><a class="reference internal" href="single_device_scripts.html">Single Device Scripts</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="s_add_global_config.html">s_add_global_config</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_AireOS_collect_ap_detail.html">s_AireOS_collect_ap_detail</a></li>
-<li class="toctree-l3"><a class="reference internal" href="s_AireOS_collect_ap_summ.html">s_AireOS_collect_ap_summ</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">s_AireOS_collect_ap_summ</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_AireOS_collect_auth_list.html">s_AireOS_collect_auth_list</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_AireOS_collect_interface_detail.html">s_AireOS_collect_interface_detail</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_AireOS_collect_mobility_group.html">s_AireOS_collect_mobility_group</a></li>
@@ -171,7 +114,7 @@ SecureCRTSession or DirectSession)</td>
 <li class="toctree-l3"><a class="reference internal" href="s_arp_to_csv.html">s_arp_to_csv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_cdp_to_csv.html">s_cdp_to_csv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_create_sessions_from_cdp.html">s_create_sessions_from_cdp</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">s_document_device</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s_document_device.html">s_document_device</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_eigrp_topology_summary.html">s_eigrp_topology_summary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_eigrp_topology_to_csv.html">s_eigrp_topology_to_csv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="s_interface_stats.html">s_interface_stats</a></li>
@@ -210,9 +153,9 @@ SecureCRTSession or DirectSession)</td>
       <div class="footer">
         <div class="left">
           <div role="navigation" aria-label="related navigaton">
-            <a href="s_create_sessions_from_cdp.html" title="s_create_sessions_from_cdp"
+            <a href="s_AireOS_collect_ap_detail.html" title="s_AireOS_collect_ap_detail"
               >previous</a> |
-            <a href="s_eigrp_topology_summary.html" title="s_eigrp_topology_summary"
+            <a href="s_AireOS_collect_auth_list.html" title="s_AireOS_collect_auth_list"
               >next</a> |
             <a href="py-modindex.html" title="Python Module Index"
               >modules</a> |
@@ -221,7 +164,7 @@ SecureCRTSession or DirectSession)</td>
           </div>
           <div role="note" aria-label="source link">
               <br/>
-              <a href="_sources/s_document_device.rst.txt"
+              <a href="_sources/s_AireOS_collect_ap_summ.rst.txt"
                 rel="nofollow">Show Source</a>
           </div>
         </div>

@@ -11,8 +11,11 @@ These scripts can also be imported into Multi-Device scripts to reduce the amoun
 
    s_add_global_config
    s_AireOS_collect_ap_detail
+   s_AireOS_collect_ap_summ
    s_AireOS_collect_auth_list
    s_AireOS_collect_interface_detail
+   s_AireOS_collect_mobility_group
+   s_AireOS_collect_wlan_detail
    s_arp_to_csv
    s_cdp_to_csv
    s_create_sessions_from_cdp
