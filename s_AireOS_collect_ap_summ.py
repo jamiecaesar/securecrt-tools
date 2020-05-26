@@ -72,7 +72,7 @@ def get_ap_summ_table(session):
     send_cmd = "show ap summary"
 
     # TextFSM template for parsing "show ap summary" output
-    template_file = session.script.get_template("cisco_aireos_show_ap_summary_table.template")
+    template_file = session.script.get_template("cisco_aireos_show_ap_summary.template")
 
     raw_ap_summ = session.get_command_output(send_cmd)
     ap_summ_table = utilities.textfsm_parse_to_list(raw_ap_summ, template_file, add_header=True)
