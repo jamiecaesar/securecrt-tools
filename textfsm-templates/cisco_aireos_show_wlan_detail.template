@@ -195,11 +195,7 @@ Start
   # Network Admission Control
   # Client Profiling Status
   ^\s*Radius\s+Profiling\s*[\.]+\s*${WLAN_RadiusProfiling} -> RadiusProfiling
-  ^\s*DHCP\s*[\.]+\s*${WLAN_RadiusProfilingDHCP}
-  ^\s*HTTP\s*[\.]+\s*${WLAN_RadiusProfilingHTTP} -> Start
   ^\s*Local\s+Profiling\s*[\.]+\s*${WLAN_LocalProfiling} -> LocalProfiling
-  ^\s*DHCP\s*[\.]+\s*${WLAN_LocalProfilingDHCP}
-  ^\s*HTTP\s*[\.]+\s*${WLAN_LocalProfilingHTTP} -> Start
   ^\s*Radius-NAC\s+State\s*[\.]+\s*${WLAN_RadiusNACState}
   ^\s*SNMP-NAC\s+State\s*[\.]+\s*${WLAN_SNMPNACState}
   ^\s*Quarantine\s+VLAN\s*[\.]+\s*${WLAN_QuarantineVLAN}
@@ -233,15 +229,7 @@ Start
   ^\s*Tunnel\s+Profile\s*[\.]+\s*${WLAN_TunnelProfile}
   ^\s*Quality\s+of\s+Service\s*[\.]+\s*${WLAN_QualityofService}
   ^\s*Per-SSID\s+Rate\s+Limits\s*[\.]+\s*Upstream\s+Downstream -> PerSSIDRateLimits
-  ^\s*Average\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerSSIDAverageDataRateUpStream}\s+${WLAN_PerSSIDAverageDataRateDownStream}
-  ^\s*Average\s+Realtime\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerSSIDAverageRealtimeDataRateUpStream}\s+${WLAN_PerSSIDAverageRealtimeDataRateDownStream}
-  ^\s*Burst\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerSSIDBurstDataRateUpStream}\s+${WLAN_PerSSIDBurstDataRateDownStream}
-  ^\s*Burst\s+Realtime\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerSSIDBurstRealtimeDataRateUpStream}\s+${WLAN_PerSSIDBurstRealtimeDataRateDownStream} -> Start
   ^\s*Per-Client\s+Rate\s+Limits\s*[\.]+\s*Upstream\s+Downstream -> PerUserRateLimits
-  ^\s*Average\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerClientAverageDataRateUpStream}\s+${WLAN_PerClientAverageDataRateDownStream}
-  ^\s*Average\s+Realtime\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerClientAverageRealtimeDataRateUpStream}\s+${WLAN_PerClientAverageRealtimeDataRateDownStream}
-  ^\s*Burst\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerClientBurstDataRateUpStream}\s+${WLAN_PerClientBurstDataRateDownStream}
-  ^\s*Burst\s+Realtime\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerClientBurstRealtimeDataRateUpStream}\s+${WLAN_PerClientBurstRealtimeDataRateDownStream} -> Start
   ^\s*Scan\s+Defer\s+Priority\s*[\.]+\s*${WLAN_ScanDeferPriority}
   ^\s*Scan\s+Defer\s+Time\s*[\.]+\s*${WLAN_ScanDeferTime}
   ^\s*WMM\s*[\.]+\s*${WLAN_WMM}
@@ -258,8 +246,6 @@ Start
   ^\s*DTIM\s+period\s+for\s+802.11a\s+radio\s*[\.]+\s*${WLAN_DTIM80211a}
   ^\s*DTIM\s+period\s+for\s+802.11b\s+radio\s*[\.]+\s*${WLAN_DTIM80211b}
   ^\s*Radius\s+Servers -> RadiusServers
-  ^\s*Authentication\s*[\.]+\s*${WLAN_RADIUSAuthentication}
-  ^\s*Accounting\s*[\.]+\s*${WLAN_RADIUSAccounting} -> Start
   ^\s*Dynamic\s+Interface\s*[\.]+\s*${WLAN_RADUISDynamicInterface}
   ^\s*Dynamic\s+Interface\s+Priority\s*[\.]+\s*${WLAN_RADIUSDynamicInterfacePriority}
   ^\s*Local\s+EAP\s+Authentication\s*[\.]+\s*${WLAN_LocalEAPAuthentication}
@@ -272,14 +258,7 @@ Start
   ^\s*802.1X\s*[\.]+\s*${WLAN_Security8021X}
   ^\s*Wi-Fi\s+Protected\s+Access\s+\(WPA/WPA2\)\s*[\.]+\s*${WLAN_SecurityWPAWPA2}
   ^\s*WPA\s+\(SSN\s+IE\)\s*[\.]+\s*${WLAN_SecurityWPA} -> WPA_Block
-  ^\s*TKIP\s+Cipher\s*[\.]+\s*${WLAN_SecurityWPATKIP}
-  ^\s*AES\s+Cipher\s*[\.]+\s*${WLAN_SecurityWPAAES} -> Start
   ^\s*WPA2\s+\(RSN\s+IE\)\s*[\.]+\s*${WLAN_SecurityWPA2} -> WPA2_Block
-  ^\s*TKIP\s+Cipher\s*[\.]+\s*${WLAN_SecurityWPA2TKIP}
-  ^\s*AES\s+Cipher\s*[\.]+\s*${WLAN_SecurityWPA2AES}
-  ^\s*CCMP256\s+Cipher\s*[\.]+\s*${WLAN_SecurityWPA2CCMP256}
-  ^\s*GCMP128\s+Cipher\s*[\.]+\s*${WLAN_SecurityWPA2GCMP128}
-  ^\s*GCMP256\s+Cipher\s*[\.]+\s*${WLAN_SecurityWPA2GCMP256} -> Start
   ^\s*OSEN\s+IE\s*[\.]+\s*${WLAN_SecurityOSEN}
   ^\s*Auth\s+Key\s+Management
   ^\s*802.1x\s*[\.]+\s*${WLAN_SecurityAKM8021X}
@@ -386,44 +365,38 @@ Start
   #
   ^\s*U3-Reporting Interval\s*[\.]+\s*
   #
+  ^\n -> Record
 
 
 RadiusProfiling
-  ^\s*Radius\s+Profiling\s*[\.]+\s*${WLAN_RadiusProfiling} -> RadiusProfiling
   ^\s*DHCP\s*[\.]+\s*${WLAN_RadiusProfilingDHCP}
   ^\s*HTTP\s*[\.]+\s*${WLAN_RadiusProfilingHTTP} -> Start
 
 LocalProfiling
-  ^\s*Local\s+Profiling\s*[\.]+\s*${WLAN_LocalProfiling} -> LocalProfiling
   ^\s*DHCP\s*[\.]+\s*${WLAN_LocalProfilingDHCP}
   ^\s*HTTP\s*[\.]+\s*${WLAN_LocalProfilingHTTP} -> Start
 
 PerSSIDRateLimits
-  ^\s*Per-SSID\s+Rate\s+Limits\s*[\.]+\s*Upstream\s+Downstream -> PerSSIDRateLimits
   ^\s*Average\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerSSIDAverageDataRateUpStream}\s+${WLAN_PerSSIDAverageDataRateDownStream}
   ^\s*Average\s+Realtime\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerSSIDAverageRealtimeDataRateUpStream}\s+${WLAN_PerSSIDAverageRealtimeDataRateDownStream}
   ^\s*Burst\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerSSIDBurstDataRateUpStream}\s+${WLAN_PerSSIDBurstDataRateDownStream}
   ^\s*Burst\s+Realtime\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerSSIDBurstRealtimeDataRateUpStream}\s+${WLAN_PerSSIDBurstRealtimeDataRateDownStream} -> Start
 
 PerUserRateLimits
-  ^\s*Per-Client\s+Rate\s+Limits\s*[\.]+\s*Upstream\s+Downstream -> PerUserRateLimits
   ^\s*Average\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerClientAverageDataRateUpStream}\s+${WLAN_PerClientAverageDataRateDownStream}
   ^\s*Average\s+Realtime\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerClientAverageRealtimeDataRateUpStream}\s+${WLAN_PerClientAverageRealtimeDataRateDownStream}
   ^\s*Burst\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerClientBurstDataRateUpStream}\s+${WLAN_PerClientBurstDataRateDownStream}
   ^\s*Burst\s+Realtime\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerClientBurstRealtimeDataRateUpStream}\s+${WLAN_PerClientBurstRealtimeDataRateDownStream} -> Start
 
 RadiusServers
-  ^\s*Radius\s+Servers -> RadiusServers
   ^\s*Authentication\s*[\.]+\s*${WLAN_RADIUSAuthentication}
   ^\s*Accounting\s*[\.]+\s*${WLAN_RADIUSAccounting} -> Start
 
 WPA_Block
-  ^\s*WPA\s+\(SSN\s+IE\)\s*[\.]+\s*${WLAN_SecurityWPA} -> WPA_Block
   ^\s*TKIP\s+Cipher\s*[\.]+\s*${WLAN_SecurityWPATKIP}
   ^\s*AES\s+Cipher\s*[\.]+\s*${WLAN_SecurityWPAAES} -> Start
 
 WPA2_Block
-  ^\s*WPA\s+\(SSN\s+IE\)\s*[\.]+\s*${WLAN_SecurityWPA} -> WPA_Block
   ^\s*WPA2\s+\(RSN\s+IE\)\s*[\.]+\s*${WLAN_SecurityWPA2}
   ^\s*TKIP\s+Cipher\s*[\.]+\s*${WLAN_SecurityWPA2TKIP}
   ^\s*AES\s+Cipher\s*[\.]+\s*${WLAN_SecurityWPA2AES}
