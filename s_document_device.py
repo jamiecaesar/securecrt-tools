@@ -134,7 +134,7 @@ def script_main(session):
     session.start_cisco_session()
 
     # Validate device is running a supported OS
-    session.validate_os(["IOS", "NXOS", "ASA", "IOS-XR"])
+    session.validate_os(["IOS", "NXOS", "ASA", "IOS-XR", "AireOS"])
 
     # Display instructions message, unless settings prevent it
     show_instructions = script.settings.getboolean("document_device", "show_instructions")

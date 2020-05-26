@@ -1,0 +1,405 @@
+Value Required,Key WLAN_Identifier (\d+)
+Value Key WLAN_Guest_Identifier (\d+)
+Value Key WLAN_Remote_Identifier (\d+)
+Value Required,Key WLAN_Profile (.*)
+Value WLAN_SSID (.*)
+Value WLAN_Status (.*)
+Value WLAN_MACFilter (.*)
+Value WLAN_Broadcast (.*)
+Value WLAN_AAAOverride (.*)
+Value WLAN_RadiusProfiling (.*)
+Value WLAN_RadiusProfilingDHCP (.*)
+Value WLAN_RadiusProfilingHTTP (.*)
+Value WLAN_LocalProfiling (.*)
+Value WLAN_LocalProfilingDHCP (.*)
+Value WLAN_LocalProfilingHTTP (.*)
+Value WLAN_RadiusNACState (.*)
+Value WLAN_SNMPNACState (.*)
+Value WLAN_QuarantineVLAN (.*)
+Value WLAN_MaximumClientsAllowed (.*)
+Value WLAN_SecurityGroupTTag (.*)
+Value WLAN_MaximumNumberClientsAPRadio (.*)
+Value WLAN_ATFPolicy (.*)
+Value WLAN_ExclusionlistTimeout (.*)
+Value WLAN_SessionTimeout (.*)
+Value WLAN_UserIdleTimeout (.*)
+Value WLAN_SleepClient (.*)
+Value WLAN_SleepClientTimeout (.*)
+Value WLAN_WebAuthCaptiveBypassMode (.*)
+Value WLAN_UserIdleThreshold (.*)
+Value WLAN_NASIdentifier (.*)
+Value WLAN_CHDperWLAN (.*)
+Value WLAN_WebauthDHCPexclusion (.*)
+Value WLAN_Interface (.*)
+Value WLAN_MulticastInterface (.*)
+Value WLAN_IngressInterface (.*)
+Value WLAN_IPv4ACL (.*)
+Value WLAN_IPv6ACL (.*)
+Value WLAN_Layer2ACL (.*)
+Value WLAN_DNSStatus (.*)
+Value WLAN_mDNSProfileName (.*)
+Value WLAN_DHCPServer (.*)
+Value WLAN_CentralNATPeerPeerBlocking (.*)
+Value WLAN_DHCPAddressAssignmentRequired (.*)
+Value WLAN_StaticIPClientTunneling (.*)
+Value WLAN_TunnelProfile (.*)
+Value WLAN_QualityofService (.*)
+Value WLAN_PerSSIDAverageDataRateUpStream (\d+)
+Value WLAN_PerSSIDAverageDataRateDownStream (\d+)
+Value WLAN_PerSSIDAverageRealtimeDataRateUpStream (\d+)
+Value WLAN_PerSSIDAverageRealtimeDataRateDownStream (\d+)
+Value WLAN_PerSSIDBurstDataRateUpStream (\d+)
+Value WLAN_PerSSIDBurstDataRateDownStream (\d+)
+Value WLAN_PerSSIDBurstRealtimeDataRateUpStream (\d+)
+Value WLAN_PerSSIDBurstRealtimeDataRateDownStream (\d+)
+Value WLAN_PerClientAverageDataRateUpStream (\d+)
+Value WLAN_PerClientAverageDataRateDownStream (\d+)
+Value WLAN_PerClientAverageRealtimeDataRateUpStream (\d+)
+Value WLAN_PerClientAverageRealtimeDataRateDownStream (\d+)
+Value WLAN_PerClientBurstDataRateUpStream (\d+)
+Value WLAN_PerClientBurstDataRateDownStream (\d+)
+Value WLAN_PerClientBurstRealtimeDataRateUpStream (\d+)
+Value WLAN_PerClientBurstRealtimeDataRateDownStream (\d+)
+Value WLAN_ScanDeferPriority (.*)
+Value WLAN_ScanDeferTime (.*)
+Value WLAN_WMM (.*)
+Value WLAN_WMMUAPSDCompliantClientSupport (.*)
+Value WLAN_MediaStreamMulticastDirect (.*)
+Value WLAN_CCXAironetIeSupport (.*)
+Value WLAN_CCXGratuitousProbeResponseGPR (.*)
+Value WLAN_CCXDiagnosticsChannelCapability (.*)
+Value WLAN_Dot11PhoneMode7920 (.*)
+Value WLAN_WiredProtocol (.*)
+Value WLAN_PassiveClientFeature (.*)
+Value WLAN_PeertoPeerBlockingAction (.*)
+Value WLAN_RadioPolicy (.*)
+Value WLAN_DTIM80211a (.*)
+Value WLAN_DTIM80211b (.*)
+Value List WLAN_RADIUSAuthentication (.*)
+Value List WLAN_RADIUSAccounting (.*)
+Value WLAN_RADUISDynamicInterface (.*)
+Value WLAN_RADIUSDynamicInterfacePriority (.*)
+Value WLAN_LocalEAPAuthentication (.*)
+Value WLAN_RADIUSNAIRealm (.*)
+Value WLAN_MuMimo (.*)
+Value WLAN_Security80211Authentication (.*)
+Value WLAN_SecurityFTSupport (.*)
+Value WLAN_SecurityStaticWEPKeys (.*)
+Value WLAN_Security8021X (.*)
+Value WLAN_SecurityWPAWPA2 (.*)
+Value WLAN_SecurityWPA (.*)
+Value WLAN_SecurityWPATKIP (.*)
+Value WLAN_SecurityWPAAES (.*)
+Value WLAN_SecurityWPA2 (.*)
+Value WLAN_SecurityWPA2TKIP (.*)
+Value WLAN_SecurityWPA2AES (.*)
+Value WLAN_SecurityWPA2CCMP256 (.*)
+Value WLAN_SecurityWPA2GCMP128 (.*)
+Value WLAN_SecurityWPA2GCMP256 (.*)
+Value WLAN_SecurityOSEN (.*)
+Value WLAN_SecurityAKM8021X (.*)
+Value WLAN_SecurityAKMPSK (.*)
+Value WLAN_SecurityAKMCCKM (.*)
+Value WLAN_SecurityAKMFT1X (.*)
+Value WLAN_SecurityAKMFTPSK (.*)
+Value WLAN_SecurityAKMPMF1X (.*)
+Value WLAN_SecurityAKMPMFPSK (.*)
+Value WLAN_SecurityOSEN1X (.*)
+Value WLAN_SecuritySUITEB1X (.*)
+Value WLAN_SecuritySUITEB1921X (.*)
+Value WLAN_SecurityFTReassociationTimeout (.*)
+Value WLAN_SecurityFTOverTheDS (.*)
+Value WLAN_SecurityGTKRandomization (.*)
+Value WLAN_SecuritySKCCacheSupport (.*)
+Value WLAN_SecurityCCKMTSFTolerance (.*)
+Value WLAN_SecurityWiFiDirectPolicy (.*)
+Value WLAN_SecurityEAPPassthrough (.*)
+Value WLAN_SecurityCKIP (.*)
+Value WLAN_SecurityWebBasedAuthentication (.*)
+Value WLAN_SecurityWebAuthenticationTimeout (.*)
+Value WLAN_SecurityWebPassthrough (.*)
+Value WLAN_SecurityMacAuthServer (.*)
+Value WLAN_SecurityWebPortalServer (.*)
+Value WLAN_Securityqrscandeskey (.*)
+Value WLAN_SecurityConditionalWebRedirect (.*)
+Value WLAN_SecuritySplashPageWebRedirect (.*)
+Value WLAN_SecurityAutoAnchor (.*)
+Value WLAN_FlexConnectLocalSwitching (.*)
+Value WLAN_FlexConnectCentralAssociation (.*)
+Value WLAN_FlexConnectCentralDhcpFlag (.*)
+Value WLAN_FlexConnectNatPatFlag (.*)
+Value WLAN_FlexConnectDnsOverrideFlag (.*)
+Value WLAN_FlexConnectPPPoEPassThrough (.*)
+Value WLAN_FlexConnectLocalSwitchingIPSourceGuard (.*)
+Value WLAN_FlexConnectVlanbasedCentralSwitching (.*)
+Value WLAN_FlexConnectLocalAuthentication (.*)
+Value WLAN_FlexConnectLearnIPAddress (.*)
+Value WLAN_ClientMFP (.*)
+Value WLAN_MFP (.*)
+Value WLAN_PMFAssociationComebackTime (.*)
+Value WLAN_PMFSAQueryRetryTimeout (.*)
+Value WLAN_TkipMICCountermeasureHolddownTimer (.*)
+Value WLAN_EapParams (.*)
+Value WLAN_AVCVisibilty (.*)
+Value WLAN_AVCProfileName (.*)
+Value WLAN_OpenDnsProfileName (.*)
+Value WLAN_OpenDnsWlanMode (.*)
+Value WLAN_FlowMonitorName (.*)
+Value WLAN_SplitTunnel (.*)
+Value WLAN_CallSnooping (.*)
+Value WLAN_RoamedCallReAnchorPolicy (.*)
+Value WLAN_SIPCACFailSend486BusyPolicy (.*)
+Value WLAN_SIPCACFailSendDisAssociationPolicy (.*)
+Value WLAN_KTSbasedCACPolicy (.*)
+Value WLAN_AssistedRoamingPredictionOptimization (.*)
+Value WLAN_80211kNeighborList (.*)
+Value WLAN_80211kNeighborListDualBand (.*)
+Value WLAN_80211vDirectedMulticastService (.*)
+Value WLAN_80211vBSSTransitionIdleService (.*)
+Value WLAN_80211vBSSTransitionService (.*)
+Value WLAN_80211vBSSTransitionDisassocImminent (.*)
+Value WLAN_80211vBSSTransitionDisassocTimer (.*)
+Value WLAN_80211vBSSTransitionOpRoamDisassocTimer (.*)
+Value WLAN_BandSelect (.*)
+Value WLAN_LoadBalancing (.*)
+Value WLAN_MulticastBuffer (.*)
+Value WLAN_UniversalApAdmin (.*)
+Value WLAN_BroadcastTagging (.*)
+Value WLAN_PRP (.*)
+Value WLAN_QoSFastlaneStatus (.*)
+Value WLAN_SelectiveReanchoringStatus (.*)
+Value WLAN_LobbyAdminAccess (.*)
+Value WLAN_SDAFabricStatus (.*)
+Value WLAN_SDAVnidName (.*)
+Value WLAN_SDAVnid (.*)
+Value WLAN_SDAAppliedSGTTag (.*)
+Value WLAN_SDAPeerIpAddress (.*)
+Value WLAN_SDAFlexAclName (.*)
+Value WLAN_SDAFlexAvcPolicyName (.*)
+
+Start
+  ^\s*(WLAN|Guest\s+LAN|Remote\s+LAN)\s+Identifier -> Continue.Record
+  #   For concatenated output, on first entry the Continue.Record won't do a Record line Value is empty and Required.
+  #   This reliable than looking for some ending line that might not exist in every case/code-release.
+  ^\s*WLAN\s+Identifier\s*[\.]+\s*${WLAN_Identifier}
+  ^\s*Guest\s+LAN\s+Identifier\s*[\.]+\s*${WLAN_Identifier} -> Continue
+  ^\s*Remote\s+LAN\s+Identifier\s*[\.]+\s*${WLAN_Identifier} -> Continue
+  ^\s*Guest\s+LAN\s+Identifier\s*[\.]+\s*${WLAN_Guest_Identifier}
+  ^\s*Remote\s+LAN\s+Identifier\s*[\.]+\s*${WLAN_Remote_Identifier}
+  ^\s*Profile\s+Name\s*[\.]+\s*${WLAN_Profile}
+  ^\s*Network\s+Name\s+\(SSID\)\s*[\.]+\s*${WLAN_SSID}
+  ^\s*Status\s*[\.]+\s*${WLAN_Status}
+  ^\s*MAC\s+Filtering\s*[\.]+\s*${WLAN_MACFilter}
+  ^\s*Broadcast\s+SSID\s*[\.]+\s*${WLAN_Broadcast}
+  ^\s*AAA\s+Policy\s+Override\s*[\.]+\s*${WLAN_AAAOverride}
+  # Network Admission Control
+  # Client Profiling Status
+  ^\s*Radius\s+Profiling\s*[\.]+\s*${WLAN_RadiusProfiling} -> RadiusProfiling
+  ^\s*Local\s+Profiling\s*[\.]+\s*${WLAN_LocalProfiling} -> LocalProfiling
+  ^\s*Radius-NAC\s+State\s*[\.]+\s*${WLAN_RadiusNACState}
+  ^\s*SNMP-NAC\s+State\s*[\.]+\s*${WLAN_SNMPNACState}
+  ^\s*Quarantine\s+VLAN\s*[\.]+\s*${WLAN_QuarantineVLAN}
+  ^\s*Maximum\s+Clients\s+Allowed\s*[\.]+\s*${WLAN_MaximumClientsAllowed}
+  ^\s*Security\s+Group\s+Tag\s*[\.]+\s*${WLAN_SecurityGroupTTag}
+  ^\s*Maximum\s+number\s+of\s+Clients\s+per\s+AP\s+Radio\s*[\.]+\s*${WLAN_MaximumNumberClientsAPRadio}
+  ^\s*ATF\s+Policy\s*[\.]+\s*${WLAN_ATFPolicy}
+  # Number of Active Clients......................... 2
+  ^\s*Exclusionlist\s+Timeout\s*[\.]+\s*${WLAN_ExclusionlistTimeout}
+  ^\s*Session\s+Timeout\s*[\.]+\s*${WLAN_SessionTimeout}
+  ^\s*User\s+Idle\s+Timeout\s*[\.]+\s*${WLAN_UserIdleTimeout}
+  ^\s*Sleep\s+Client\s*[\.]+\s*${WLAN_SleepClient}
+  ^\s*Sleep\s+Client\s+Timeout\s*[\.]+\s*${WLAN_SleepClientTimeout}
+  ^\s*Web\s+Auth\s+Captive\s+Bypass\s+Mode\s*[\.]+\s*${WLAN_WebAuthCaptiveBypassMode}
+  ^\s*User\s+Idle\s+Threshold\s*[\.]+\s*${WLAN_UserIdleThreshold}
+  ^\s*NAS-identifier\s*[\.]+\s*${WLAN_NASIdentifier}
+  ^\s*CHD\s+per\s+WLAN\s*[\.]+\s*${WLAN_CHDperWLAN}
+  ^\s*Webauth\s+DHCP\s+exclusion\s*[\.]+\s*${WLAN_WebauthDHCPexclusion}
+  ^\s*Interface\s*[\.]+\s*${WLAN_Interface}
+  ^\s*Multicast\s+Interface\s*[\.]+\s*${WLAN_MulticastInterface}
+  ^\s*Ingress\s+Interface\s*[\.]+\s*${WLAN_IngressInterface}
+  ^\s*WLAN\s+IPv4\s+ACL\s*[\.]+\s*${WLAN_IPv4ACL}
+  ^\s*WLAN\s+IPv6\s+ACL\s*[\.]+\s*${WLAN_IPv6ACL}
+  ^\s*WLAN\s+Layer2\s+ACL\s*[\.]+\s*${WLAN_Layer2ACL}
+  ^\s*mDNS\s+Status\s*[\.]+\s*${WLAN_DNSStatus}
+  ^\s*mDNS\s+Profile\s+Name\s*[\.]+\s*${WLAN_mDNSProfileName}
+  ^\s*DHCP\s+Server\s*[\.]+\s*${WLAN_DHCPServer}
+  ^\s*Central\s+NAT\s+Peer-Peer\s+Blocking\s*[\.]+\s*${WLAN_CentralNATPeerPeerBlocking}
+  ^\s*DHCP\s+Address\s+Assignment\s+Required\s*[\.]+\s*${WLAN_DHCPAddressAssignmentRequired}
+  ^\s*Static\s+IP\s+client\s+tunneling\s*[\.]+\s*${WLAN_StaticIPClientTunneling}
+  ^\s*Tunnel\s+Profile\s*[\.]+\s*${WLAN_TunnelProfile}
+  ^\s*Quality\s+of\s+Service\s*[\.]+\s*${WLAN_QualityofService}
+  ^\s*Per-SSID\s+Rate\s+Limits\s*[\.]+\s*Upstream\s+Downstream -> PerSSIDRateLimits
+  ^\s*Per-Client\s+Rate\s+Limits\s*[\.]+\s*Upstream\s+Downstream -> PerUserRateLimits
+  ^\s*Scan\s+Defer\s+Priority\s*[\.]+\s*${WLAN_ScanDeferPriority}
+  ^\s*Scan\s+Defer\s+Time\s*[\.]+\s*${WLAN_ScanDeferTime}
+  ^\s*WMM\s*[\.]+\s*${WLAN_WMM}
+  ^\s*WMM\s+UAPSD\s+Compliant\s+Client\s+Support\s*[\.]+\s*${WLAN_WMMUAPSDCompliantClientSupport}
+  ^\s*Media\s+Stream\s+Multicast-direct\s*[\.]+\s*${WLAN_MediaStreamMulticastDirect}
+  ^\s*CCX\s+-\s+AironetIe\s+Support\s*[\.]+\s*${WLAN_CCXAironetIeSupport}
+  ^\s*CCX\s+-\s+Gratuitous\s+ProbeResponse\s+\(GPR\)\s*[\.]+\s*${WLAN_CCXGratuitousProbeResponseGPR}
+  ^\s*CCX\s+-\s+Diagnostics\s+Channel\s+Capability\s*[\.]+\s*${WLAN_CCXDiagnosticsChannelCapability}
+  ^\s*Dot11-Phone\s+Mode\s+\(7920\)\s*[\.]+\s*${WLAN_Dot11PhoneMode7920}
+  ^\s*Wired\s+Protocol\s*[\.]+\s*${WLAN_WiredProtocol}
+  ^\s*Passive\s+Client\s+Feature\s*[\.]+\s*${WLAN_PassiveClientFeature}
+  ^\s*Peer-to-Peer\s+Blocking\s+Action\s*[\.]+\s*${WLAN_PeertoPeerBlockingAction}
+  ^\s*Radio\s+Policy\s*[\.]+\s*${WLAN_RadioPolicy}
+  ^\s*DTIM\s+period\s+for\s+802.11a\s+radio\s*[\.]+\s*${WLAN_DTIM80211a}
+  ^\s*DTIM\s+period\s+for\s+802.11b\s+radio\s*[\.]+\s*${WLAN_DTIM80211b}
+  ^\s*Radius\s+Servers -> RadiusServers
+  ^\s*Dynamic\s+Interface\s*[\.]+\s*${WLAN_RADUISDynamicInterface}
+  ^\s*Dynamic\s+Interface\s+Priority\s*[\.]+\s*${WLAN_RADIUSDynamicInterfacePriority}
+  ^\s*Local\s+EAP\s+Authentication\s*[\.]+\s*${WLAN_LocalEAPAuthentication}
+  ^\s*Radius\s+NAI-Realm\s*[\.]+\s*${WLAN_RADIUSNAIRealm}
+  ^\s*Mu-Mimo\s*[\.]+\s*${WLAN_MuMimo}
+  # Security
+  ^\s*802.11\s+Authentication:\s*[\.]+\s*${WLAN_Security80211Authentication}
+  ^\s*FT\s+Support\s*[\.]+\s*${WLAN_SecurityFTSupport}
+  ^\s*Static\s+WEP\s+Keys\s*[\.]+\s*${WLAN_SecurityStaticWEPKeys}
+  ^\s*802.1X\s*[\.]+\s*${WLAN_Security8021X}
+  ^\s*Wi-Fi\s+Protected\s+Access\s+\(WPA/WPA2\)\s*[\.]+\s*${WLAN_SecurityWPAWPA2}
+  ^\s*WPA\s+\(SSN\s+IE\)\s*[\.]+\s*${WLAN_SecurityWPA} -> WPA_Block
+  ^\s*WPA2\s+\(RSN\s+IE\)\s*[\.]+\s*${WLAN_SecurityWPA2} -> WPA2_Block
+  ^\s*OSEN\s+IE\s*[\.]+\s*${WLAN_SecurityOSEN}
+  ^\s*Auth\s+Key\s+Management
+  ^\s*802.1x\s*[\.]+\s*${WLAN_SecurityAKM8021X}
+  ^\s*PSK\s*[\.]+\s*${WLAN_SecurityAKMPSK}
+  ^\s*CCKM\s*[\.]+\s*${WLAN_SecurityAKMCCKM}
+  ^\s*FT-1X\(802.11r\)\s*[\.]+\s*${WLAN_SecurityAKMFT1X}
+  ^\s*FT-PSK\(802.11r\)\s*[\.]+\s*${WLAN_SecurityAKMFTPSK}
+  ^\s*PMF-1X\(802.11w\)\s*[\.]+\s*${WLAN_SecurityAKMPMF1X}
+  ^\s*PMF-PSK\(802.11w\)\s*[\.]+\s*${WLAN_SecurityAKMPMFPSK}
+  ^\s*OSEN-1X\s*[\.]+\s*${WLAN_SecurityOSEN1X}
+  ^\s*SUITEB-1X\s*[\.]+\s*${WLAN_SecuritySUITEB1X}
+  ^\s*SUITEB192-1X\s*[\.]+\s*${WLAN_SecuritySUITEB1921X}
+  ^\s*FT\s+Reassociation\s+Timeout\s*[\.]+\s*${WLAN_SecurityFTReassociationTimeout}
+  ^\s*FT\s+Over-The-DS\s+mode\s*[\.]+\s*${WLAN_SecurityFTOverTheDS}
+  ^\s*GTK\s+Randomization\s*[\.]+\s*${WLAN_SecurityGTKRandomization}
+  ^\s*SKC\s+Cache\s+Support\s*[\.]+\s*${WLAN_SecuritySKCCacheSupport}
+  ^\s*CCKM\s+TSF\s+Tolerance\s*[\.]+\s*${WLAN_SecurityCCKMTSFTolerance}
+  ^\s*Wi-Fi\s+Direct\s+policy\s+configured\s*[\.]+\s*${WLAN_SecurityWiFiDirectPolicy}
+  ^\s*EAP-Passthrough\s*[\.]+\s*${WLAN_SecurityEAPPassthrough}
+  ^\s*CKIP\s*[\.]+\s*${WLAN_SecurityCKIP}
+  ^\s*Web\s+Based\s+Authentication\s*[\.]+\s*${WLAN_SecurityWebBasedAuthentication}
+  ^\s*Web\s+Authentication\s+Timeout\s*[\.]+\s*${WLAN_SecurityWebAuthenticationTimeout}
+  ^\s*Web-Passthrough\s*[\.]+\s*${WLAN_SecurityWebPassthrough}
+  ^\s*Mac-auth-server\s*[\.]+\s*${WLAN_SecurityMacAuthServer}
+  ^\s*Web-portal-server\s*[\.]+\s*${WLAN_SecurityWebPortalServer}
+  ^\s*qrscan-des-key\s*[\.]+\s*${WLAN_Securityqrscandeskey}
+  ^\s*Conditional\s+Web\s+Redirect\s*[\.]+\s*${WLAN_SecurityConditionalWebRedirect}
+  ^\s*Splash-Page\s+Web\s+Redirect\s*[\.]+\s*${WLAN_SecuritySplashPageWebRedirect}
+  ^\s*Auto\s+Anchor\s*[\.]+\s*${WLAN_SecurityAutoAnchor}
+  ^\s*FlexConnect\s+Local\s+Switching\s*[\.]+\s*${WLAN_FlexConnectLocalSwitching}
+  ^\s*FlexConnect\s+Central\s+Association\s*[\.]+\s*${WLAN_FlexConnectCentralAssociation}
+  ^\s*flexconnect\s+Central\s+Dhcp\s+Flag\s*[\.]+\s*${WLAN_FlexConnectCentralDhcpFlag}
+  ^\s*flexconnect\s+nat-pat\s+Flag\s*[\.]+\s*${WLAN_FlexConnectNatPatFlag}
+  ^\s*flexconnect\s+Dns\s+Override\s+Flag\s*[\.]+\s*${WLAN_FlexConnectDnsOverrideFlag}
+  ^\s*flexconnect\s+PPPoE\s+pass-through\s*[\.]+\s*${WLAN_FlexConnectPPPoEPassThrough}
+  ^\s*flexconnect\s+local-switching\s+IP-source-guar\s*[\.]+\s*${WLAN_FlexConnectLocalSwitchingIPSourceGuard}
+  ^\s*FlexConnect\s+Vlan\s+based\s+Central\s+Switching\s*[\.]+\s*${WLAN_FlexConnectVlanbasedCentralSwitching}
+  ^\s*FlexConnect\s+Local\s+Authentication\s*[\.]+\s*${WLAN_FlexConnectLocalAuthentication}
+  ^\s*FlexConnect\s+Learn\s+IP\s+Address\s*[\.]+\s*${WLAN_FlexConnectLearnIPAddress}
+  ^\s*Client\s+MFP\s*[\.]+\s*${WLAN_ClientMFP}
+  ^\s*PMF\s*[\.]+\s*${WLAN_MFP}
+  ^\s*PMF\s+Association\s+Comeback\s+Time\s*[\.]+\s*${WLAN_PMFAssociationComebackTime}
+  ^\s*PMF\s+SA\s+Query\s+RetryTimeout\s*[\.]+\s*${WLAN_PMFSAQueryRetryTimeout}
+  ^\s*Tkip\s+MIC\s+Countermeasure\s+Hold-down\s+Timer\s*[\.]+\s*${WLAN_TkipMICCountermeasureHolddownTimer}
+  ^\s*Eap-params\s*[\.]+\s*${WLAN_EapParams}
+  ^\s*AVC\s+Visibilty\s*[\.]+\s*${WLAN_AVCVisibilty}
+  ^\s*AVC\s+Profile\s+Name\s*[\.]+\s*${WLAN_AVCProfileName}
+  ^\s*OpenDns\s+Profile\s+Name\s*[\.]+\s*${WLAN_OpenDnsProfileName}
+  ^\s*OpenDns\s+Wlan\s+Mode\s*[\.]+\s*${WLAN_OpenDnsWlanMode}
+  ^\s*Flow\s+Monitor\s+Name\s*[\.]+\s*${WLAN_FlowMonitorName}
+  # Split Tunnel Configuration
+  ^\s*Split\s+Tunnel\s*[\.]+\s*${WLAN_SplitTunnel}
+  ^\s*Call\s+Snooping\s*[\.]+\s*${WLAN_CallSnooping}
+  ^\s*Roamed\s+Call\s+Re-Anchor\s+Policy\s*[\.]+\s*${WLAN_RoamedCallReAnchorPolicy}
+  ^\s*SIP\s+CAC\s+Fail\s+Send-486-Busy\s+Policy\s*[\.]+\s*${WLAN_SIPCACFailSend486BusyPolicy}
+  ^\s*SIP\s+CAC\s+Fail\s+Send\s+Dis-Association\s+Policy\s*[\.]+\s*${WLAN_SIPCACFailSendDisAssociationPolicy}
+  ^\s*KTS\s+based\s+CAC\s+Policy\s*[\.]+\s*${WLAN_KTSbasedCACPolicy}
+  ^\s*Assisted\s+Roaming\s+Prediction\s+Optimization\s*[\.]+\s*${WLAN_AssistedRoamingPredictionOptimization}
+  ^\s*802.11k\s+Neighbor\s+List\s*[\.]+\s*${WLAN_80211kNeighborList}
+  ^\s*802.11k\s+Neighbor\s+List\s+Dual\s+Band\s*[\.]+\s*${WLAN_80211kNeighborListDualBand}
+  ^\s*802.11v\s+Directed\s+Multicast\s+Service\s*[\.]+\s*${WLAN_80211vDirectedMulticastService}
+  ^\s*802.11v\s+BSS\s+Max\s+Idle\s+Service\s*[\.]+\s*${WLAN_80211vBSSTransitionIdleService}
+  ^\s*802.11v\s+BSS\s+Transition\s+Service\s*[\.]+\s*${WLAN_80211vBSSTransitionService}
+  ^\s*802.11v\s+BSS\s+Transition\s+Disassoc\s+Imminent\s*[\.]+\s*${WLAN_80211vBSSTransitionDisassocImminent}
+  ^\s*802.11v\s+BSS\s+Transition\s+Disassoc\s+Timer\s*[\.]+\s*${WLAN_80211vBSSTransitionDisassocTimer}
+  ^\s*802.11v\s+BSS\s+Transition\s+OpRoam\s+Disassoc\s+Timer\s*[\.]+\s*${WLAN_80211vBSSTransitionOpRoamDisassocTimer}
+  # DMS DB is empty
+  ^\s*Band\s+Select\s*[\.]+\s*${WLAN_BandSelect}
+  ^\s*Load\s+Balancing\s*[\.]+\s*${WLAN_LoadBalancing}
+  ^\s*Multicast\s+Buffer\s*[\.]+\s*${WLAN_MulticastBuffer}
+  ^\s*Universal\s+Ap\s+Admin\s*[\.]+\s*${WLAN_UniversalApAdmin}
+  ^\s*Broadcast\s+Tagging\s*[\.]+\s*${WLAN_BroadcastTagging}
+  ^\s*PRP\s*[\.]+\s*${WLAN_PRP}
+  #
+  #  Mobility Anchor List
+  #  WLAN ID     IP Address            Status                             Priority
+  #  -------     ---------------       ------                             --------
+  #
+  # 802.11u........................................ Disabled
+  #
+  # MSAP Services.................................. Disabled
+  #
+  # Local Policy
+  # ----------------
+  # Priority  Policy Name
+  # --------  ---------------
+  #
+  ^\s*QoS\s+Fastlane\s+Status\s*[\.]+\s*${WLAN_QoSFastlaneStatus}
+  ^\s*Selective\s+Reanchoring\s+Status\s*[\.]+\s*${WLAN_SelectiveReanchoringStatus}
+  ^\s*Lobby\s+Admin\s+Access\s*[\.]+\s*${WLAN_LobbyAdminAccess}
+  #
+  #  Fabric Status
+  # --------------
+  #
+  ^\s*Fabric\s+status\s*[\.]+\s*${WLAN_SDAFabricStatus}
+  ^\s*Vnid\s+Name\s*[\.]+\s*${WLAN_SDAVnidName}
+  ^\s*Vnid\s*[\.]+\s*${WLAN_SDAVnid}
+  ^\s*Applied\s+SGT\s+Tag\s*[\.]+\s*${WLAN_SDAAppliedSGTTag}
+  ^\s*Peer\s+Ip\s+Address\s*[\.]+\s*${WLAN_SDAPeerIpAddress}
+  ^\s*Flex\s+Acl\s+Name\s*[\.]+\s*${WLAN_SDAFlexAclName}
+  ^\s*Flex\s+Avc\s+Policy\s+Name\s*[\.]+\s*${WLAN_SDAFlexAvcPolicyName}
+  #
+  ^\s*U3-Interface\s*[\.]+\s*
+  #
+  ^\s*U3-Reporting Interval\s*[\.]+\s*
+  #
+  ^\n -> Record
+
+
+RadiusProfiling
+  ^\s*DHCP\s*[\.]+\s*${WLAN_RadiusProfilingDHCP}
+  ^\s*HTTP\s*[\.]+\s*${WLAN_RadiusProfilingHTTP} -> Start
+
+LocalProfiling
+  ^\s*DHCP\s*[\.]+\s*${WLAN_LocalProfilingDHCP}
+  ^\s*HTTP\s*[\.]+\s*${WLAN_LocalProfilingHTTP} -> Start
+
+PerSSIDRateLimits
+  ^\s*Average\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerSSIDAverageDataRateUpStream}\s+${WLAN_PerSSIDAverageDataRateDownStream}
+  ^\s*Average\s+Realtime\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerSSIDAverageRealtimeDataRateUpStream}\s+${WLAN_PerSSIDAverageRealtimeDataRateDownStream}
+  ^\s*Burst\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerSSIDBurstDataRateUpStream}\s+${WLAN_PerSSIDBurstDataRateDownStream}
+  ^\s*Burst\s+Realtime\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerSSIDBurstRealtimeDataRateUpStream}\s+${WLAN_PerSSIDBurstRealtimeDataRateDownStream} -> Start
+
+PerUserRateLimits
+  ^\s*Average\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerClientAverageDataRateUpStream}\s+${WLAN_PerClientAverageDataRateDownStream}
+  ^\s*Average\s+Realtime\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerClientAverageRealtimeDataRateUpStream}\s+${WLAN_PerClientAverageRealtimeDataRateDownStream}
+  ^\s*Burst\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerClientBurstDataRateUpStream}\s+${WLAN_PerClientBurstDataRateDownStream}
+  ^\s*Burst\s+Realtime\s+Data\s+Rate\s*[\.]+\s*${WLAN_PerClientBurstRealtimeDataRateUpStream}\s+${WLAN_PerClientBurstRealtimeDataRateDownStream} -> Start
+
+RadiusServers
+  ^\s*Authentication\s*[\.]+\s*${WLAN_RADIUSAuthentication}
+  ^\s*Accounting\s*[\.]+\s*${WLAN_RADIUSAccounting} -> Start
+
+WPA_Block
+  ^\s*TKIP\s+Cipher\s*[\.]+\s*${WLAN_SecurityWPATKIP}
+  ^\s*AES\s+Cipher\s*[\.]+\s*${WLAN_SecurityWPAAES} -> Start
+
+WPA2_Block
+  ^\s*WPA2\s+\(RSN\s+IE\)\s*[\.]+\s*${WLAN_SecurityWPA2}
+  ^\s*TKIP\s+Cipher\s*[\.]+\s*${WLAN_SecurityWPA2TKIP}
+  ^\s*AES\s+Cipher\s*[\.]+\s*${WLAN_SecurityWPA2AES}
+  ^\s*CCMP256\s+Cipher\s*[\.]+\s*${WLAN_SecurityWPA2CCMP256}
+  ^\s*GCMP128\s+Cipher\s*[\.]+\s*${WLAN_SecurityWPA2GCMP128}
+  ^\s*GCMP256\s+Cipher\s*[\.]+\s*${WLAN_SecurityWPA2GCMP256} -> Start

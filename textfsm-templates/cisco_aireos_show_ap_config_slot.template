@@ -1,0 +1,35 @@
+Value Required,Key AP_Name (\S+)
+Value AP_Radio_State_Admin (\S+)
+Value AP_Radio_State_Oper (.*)
+Value AP_Radio_Type (\S+)
+Value AP_Radio_RoleMesh (\S+)
+Value AP_Radio_Role (.*)
+Value AP_Radio_AssignMethod (\S+)
+Value AP_Radio_Band (.*)
+Value AP_Radio_MAC_BSSID ([0-f][0-f]:[0-f][0-f]:[0-f][0-f]:[0-f][0-f]:[0-f][0-f]:[0-f][0-f])
+Value AP_Radio_Channel_Num (\d+)
+Value AP_Radio_Channel_AssignedBy (.*)
+Value AP_Radio_Channel_Width (.*)
+Value AP_Radio_Channel_WidthExt (.*)
+Value AP_Radio_RF_Prof (.*)
+
+Start
+  ^\s*Cisco\s+AP\s+Name\s*[\.]+\s*${AP_Name}
+  ^\s*Attributes\s+for\s+Slot -> SlotX
+
+SlotX
+  ^\s*Cisco\s*AP\s*Identifier -> Record Start
+  ^\s*Administrative\s+State\s*[\.]+\s*${AP_Radio_State_Admin}
+  ^\s*Operation\s+State\s*[\.]+\s*${AP_Radio_State_Oper}
+  ^\s*Radio\s+Type\s*[\.]+\s*${AP_Radio_Type}
+  ^\s*Mesh\s+Radio\s+Role\s*[\.]+\s*${AP_Radio_RoleMesh}
+  ^\s*Radio\s+Role\s*[\.]+\s*${AP_Radio_Role}
+  ^\s*Assignment\s+Method\s*[\.]+\s*${AP_Radio_AssignMethod}
+  ^\s*Band\s*[\.]+\s*${AP_Radio_Band}
+  ^\s*BSSID\s*[\.]+\s*${AP_Radio_MAC_BSSID}
+  ^\s*Current\s+Channel\s*[\.]+\s*${AP_Radio_Channel_Num}
+  ^\s*Channel\s+Assigned\s+By\s*[\.]+\s*${AP_Radio_Channel_AssignedBy}
+  ^\s*Extension\s+Channel\s*[\.]+\s*${AP_Radio_Channel_WidthExt}
+  ^\s*Channel\s+Width\s*[\.]+\s*${AP_Radio_Channel_Width}
+  ^\s*DCA\s+Channel\s+List\s*[\.]+\s*${AP_Radio_RF_Prof}
+

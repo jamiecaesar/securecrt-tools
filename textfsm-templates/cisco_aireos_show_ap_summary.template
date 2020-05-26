@@ -1,0 +1,11 @@
+Value Required,Key AP_Name (\S+)
+Value AP_Slots (\d+)
+Value AP_Model (\S+)
+Value AP_MAC_Enet ([0-9a-fA-F]{2}\:[0-9a-fA-F]{2}\:[0-9a-fA-F]{2}\:[0-9a-fA-F]{2}\:[0-9a-fA-F]{2}\:[0-9a-fA-F]{2})
+Value AP_Location (.*)
+Value AP_Country (\S+)
+Value AP_IP_Addr (\S+)
+Value AP_Clients (\d+)
+
+Start
+  ^${AP_Name}\s+${AP_Slots}\s+${AP_Model}\s+${AP_MAC_Enet}\s+${AP_Location}\s+${AP_Country}\s+${AP_IP_Addr}\s+${AP_Clients} -> Record

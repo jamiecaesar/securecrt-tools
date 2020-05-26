@@ -17,6 +17,7 @@ settings/
 dev-test/
 private/
 doctrees/
+ScriptOutput/
 
 # Ignore CSV files
 *.csv
