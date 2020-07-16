@@ -279,7 +279,7 @@ class CRTSession(Session):
         self.tab = tab
         self.screen = tab.Screen
         self.session = tab.Session
-        self.response_timeout = 30
+        self.response_timeout = self.script.settings.getint("Global", "response_timeout")
         self.session_set_sync = False
 
         if not self.is_connected():
@@ -457,7 +457,7 @@ class CRTSession(Session):
             # Loop to capture every line of the command. If we get our prompt back (which won't have CRLF),
             # break the loop b/c we found the end of the output.
             while True:
-                nextline = self.screen.ReadString(matches, 30)
+                nextline = self.screen.ReadString(matches, self.response_timeout)
                 if self.screen.MatchIndex == 0:
                     raise InteractionError("Timeout trying to capture output")
                 elif self.screen.MatchIndex == 1:
@@ -627,9 +627,8 @@ class CRTSession(Session):
         attempts = 0
         while result == '' and attempts < 3:
             test_string = "\n!&%\b\b\b"
-            timeout_seconds = 2
             self.screen.Send(test_string)
-            result = self.screen.ReadString("!&%", timeout_seconds)
+            result = self.screen.ReadString("!&%", self.response_timeout)
             attempts += 1
             self.logger.debug("<CONNECT> Attempt {0}: Prompt result = {1}".format(attempts, result))
 
@@ -734,7 +733,7 @@ class CRTSession(Session):
         self.__send(command.strip() + '\n')
 
         # Capture the output until we get our prompt back and write it to the file
-        result = self.screen.ReadString(self.prompt)
+        result = self.screen.ReadString(self.prompt, self.response_timeout)
 
         return result.strip('\r\n')
 
@@ -784,7 +783,7 @@ class CRTSession(Session):
                 # write that line to the file.  If we get our prompt back (which won't have CRLF), break the loop b/c we
                 # found the end of the output.
                 while True:
-                    nextline = self.screen.ReadString(matches, 30)
+                    nextline = self.screen.ReadString(matches, self.response_timeout)
                     # If the match was the 1st index in the endings list -> \r\n
                     if self.screen.MatchIndex == 0:
                         raise InteractionError("Timeout trying to capture output")
@@ -881,7 +880,7 @@ class CRTSession(Session):
 
         for command in command_list:
             self.screen.Send("{0}\n".format(command))
-            output = self.screen.ReadString(")#", 3)
+            output = self.screen.ReadString(")#", self.response_timeout)
             if output:
                 config_results += "{0})#".format(output)
             else:
@@ -890,7 +889,7 @@ class CRTSession(Session):
                 raise InteractionError("{0}".format(error))
 
         self.screen.Send("end\n")
-        output = self.screen.ReadString(self.prompt, 2)
+        output = self.screen.ReadString(self.prompt, self.response_timeout)
         config_results += "{0}{1}".format(output, self.prompt)
 
         with open(output_filename, 'w') as output_file:
