@@ -90,7 +90,8 @@ def script_main(script):
             script.settings.update(settings_header, "show_instructions", False)
 
     # Get setting that decides if we need to give a warning that we will be pushing configuration to devices.
-    prompt_before_write = script.settings.getboolean(settings_header, "prompt_before_write")
+    # Not currently used in this script.
+    # prompt_before_write = script.settings.getboolean(settings_header, "prompt_before_write")
 
     # #########################################  START CHECK MODE SECTION  ###########################################
     # Ask if this should be a test run (generate configs only) or full run (push updates to devices)
