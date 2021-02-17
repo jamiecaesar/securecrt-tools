@@ -1,0 +1,4 @@
+session_name,hostname,protocol,folder
+switch1,10.10.10.10,SSH2,Customer1/Site1/Building1/IDF1
+switch2,10.10.20.10,SSH2,Customer1/Site1/Building1/IDF2
+router1,10.10.10.1,SSH2,Customer1/Site1/Building1/IDF1
