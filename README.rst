@@ -4,6 +4,10 @@ This repository contains a collection of SecureCRT scripts that automate various
 
 These scripts should work on any version of SecureCRT that supports python.  If you find that a script won't work on your machine, please post an issue to let us know!
 
+Note on SecureCRT 9.x
+=====================
+SecureCRT 9.x has changed they way that the python interpreter is bundled with the software.  It seems these scripts do not work with SecureCRT 9.x at this time.  There is an open issue tracking the problem, but I'll need to find some time to try out the newer version and discover what has changed and how to fix it.  No ETA at this time due to time constraints.
+
 Important Note For Users of Older Versions
 ==========================================
 The settings files for these scripts have been changed from using JSON files to the Python built-in ConfigParse module.  In addition instead of each script uses indivdiual settings having its own JSON file, now that settings are saved in the common "settings.ini" file under a separate heading for that script.  **There is no code to migrate your settings from the old JSON format to the INI format, so please check your settings and remove the old JSON files**
