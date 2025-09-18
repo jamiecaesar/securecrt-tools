@@ -292,24 +292,22 @@ def get_arp_info(script):
 
     :return: A dictionary that can be used to lookup both the MAC and IP associated with an interface, or the IP and
         VLAN associated with a MAC address.
+        
     :rtype: dict
     """
-
     arp_filename = script.file_open_dialog("Please select the ARP file to use when looking up MAC addresses.", "Open",
-                                           "CSV Files (*.csv)|*.csv||")
+                                           "", "CSV Files (*.csv)|*.csv|All Files (*.*)|*.*||")
     if arp_filename == "":
         return {}
-
     with open(arp_filename, 'r') as arp_file:
         arp_csv = csv.reader(arp_file)
         arp_list = [x for x in arp_csv]
-
     arp_lookup = {}
     # Process all ARP entries AFTER the header row.
     for entry in arp_list[1:]:
         # Get the IP address
         ip = entry[0]
-        # Get the MAC address.  If 'Incomplete', skip entry
+        # Get the MAC address. If 'Incomplete', skip entry
         mac = entry[2]
         if mac.lower() == 'incomplete':
             continue
@@ -319,14 +317,11 @@ def get_arp_info(script):
             vlan = intf[4:]
         else:
             vlan = None
-
         if intf in list(arp_lookup.keys()):
             arp_lookup[intf].append((mac, ip))
         else:
             arp_lookup[intf] = [(mac, ip)]
-
         arp_lookup[(mac, vlan)] = ip
-
     return arp_lookup
 
 
